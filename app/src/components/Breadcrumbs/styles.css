@@ -1,0 +1,21 @@
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumbs li {
+  font-size: 0.75rem;
+}
+
+.breadcrumbs li:first-child {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.breadcrumbs li:after {
+  content: '/';
+  margin: 0 0.5em;
+}
+
+.breadcrumbs li:last-child:after { content: '' }

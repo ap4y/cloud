@@ -4,16 +4,24 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/go-chi/chi"
+	"github.com/ap4y/cloud/api"
+)
+
+var (
+	modules = []string{"gallery"}
+	devURL  = "http://localhost:3000"
+	addr    = ":8080"
+
+	galleryPath = "/mnt/media/Photos/Export/2018/"
 )
 
 func main() {
-	mux := chi.NewRouter()
-	mux.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
-	})
+	srv, err := api.NewServer(modules, galleryPath, devURL)
+	if err != nil {
+		log.Fatal("failed to initialise server:", err)
+	}
 
-	if err := http.ListenAndServe(":3000", mux); err != nil {
-		log.Fatal("Failed to start server:", err)
+	if err := http.ListenAndServe(addr, srv); err != nil {
+		log.Fatal("failed to start server:", err)
 	}
 }
