@@ -1,33 +1,66 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { NavLink } from 'react-router-dom';
-import ReactSVG from 'react-svg';
+import React, { Component } from "react";
+import styled from "@emotion/styled";
+import { connect } from "react-redux";
+import { NavLink } from "react-router-dom";
 
-import './styles.css';
+const Albums = styled.ul`
+  list-style: none;
+
+  a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  a span {
+    margin-right: 1rem;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  a > small {
+    background: #e5e9f0;
+  }
+
+  a.active > small {
+    background: var(--outline-color);
+  }
+`;
+
+const Badge = styled.small`
+  flex: 0 0 auto;
+  padding: 0.25em 0.5em;
+
+  background: var(--outline-color);
+  border-radius: 3px;
+
+  font-weight: bold;
+`;
 
 class AlbumsList extends Component {
   render() {
-    const albumItems = this.props.albums
-          .map((album) =>
-               <li className="albums-list-item" key={album.Name}>
-                 <ReactSVG className="icon" path="/images/album.svg"/>
-                 <NavLink to={`${this.props.match.url}/${album.Name}`}>
-                   {album.Name}
-                 </NavLink>
-                 <span>{album.ItemsCount}</span>
-               </li>
-              );
+    const albumItems = this.props.albums.map(album => (
+      <li key={album.Name}>
+        <NavLink to={`${this.props.match.url}/${album.Name}`}>
+          <span>{album.Name}</span>
+
+          <Badge>{album.ItemsCount}</Badge>
+        </NavLink>
+      </li>
+    ));
+
     return (
       <div>
-        <h3>Albums</h3>
-        <ul className="albums-list">{albumItems}</ul>
+        <h2>Albums</h2>
+        <Albums>{albumItems}</Albums>
       </div>
     );
   }
 }
 
-function mapStateToProps(state) {
-  return { albums: state.gallery.albums };
-}
-
-export default connect(mapStateToProps, {})(AlbumsList);
+export default connect(
+  ({ gallery: { albums } }) => ({ albums }),
+  {}
+)(AlbumsList);

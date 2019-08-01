@@ -1,81 +1,123 @@
-import React, { Component } from 'react';
-import { HashRouter, Route, NavLink, Switch, Redirect } from 'react-router-dom';
-import ReactSVG from 'react-svg';
+import React, { Component } from "react";
+import styled from "@emotion/styled";
+import { connect } from "react-redux";
+import { HashRouter, Route, NavLink, Switch, Redirect } from "react-router-dom";
 
-import Breadcrumbs from './components/Breadcrumbs/index';
-import AlbumsList from './components/AlbumsList/index';
-import { GalleryRoutes } from './components/Routes';
-import { apiClient } from './actions';
+import AlbumsList from "./components/AlbumsList/index";
+import LoginForm from "./components/LoginForm/index";
+import { GalleryRoutes } from "./components/Routes";
+import { apiClient, fetchModules } from "./actions";
 
-import './App.css';
+const supportedModules = {
+  gallery: {
+    sidebar: AlbumsList,
+    content: GalleryRoutes,
+    icon: null
+  }
+};
+
+const PageContainer = styled.div`
+  min-height: 100vh;
+
+  display: flex;
+  background: #eceff4;
+`;
+
+const Sidepanel = styled.aside`
+  padding: ${({ collapsed }) => (collapsed ? 0 : "5rem 0 5rem 2rem")};
+  flex: 0 0 auto;
+  max-width: ${({ collapsed }) => (collapsed ? 0 : 30)}%;
+
+  nav {
+    position: sticky;
+    top: 2rem;
+  }
+`;
+
+const Content = styled.main`
+  flex: 1;
+  margin: 2rem 2rem 2rem 2rem;
+  padding: 4rem 3rem 1rem 3rem;
+
+  background: white;
+  border-radius: 8px;
+  box-shadow: rgba(184, 194, 215, 0.25) 0px 4px 6px,
+    rgba(184, 194, 215, 0.1) 0px 5px 7px;
+`;
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      modules: [],
-      moduleMappings: {
-        gallery: { sidebar: AlbumsList, content: GalleryRoutes, icon: <ReactSVG path="/images/images-regular.svg"/> }
-      }
-    };
-  }
-
   componentDidMount() {
-    apiClient.do('/api/modules')
-      .then(({ modules }) => { this.setState({ modules }); });
+    apiClient.token = this.props.authToken;
+    this.props.fetchModules();
   }
 
-  render() {
-    let navItems = [], sidebarItems = [], contentItems = [], { modules } = this.state;
-    modules.forEach((module) => {
-      const component = this.state.moduleMappings[module];
+  componentDidUpdate(prevProps) {
+    if (prevProps.authToken === this.props.authToken) return;
+    apiClient.token = this.props.authToken;
+    this.props.fetchModules();
+  }
+
+  _renderModules = () => {
+    const { modules } = this.props;
+
+    let navItems = [],
+      sidebarItems = [],
+      contentItems = [];
+    modules.forEach(module => {
+      const component = supportedModules[module];
       if (!component) return;
 
       navItems.push(
-        <li key={module} className="app-module-nav-item">
+        <li key={module}>
           <NavLink to={module}>{component.icon}</NavLink>
         </li>
       );
 
       sidebarItems.push(
-        <Route className="app-sidebar-items" key={module} path={`/${module}`} component={component.sidebar}/>
+        <Route key={module} path={`/${module}`} component={component.sidebar} />
       );
 
       contentItems.push(
-        <Route key={module} path={`/${module}`} component={component.content}/>
+        <Route key={module} path={`/${module}`} component={component.content} />
       );
     });
 
-    let modulesNav = navItems.length <= 1 ? null : <nav className="app-modules"><ul>{navItems}</ul></nav>;
+    return { navItems, sidebarItems, contentItems };
+  };
+
+  render() {
+    const { modules, authError } = this.props;
+    const { navItems, sidebarItems, contentItems } = this._renderModules();
 
     return (
       <HashRouter>
-        <div className="app">
-          <header className="app-header">
-            <Breadcrumbs/>
-          </header>
+        <PageContainer>
+          <Sidepanel collapsed={navItems.length === 0}>
+            {navItems.length > 1 && (
+              <nav>
+                <ul>{navItems}</ul>
+              </nav>
+            )}
 
-          <aside className="app-sidebar">
-            {modulesNav}
+            <nav>{sidebarItems}</nav>
+          </Sidepanel>
 
-            <nav className="app-sidebar-nav">
-              {sidebarItems}
-            </nav>
-          </aside>
-
-          <main className="app-content">
+          <Content>
             <Switch>
+              <Route path="/login" component={LoginForm} />
+              {authError && <Redirect to="/login" />}
               {contentItems}
-              {modules.length > 0 && <Redirect to={`/${modules[0]}`}/>}
-              <Route render={() => (<h2>No active modules</h2>)}/>
+              {modules.length > 0 && <Redirect to={`/${modules[0]}`} />}
+              <Route render={() => <h2>No active modules</h2>} />
             </Switch>
-          </main>
-
-          <footer className="app-footer"></footer>
-        </div>
+          </Content>
+        </PageContainer>
       </HashRouter>
     );
   }
 }
 
-export default App;
+export default connect(
+  ({ modules, authError, authToken }) => ({ modules, authError, authToken }),
+  { fetchModules }
+)(App);

@@ -1,31 +1,73 @@
-import { combineReducers } from 'redux';
-import * as ActionTypes from './actions';
+import { combineReducers } from "redux";
+import * as ActionTypes from "./actions";
+
+function modules(state = [], action) {
+  switch (action.type) {
+    case ActionTypes.MODULES_SUCCESS:
+      return [...action.modules];
+    default:
+      return state;
+  }
+}
 
 function gallery(state = { albums: [] }, action) {
   switch (action.type) {
-  case ActionTypes.GALLERY_SUCCESS:
-    return Object.assign({}, state, {
-      albums: action.albums
-    });
-  default:
-    return state;
+    case ActionTypes.GALLERY_SUCCESS:
+      return Object.assign({}, state, {
+        albums: action.albums
+      });
+    default:
+      return state;
   }
 }
 
 function albumImages(state = {}, action) {
   switch (action.type) {
-  case ActionTypes.ALBUM_SUCCESS:
-    return Object.assign({}, state, {
-      [action.galleryName]: action.images
-    });
-  default:
-    return state;
+    case ActionTypes.ALBUM_SUCCESS:
+      return Object.assign({}, state, {
+        [action.galleryName]: action.images
+      });
+    default:
+      return state;
   }
 }
 
-const rootReducer = combineReducers({
-  gallery,
-  albumImages
-});
+function authToken(state = localStorage.getItem("authToken"), action) {
+  switch (action.type) {
+    case ActionTypes.AUTH_SUCCESS:
+      localStorage.setItem("authToken", action.token);
+      return action.token;
+    default:
+      return state;
+  }
+}
 
-export default rootReducer;
+function authError(state = null, action) {
+  switch (action.type) {
+    case ActionTypes.AUTH_ERROR:
+      return action.error;
+    case ActionTypes.RESET_AUTH_ERROR:
+      return null;
+    default:
+      return state;
+  }
+}
+
+function errorMessage(state = null, action) {
+  const { type, error } = action;
+
+  if (type === ActionTypes.AUTH_ERROR) return null;
+  if (type === ActionTypes.RESET_ERROR_MESSAGE) return null;
+
+  if (error) return action.error;
+  return state;
+}
+
+export default combineReducers({
+  modules,
+  gallery,
+  albumImages,
+  authToken,
+  authError,
+  errorMessage
+});
