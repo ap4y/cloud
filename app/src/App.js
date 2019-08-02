@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import styled from "@emotion/styled";
 import { connect } from "react-redux";
 import { HashRouter, Route, NavLink, Switch, Redirect } from "react-router-dom";
+import ReactSVG from "react-svg";
 
 import AlbumsList from "./components/AlbumsList/index";
 import LoginForm from "./components/LoginForm/index";
@@ -24,20 +25,32 @@ const PageContainer = styled.div`
 `;
 
 const Sidepanel = styled.aside`
-  padding: ${({ collapsed }) => (collapsed ? 0 : "5rem 0 5rem 2rem")};
   flex: 0 0 auto;
+  padding: 6rem 0;
+  margin-left: ${({ collapsed }) => (collapsed ? 0 : "2rem")};
   max-width: ${({ collapsed }) => (collapsed ? 0 : 30)}%;
 
   nav {
     position: sticky;
     top: 2rem;
+    overflow: hidden;
+  }
+`;
+
+const SVGButton = styled.a`
+  display: block;
+  margin-left: -3rem;
+
+  svg {
+    height: 4rem;
+    width: auto;
   }
 `;
 
 const Content = styled.main`
   flex: 1;
   margin: 2rem 2rem 2rem 2rem;
-  padding: 4rem 3rem 1rem 3rem;
+  padding: 0rem 3rem 1rem 3rem;
 
   background: white;
   border-radius: 8px;
@@ -46,6 +59,8 @@ const Content = styled.main`
 `;
 
 class App extends Component {
+  state = { collapsed: false };
+
   componentDidMount() {
     apiClient.token = this.props.authToken;
     this.props.fetchModules();
@@ -86,13 +101,14 @@ class App extends Component {
   };
 
   render() {
+    const { collapsed } = this.state;
     const { modules, authError } = this.props;
     const { navItems, sidebarItems, contentItems } = this._renderModules();
 
     return (
       <HashRouter>
         <PageContainer>
-          <Sidepanel collapsed={navItems.length === 0}>
+          <Sidepanel collapsed={collapsed || navItems.length === 0}>
             {navItems.length > 1 && (
               <nav>
                 <ul>{navItems}</ul>
@@ -103,6 +119,19 @@ class App extends Component {
           </Sidepanel>
 
           <Content>
+            {navItems.length > 0 && (
+              <SVGButton>
+                <ReactSVG
+                  onClick={() => this.setState({ collapsed: !collapsed })}
+                  path={
+                    collapsed
+                      ? "/images/ic_arrow_right.svg"
+                      : "/images/ic_arrow_left.svg"
+                  }
+                />
+              </SVGButton>
+            )}
+
             <Switch>
               <Route path="/login" component={LoginForm} />
               {authError && <Redirect to="/login" />}

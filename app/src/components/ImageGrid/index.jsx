@@ -75,7 +75,7 @@ const Images = styled.div`
   margin: 0 -1rem;
 
   a {
-    flex: 1 0 250px;
+    flex: 1 0 300px;
     max-width: 50%;
     padding: 0 1rem;
     margin-bottom: 2rem;
