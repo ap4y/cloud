@@ -19,15 +19,16 @@ const supportedModules = {
 
 const PageContainer = styled.div`
   min-height: 100vh;
+  position: relative;
 
   display: flex;
-  background: #eceff4;
+  background: var(--primary-background-color);
 `;
 
 const Sidepanel = styled.aside`
+  position: relative;
   flex: 0 0 auto;
-  padding: 6rem 0;
-  margin-left: ${({ collapsed }) => (collapsed ? 0 : "2rem")};
+  padding: 4rem 2rem;
   max-width: ${({ collapsed }) => (collapsed ? 0 : 30)}%;
 
   nav {
@@ -37,20 +38,54 @@ const Sidepanel = styled.aside`
   }
 `;
 
-const SVGButton = styled.a`
+const CollapseButton = styled.a`
   display: block;
-  margin-left: -3rem;
+  position: absolute;
+  top: 3.5rem;
+  right: -1rem;
+  width: 3rem;
+  height: 3rem;
+
+  background: white;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  box-shadow: rgba(184, 194, 215, 0.25) 0px 4px 6px,
+    rgba(184, 194, 215, 0.1) 0px 5px 7px;
 
   svg {
-    height: 4rem;
+    margin-left: -5px;
+    height: 3rem;
     width: auto;
+    fill: var(--secondary-color);
+  }
+`;
+
+const Toolbar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 4rem;
+  position: absolute;
+  top: 4rem;
+  right: 5rem;
+
+  a {
+    display: block;
+    height: 2rem;
+  }
+
+  svg {
+    height: 2rem;
+    width: auto;
+    fill: var(--secondary-color);
   }
 `;
 
 const Content = styled.main`
   flex: 1;
-  margin: 2rem 2rem 2rem 2rem;
-  padding: 0rem 3rem 1rem 3rem;
+  margin: 2rem 2rem 2rem 0;
+  padding: 2rem 3rem;
+  z-index: 1;
 
   background: white;
   border-radius: 8px;
@@ -109,6 +144,20 @@ class App extends Component {
       <HashRouter>
         <PageContainer>
           <Sidepanel collapsed={collapsed || navItems.length === 0}>
+            {navItems.length > 0 && (
+              <CollapseButton
+                onClick={() => this.setState({ collapsed: !collapsed })}
+              >
+                <ReactSVG
+                  path={
+                    collapsed
+                      ? "/images/ic_arrow_right.svg"
+                      : "/images/ic_arrow_left.svg"
+                  }
+                />
+              </CollapseButton>
+            )}
+
             {navItems.length > 1 && (
               <nav>
                 <ul>{navItems}</ul>
@@ -119,18 +168,11 @@ class App extends Component {
           </Sidepanel>
 
           <Content>
-            {navItems.length > 0 && (
-              <SVGButton>
-                <ReactSVG
-                  onClick={() => this.setState({ collapsed: !collapsed })}
-                  path={
-                    collapsed
-                      ? "/images/ic_arrow_right.svg"
-                      : "/images/ic_arrow_left.svg"
-                  }
-                />
-              </SVGButton>
-            )}
+            <Toolbar>
+              <a>
+                <ReactSVG path="/images/ic_share.svg" />
+              </a>
+            </Toolbar>
 
             <Switch>
               <Route path="/login" component={LoginForm} />
