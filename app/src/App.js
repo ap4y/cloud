@@ -39,12 +39,14 @@ const Sidepanel = styled.aside`
 `;
 
 const CollapseButton = styled.a`
-  display: block;
+  display: flex;
+  align-items: center;
   position: absolute;
   top: 3.5rem;
   right: -1rem;
   width: 3rem;
   height: 3rem;
+  cursor: pointer;
 
   background: white;
   border-top-left-radius: 5px;
@@ -52,12 +54,7 @@ const CollapseButton = styled.a`
   box-shadow: rgba(184, 194, 215, 0.25) 0px 4px 6px,
     rgba(184, 194, 215, 0.1) 0px 5px 7px;
 
-  svg {
-    margin-left: -5px;
-    height: 3rem;
-    width: auto;
-    fill: var(--secondary-color);
-  }
+  color: var(--secondary-color);
 `;
 
 const Toolbar = styled.div`
@@ -72,12 +69,7 @@ const Toolbar = styled.div`
   a {
     display: block;
     height: 2rem;
-  }
-
-  svg {
-    height: 2rem;
-    width: auto;
-    fill: var(--secondary-color);
+    color: var(--secondary-color);
   }
 `;
 
@@ -148,13 +140,9 @@ class App extends Component {
               <CollapseButton
                 onClick={() => this.setState({ collapsed: !collapsed })}
               >
-                <ReactSVG
-                  path={
-                    collapsed
-                      ? "/images/ic_arrow_right.svg"
-                      : "/images/ic_arrow_left.svg"
-                  }
-                />
+                <i className="material-icons-round">
+                  {collapsed ? "arrow_right" : "arrow_left"}
+                </i>
               </CollapseButton>
             )}
 
@@ -170,7 +158,7 @@ class App extends Component {
           <Content>
             <Toolbar>
               <a>
-                <ReactSVG path="/images/ic_share.svg" />
+                <i className="material-icons-round">share</i>
               </a>
             </Toolbar>
 

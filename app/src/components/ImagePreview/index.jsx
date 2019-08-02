@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import styled from "@emotion/styled";
 import { connect } from "react-redux";
 import { NavLink, Link } from "react-router-dom";
-import ReactSVG from "react-svg";
 
 import EXIFData from "./exif";
 
@@ -108,6 +107,11 @@ const ImageContainer = styled.div`
     z-index: 101;
     opacity: 0;
     transition: opacity 0.4s;
+    color: var(--primary-background-color);
+  }
+
+  a i {
+    font-size: 96px;
   }
 
   a:first-of-type {
@@ -120,12 +124,6 @@ const ImageContainer = styled.div`
 
   &:hover a {
     opacity: 1;
-  }
-
-  svg {
-    height: 150px;
-    width: auto;
-    fill: var(--primary-background-color);
   }
 `;
 
@@ -165,16 +163,11 @@ const Toolbar = styled.header`
   a {
     height: 3rem;
     margin-right: 1rem;
+    color: var(--primary-background-color);
   }
 
   a:last-of-type {
     margin-right: 0;
-  }
-
-  svg {
-    height: 3rem;
-    width: auto;
-    fill: var(--primary-background-color);
   }
 `;
 
@@ -288,22 +281,23 @@ class ImagePreview extends Component {
                 href={`/api/gallery/images/${selectedImage.Path}?jwt=${authToken}`}
                 download={selectedImage.Path.replace("/", "_")}
               >
-                <ReactSVG path="/images/ic_download.svg" />
+                <i className="material-icons-round">get_app</i>
               </a>
             )}
-            <a href="#fullscreen" onClick={this.toggleFullscreen}>
-              {!fullscreen && <ReactSVG path="/images/ic_fullscreen.svg" />}
-              {fullscreen && <ReactSVG path="/images/ic_fullscreen_exit.svg" />}
-            </a>
             <a href="#exif" onClick={this.toggleEXIF}>
-              <ReactSVG path="/images/ic_info.svg" />
+              <i className="material-icons-round">info</i>
+            </a>
+            <a href="#fullscreen" onClick={this.toggleFullscreen}>
+              <i className="material-icons-round">
+                {fullscreen ? "fullscreen_exit" : "fullscreen"}
+              </i>
             </a>
           </div>
 
           <h4>{this.props.galleryName}</h4>
 
           <NavLink exact to={match.path.replace("/:imageName", "")}>
-            <ReactSVG path="/images/ic_close.svg" />
+            <i className="material-icons-round">close</i>
           </NavLink>
         </Toolbar>
 
@@ -317,7 +311,7 @@ class ImagePreview extends Component {
               to={this.imagePath(prevImage)}
               onClick={() => this.setState({ exif: null })}
             >
-              <ReactSVG path="/images/ic_chevron_left.svg" />
+              <i className="material-icons-round">chevron_left</i>
             </Link>
 
             <img
@@ -329,7 +323,7 @@ class ImagePreview extends Component {
               to={this.imagePath(nextImage)}
               onClick={() => this.setState({ exif: null })}
             >
-              <ReactSVG path="/images/ic_chevron_right.svg" />
+              <i className="material-icons-round">chevron_right</i>
             </Link>
           </ImageContainer>
         )}

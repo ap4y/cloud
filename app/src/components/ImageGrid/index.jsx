@@ -104,7 +104,7 @@ class ImageGrid extends Component {
     });
     return (
       <div>
-        <h3>{galleryName}</h3>
+        <h2>{galleryName}</h2>
         <Images>{imageItems}</Images>
         <Route
           path={`${this.props.match.url}/:imageName`}
