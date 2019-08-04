@@ -38,10 +38,10 @@ const GalleryItem = ({ image, cellRef, authToken, selected }) => {
   return (
     <Figure ref={cellRef} selected={selected}>
       <img
-        alt={image.Name}
-        src={`/api/gallery/thumbnails/${image.Path}?jwt=${authToken}`}
+        alt={image.name}
+        src={`/api/gallery/thumbnails/${image.path}?jwt=${authToken}`}
       />
-      <figcaption>{image.Name}</figcaption>
+      <figcaption>{image.name}</figcaption>
     </Figure>
   );
 };
@@ -200,7 +200,7 @@ class ImagePreview extends Component {
     cell.scrollIntoView({ inline: "center", behavior: "smooth" });
   }
 
-  imagePath = image => this.props.match.path.replace(":imageName", image.Name);
+  imagePath = image => this.props.match.path.replace(":imageName", image.name);
 
   toggleFullscreen = e => {
     e.preventDefault();
@@ -236,9 +236,9 @@ class ImagePreview extends Component {
       this.setState({ exif: null });
     } else {
       const image = this.props.images.find(
-        image => image.Name === this.props.match.params.imageName
+        image => image.name === this.props.match.params.imageName
       );
-      apiClient.do(`/gallery/exif/${image.Path}`).then(exif => {
+      apiClient.do(`/gallery/exif/${image.path}`).then(exif => {
         this.setState({ exif });
       });
     }
@@ -248,23 +248,23 @@ class ImagePreview extends Component {
     const { fullscreen } = this.state;
     const { images, match, authToken } = this.props;
     const selectedIdx = images.findIndex(
-      image => image.Name === match.params.imageName
+      image => image.name === match.params.imageName
     );
     const selectedImage = images[selectedIdx];
     const prevImage =
-      images[selectedIdx == 0 ? images.length - 1 : selectedIdx - 1];
+      images[selectedIdx === 0 ? images.length - 1 : selectedIdx - 1];
     const nextImage =
-      images[selectedIdx == images.length - 1 ? 0 : selectedIdx + 1];
+      images[selectedIdx === images.length - 1 ? 0 : selectedIdx + 1];
 
     const galleryItems = images.map((image, idx) => (
-      <li key={image.Name}>
+      <li key={image.name}>
         <NavLink to={this.imagePath(image)}>
           <GalleryItem
             selected={idx === selectedIdx}
             image={image}
             authToken={authToken}
             cellRef={
-              selectedImage && image.Name === selectedImage.Name
+              selectedImage && image.name === selectedImage.name
                 ? this.cellRef
                 : React.createRef()
             }
@@ -278,8 +278,8 @@ class ImagePreview extends Component {
           <div>
             {selectedImage && (
               <a
-                href={`/api/gallery/images/${selectedImage.Path}?jwt=${authToken}`}
-                download={selectedImage.Path.replace("/", "_")}
+                href={`/api/gallery/images/${selectedImage.path}?jwt=${authToken}`}
+                download={selectedImage.path.replace("/", "_")}
               >
                 <i className="material-icons-round">get_app</i>
               </a>
@@ -315,8 +315,8 @@ class ImagePreview extends Component {
             </Link>
 
             <img
-              alt={selectedImage.Name}
-              src={`/api/gallery/images/${selectedImage.Path}?jwt=${authToken}`}
+              alt={selectedImage.name}
+              src={`/api/gallery/images/${selectedImage.path}?jwt=${authToken}`}
             />
 
             <Link

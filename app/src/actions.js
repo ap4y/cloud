@@ -137,7 +137,7 @@ export function fetchAlbum(galleryName) {
   return dispatch => {
     dispatch({ type: ALBUM_REQUEST });
 
-    return apiClient.do(`/gallery/${galleryName}`).then(images => {
+    return apiClient.do(`/gallery/${galleryName}/images`).then(images => {
       dispatch({
         type: ALBUM_SUCCESS,
         galleryName,

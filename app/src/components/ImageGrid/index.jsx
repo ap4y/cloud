@@ -53,14 +53,14 @@ const ImageCell = props => {
   return (
     <Figure>
       <img
-        alt={image.Name}
-        src={`/api/gallery/thumbnails/${image.Path}?jwt=${authToken}`}
+        alt={image.name}
+        src={`/api/gallery/thumbnails/${image.path}?jwt=${authToken}`}
       />
       <figcaption>
-        <span>{image.Name}</span>
+        <span>{image.name}</span>
         <small>
-          <time dateTime={image.ModTime}>
-            {new Date(image.ModTime).toLocaleString()}
+          <time dateTime={image.updated_at}>
+            {new Date(image.updated_at).toLocaleString()}
           </time>
         </small>
       </figcaption>
@@ -97,7 +97,7 @@ class ImageGrid extends Component {
     const { images, galleryName, authToken } = this.props;
     const imageItems = images.map(image => {
       return (
-        <NavLink key={image.Name} to={`${this.props.match.url}/${image.Name}`}>
+        <NavLink key={image.name} to={`${this.props.match.url}/${image.name}`}>
           <ImageCell image={image} authToken={authToken} />
         </NavLink>
       );

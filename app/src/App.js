@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import styled from "@emotion/styled";
 import { connect } from "react-redux";
 import { HashRouter, Route, NavLink, Switch, Redirect } from "react-router-dom";
-import ReactSVG from "react-svg";
 
 import AlbumsList from "./components/AlbumsList/index";
 import LoginForm from "./components/LoginForm/index";

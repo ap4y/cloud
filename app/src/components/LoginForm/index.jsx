@@ -36,10 +36,9 @@ class LoginForm extends React.Component {
 
   render() {
     const { from } = this.props.location.state || { from: { pathname: "/" } };
-    const { authToken, errorMessage } = this.props;
+    const { errorMessage } = this.props;
     if (this.props.authToken) return <Redirect to={from} />;
 
-    const { username, password } = this.state;
     return (
       <Container>
         <form onSubmit={this._performAuth}>

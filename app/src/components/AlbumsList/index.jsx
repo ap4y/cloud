@@ -42,11 +42,11 @@ const Badge = styled.small`
 class AlbumsList extends Component {
   render() {
     const albumItems = this.props.albums.map(album => (
-      <li key={album.Name}>
-        <NavLink to={`${this.props.match.url}/${album.Name}`}>
-          <span>{album.Name}</span>
+      <li key={album.name}>
+        <NavLink to={`${this.props.match.url}/${album.name}`}>
+          <span>{album.name}</span>
 
-          <Badge>{album.ItemsCount}</Badge>
+          <Badge>{album.items_count}</Badge>
         </NavLink>
       </li>
     ));
