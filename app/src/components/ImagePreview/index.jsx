@@ -161,8 +161,13 @@ const Toolbar = styled.header`
   }
 
   a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
     height: 3rem;
     margin-right: 1rem;
+
     color: var(--primary-background-color);
   }
 

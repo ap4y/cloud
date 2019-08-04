@@ -25,15 +25,39 @@ const PageContainer = styled.div`
 `;
 
 const Sidepanel = styled.aside`
-  position: relative;
   flex: 0 0 auto;
-  padding: 4rem 2rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   max-width: ${({ collapsed }) => (collapsed ? 0 : 30)}%;
+  height: 100vh;
+  padding: 4rem 2rem;
 
   nav {
     position: sticky;
     top: 2rem;
     overflow: hidden;
+  }
+
+  div {
+  }
+`;
+
+const SettingsBar = styled.div`
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+
+  a {
+    display: flex;
+    align-items: center;
+
+    color: var(--secondary-color);
+  }
+
+  a small {
+    margin-left: 0.5rem;
   }
 `;
 
@@ -54,22 +78,6 @@ const CollapseButton = styled.a`
     rgba(184, 194, 215, 0.1) 0px 5px 7px;
 
   color: var(--secondary-color);
-`;
-
-const Toolbar = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  height: 4rem;
-  position: absolute;
-  top: 4rem;
-  right: 5rem;
-
-  a {
-    display: block;
-    height: 2rem;
-    color: var(--secondary-color);
-  }
 `;
 
 const Content = styled.main`
@@ -152,15 +160,16 @@ class App extends Component {
             )}
 
             <nav>{sidebarItems}</nav>
+
+            <SettingsBar>
+              <a>
+                <i className="material-icons-round">power_settings_new</i>{" "}
+                <small>Logout</small>
+              </a>
+            </SettingsBar>
           </Sidepanel>
 
           <Content>
-            <Toolbar>
-              <a>
-                <i className="material-icons-round">share</i>
-              </a>
-            </Toolbar>
-
             <Switch>
               <Route path="/login" component={LoginForm} />
               {authError && <Redirect to="/login" />}

@@ -68,6 +68,18 @@ const ImageCell = props => {
   );
 };
 
+const Toolbar = styled.div`
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+
+  a {
+    display: block;
+    height: 2rem;
+    color: var(--secondary-color);
+  }
+`;
+
 const Images = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -104,7 +116,14 @@ class ImageGrid extends Component {
     });
     return (
       <div>
-        <h2>{galleryName}</h2>
+        <Toolbar>
+          <h2>{galleryName}</h2>
+          <div>
+            <a>
+              <i className="material-icons-round">share</i>
+            </a>
+          </div>
+        </Toolbar>
         <Images>{imageItems}</Images>
         <Route
           path={`${this.props.match.url}/:imageName`}
