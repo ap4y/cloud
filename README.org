@@ -1,0 +1,77 @@
+* Cloud
+
+*Cloud* is a web app that aims to simplify secure file sharing for
+ self hosted users. Main goals of the project are to be simple to
+ setup, secure and have support for ARM devices.
+
+** Getting started
+
+*Cloud* is a [[https://golang.org/][golang]] application and you are going to need golang
+toolchain to compile the app.
+
+To install or update run:
+
+#+BEGIN_SRC shell
+go get -u github.com/ap4y/cloud
+#+END_SRC
+
+Web UI is implemented using [[https://reactjs.org/][react]] and is pre-bundled into golang
+app. To setup local development environment for react app you will
+need [[https://nodejs.org][node.js]] with either ~npm~ or ~yarn~. 
+
+To pull react app dependecies run:
+
+#+BEGIN_SRC shell
+cd app
+npm install
+#+END_SRC
+
+To start local development setup:
+
+#+BEGIN_SRC shell
+cd app
+npm start
+#+END_SRC
+
+This will start ~creat-react~ web server on a port ~3000~, you can proxy
+local ~cloud~ app to it using ~-devURL~ argument.
+
+** Configuration
+
+*Cloud* uses ~json~ config files to setup authentication and necessary paths. [[https://github.com/ap4y/cloud/blob/master/config.example.json][Sample config]]:
+
+#+BEGIN_SRC js
+{
+  "jwt_secret": "secret",
+  "modules": ["gallery"],
+  "users": {
+    "ap4y": "$2b$10$fEWhY87kzeaV3hUEB6phTuyWjpv73V5m.YcqTxHXnvqEGIou1tXGO"
+  },
+  "gallery": {
+    "path": "/mnt/media/Photos/Export/",
+    "cache": "/tmp/cloud/"
+  }
+}
+#+END_SRC
+
+Configuration fields:
+
+- ~jwt_secret~ is a secret used for [[https://jwt.io/][JWT]] (~HS256~ algorithm) related operations.
+- ~modules~ defines enabled modules.
+- ~users~ defines ~bcrypt~ hashes for user credentials, you can use
+  ~mkpasswd~ to hash your passwords.
+- ~gallery~ defines necessary paths for the gallery module. ~path~ is
+  a gallery source folder and ~cache~ is a thumbnail cache folder.
+
+Additionally following command line arguments are supported:
+
+- ~-config cloud.json~ - path to a config file.
+- ~-addr :8080~ - address to listen on.
+- ~-devURL~ - enables proxy mode for a local react development server.
+
+** Gallery
+
+Gallery provides common image gallery features: image grid, thumbnails
+and full screen previews. Gallery traverses provided ~path~ on a disk
+and exposes folders with images as shareable galleries. Thumbnails are
+generated on the fly and cached for subsequent use.
