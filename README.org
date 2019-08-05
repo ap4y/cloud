@@ -4,6 +4,11 @@
  self hosted users. Main goals of the project are to be simple to
  setup, secure and have support for ARM devices.
 
+Screenshots:
+
+- [[https://raw.githubusercontent.com/ap4y/cloud/master/screenshot2.png][Gallery Grid]]
+- [[https://raw.githubusercontent.com/ap4y/cloud/master/screenshot1.png][Gallery Preview]]
+
 ** Getting started
 
 *Cloud* is a [[https://golang.org/][golang]] application and you are going to need golang
