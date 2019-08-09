@@ -48,19 +48,18 @@ const Figure = styled.figure`
   }
 `;
 
-const ImageCell = props => {
-  const { image, authToken } = props;
+export const ImageCell = ({ image: { name, path, updated_at }, authToken }) => {
   return (
     <Figure>
       <img
-        alt={image.name}
-        src={`/api/gallery/thumbnails/${image.path}?jwt=${authToken}`}
+        alt={name}
+        src={`/api/gallery/thumbnails/${path}?jwt=${authToken}`}
       />
       <figcaption>
-        <span>{image.name}</span>
+        <span>{name}</span>
         <small>
-          <time dateTime={image.updated_at}>
-            {new Date(image.updated_at).toLocaleString()}
+          <time dateTime={updated_at}>
+            {new Date(updated_at).toLocaleString()}
           </time>
         </small>
       </figcaption>
@@ -94,7 +93,7 @@ const Images = styled.div`
   }
 `;
 
-class ImageGrid extends Component {
+export class ImageGrid extends Component {
   componentDidMount() {
     this.props.fetchAlbum(this.props.galleryName);
   }

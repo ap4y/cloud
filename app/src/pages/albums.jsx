@@ -39,14 +39,14 @@ const Badge = styled.small`
   font-weight: bold;
 `;
 
-class AlbumsList extends Component {
+export class AlbumsList extends Component {
   render() {
-    const albumItems = this.props.albums.map(album => (
-      <li key={album.name}>
-        <NavLink to={`${this.props.match.url}/${album.name}`}>
-          <span>{album.name}</span>
+    const albumItems = this.props.albums.map(({ name, items_count }) => (
+      <li key={name}>
+        <NavLink to={`${this.props.match.url}/${name}`}>
+          <span>{name}</span>
 
-          <Badge>{album.items_count}</Badge>
+          <Badge>{items_count}</Badge>
         </NavLink>
       </li>
     ));

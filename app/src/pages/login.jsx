@@ -20,7 +20,7 @@ const Container = styled.div`
   }
 `;
 
-class LoginForm extends React.Component {
+export class LoginForm extends React.Component {
   state = { username: "", password: "" };
 
   _handleChange = field => ({ target }) => {
