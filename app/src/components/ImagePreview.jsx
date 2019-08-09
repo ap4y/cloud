@@ -33,7 +33,7 @@ const Figure = styled.figure`
   }
 `;
 
-const GalleryItem = ({ image, cellRef, authToken, selected }) => {
+export const GalleryItem = ({ image, cellRef, authToken, selected }) => {
   return (
     <Figure ref={cellRef} selected={selected}>
       <img
