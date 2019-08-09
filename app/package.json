@@ -20,8 +20,11 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
     "eslint": "^5.16.0",
-    "eslint-plugin-react": "^7.14.3"
+    "eslint-plugin-react": "^7.14.3",
+    "react-test-renderer": "^16.9.0"
   },
   "browserslist": {
     "production": [
