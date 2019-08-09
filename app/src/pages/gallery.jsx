@@ -3,8 +3,8 @@ import styled from "@emotion/styled";
 import { connect } from "react-redux";
 import { NavLink, Route } from "react-router-dom";
 
-import ImagePreview from "../ImagePreview/index";
-import { fetchAlbum } from "../../actions";
+import ImagePreview from "../components/ImagePreview";
+import { fetchAlbum } from "../actions";
 
 const Figure = styled.figure`
   position: relative;
@@ -129,6 +129,7 @@ class ImageGrid extends Component {
           path={`${this.props.match.url}/:imageName`}
           render={props => (
             <ImagePreview
+              authToken={authToken}
               images={images}
               galleryName={galleryName}
               {...props}

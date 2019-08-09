@@ -3,9 +3,9 @@ import styled from "@emotion/styled";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 
-import { Alert } from "../ui/typography";
+import { Alert } from "../components/Typography";
 
-import { performAuth, resetAuthError, resetErrorMessage } from "../../actions";
+import { performAuth, resetAuthError, resetErrorMessage } from "../actions";
 
 const Container = styled.div`
   display: flex;

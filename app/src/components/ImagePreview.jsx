@@ -1,11 +1,10 @@
 import React, { Component } from "react";
 import styled from "@emotion/styled";
-import { connect } from "react-redux";
 import { NavLink, Link } from "react-router-dom";
 
-import EXIFData from "./exif";
+import EXIFData from "./ImageEXIF";
 
-import { apiClient } from "../../actions";
+import { apiClient } from "../actions";
 
 const Figure = styled.figure`
   margin: 0;
@@ -339,7 +338,4 @@ class ImagePreview extends Component {
   }
 }
 
-export default connect(
-  ({ authToken }) => ({ authToken }),
-  {}
-)(ImagePreview);
+export default ImagePreview;

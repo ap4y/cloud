@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Route, Switch, Redirect } from "react-router-dom";
 
-import ImageGrid from "./ImageGrid/index";
-import { fetchGalleries } from "../actions";
+import ImageGrid from "./pages/gallery";
+import { fetchGalleries } from "./actions";
 
 class GalleryRoutesContainer extends Component {
   componentDidMount() {

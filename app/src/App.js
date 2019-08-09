@@ -3,9 +3,9 @@ import styled from "@emotion/styled";
 import { connect } from "react-redux";
 import { HashRouter, Route, NavLink, Switch, Redirect } from "react-router-dom";
 
-import AlbumsList from "./components/AlbumsList/index";
-import LoginForm from "./components/LoginForm/index";
-import { GalleryRoutes } from "./components/Routes";
+import AlbumsList from "./pages/albums";
+import LoginForm from "./pages/login";
+import { GalleryRoutes } from "./Routes";
 import { apiClient, fetchModules } from "./actions";
 
 const supportedModules = {
