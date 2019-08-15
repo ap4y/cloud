@@ -106,7 +106,7 @@ class App extends Component {
     this.props.fetchModules();
   }
 
-  _renderModules = () => {
+  renderModules = () => {
     const { modules } = this.props;
 
     let navItems = [],
@@ -137,7 +137,7 @@ class App extends Component {
   render() {
     const { collapsed } = this.state;
     const { modules, authError } = this.props;
-    const { navItems, sidebarItems, contentItems } = this._renderModules();
+    const { navItems, sidebarItems, contentItems } = this.renderModules();
 
     return (
       <HashRouter>
