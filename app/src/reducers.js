@@ -5,6 +5,8 @@ function modules(state = [], action) {
   switch (action.type) {
     case ActionTypes.MODULES_SUCCESS:
       return [...action.modules];
+    case ActionTypes.AUTH_SIGNOUT:
+      return [];
     default:
       return state;
   }
@@ -37,6 +39,9 @@ function authToken(state = localStorage.getItem("authToken"), action) {
     case ActionTypes.AUTH_SUCCESS:
       localStorage.setItem("authToken", action.token);
       return action.token;
+    case ActionTypes.AUTH_SIGNOUT:
+      localStorage.removeItem("authToken");
+      return null;
     default:
       return state;
   }

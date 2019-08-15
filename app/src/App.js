@@ -6,7 +6,7 @@ import { HashRouter, Route, NavLink, Switch, Redirect } from "react-router-dom";
 import AlbumsList from "./pages/albums";
 import LoginForm from "./pages/login";
 import { GalleryRoutes } from "./Routes";
-import { apiClient, fetchModules } from "./actions";
+import { apiClient, fetchModules, signOut } from "./actions";
 
 const supportedModules = {
   gallery: {
@@ -162,7 +162,7 @@ class App extends Component {
             <nav>{sidebarItems}</nav>
 
             <SettingsBar>
-              <a>
+              <a href="#lougout" onClick={this.props.signOut}>
                 <i className="material-icons-round">power_settings_new</i>{" "}
                 <small>Logout</small>
               </a>
@@ -186,5 +186,5 @@ class App extends Component {
 
 export default connect(
   ({ modules, authError, authToken }) => ({ modules, authError, authToken }),
-  { fetchModules }
+  { fetchModules, signOut }
 )(App);

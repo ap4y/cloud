@@ -95,6 +95,11 @@ export function performAuth(username, password) {
   };
 }
 
+export const AUTH_SIGNOUT = "AUTH_SIGNOUT";
+export function signOut() {
+  return { type: AUTH_SIGNOUT };
+}
+
 export const MODULES_REQUEST = "MODULES_REQUEST";
 export const MODULES_SUCCESS = "MODULES_SUCCESS";
 export const MODULES_FAILURE = "MODULES_FAILURE";
