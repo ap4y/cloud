@@ -94,11 +94,11 @@ func (cs *memoryCredentialsStorage) Validate(tokenString string) (string, error)
 // AuthHandler returns a new handler for authentication endpoints.
 func AuthHandler(credentials CredentialsStorage) http.Handler {
 	mux := chi.NewRouter()
-	mux.Post("/sign_in", func(w http.ResponseWriter, res *http.Request) {
+	mux.Post("/sign_in", func(w http.ResponseWriter, req *http.Request) {
 		body := map[string]string{}
 		w.Header().Set("Content-Type", "application/json")
 
-		if err := json.NewDecoder(res.Body).Decode(&body); err != nil {
+		if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
 			http.Error(w, fmt.Sprintf("Failed to decode json: %s", err), http.StatusBadRequest)
 			return
 		}
@@ -120,10 +120,10 @@ func AuthHandler(credentials CredentialsStorage) http.Handler {
 // Authenticator returns authentication middleware.
 func Authenticator(credentials CredentialsStorage) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token := tokenFromHeader(r.Header.Get("Authorization"))
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			token := tokenFromHeader(req.Header.Get("Authorization"))
 			if token == "" {
-				token = r.URL.Query().Get("jwt")
+				token = req.URL.Query().Get("jwt")
 			}
 
 			username, err := credentials.Validate(token)
@@ -132,8 +132,8 @@ func Authenticator(credentials CredentialsStorage) func(next http.Handler) http.
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), UsernameCtxKey, username)
-			next.ServeHTTP(w, r.WithContext(ctx))
+			ctx := context.WithValue(req.Context(), UsernameCtxKey, username)
+			next.ServeHTTP(w, req.WithContext(ctx))
 		})
 	}
 }

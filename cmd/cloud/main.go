@@ -20,10 +20,15 @@ type galleryConfig struct {
 	Cache string `json:"cache"`
 }
 
+type shareConfig struct {
+	Path string `json:"path"`
+}
+
 type config struct {
 	JWTSecret string            `json:"jwt_secret"`
-	Modules   []string          `json:"modules"`
+	Modules   []api.Module      `json:"modules"`
 	Users     map[string]string `json:"users"`
+	Share     *shareConfig      `json:"share"`
 	Gallery   *galleryConfig    `json:"gallery"`
 }
 
@@ -46,7 +51,7 @@ func main() {
 		log.Fatal("failed to decode config file:", err)
 	}
 
-	modules := map[string]http.Handler{}
+	modules := map[api.Module]http.Handler{}
 	for _, module := range cfg.Modules {
 		if module == "gallery" {
 			gallery, err := galleryModule(cfg.Gallery)
@@ -60,7 +65,8 @@ func main() {
 	}
 
 	cs := api.NewMemoryCredentialsStorage(cfg.Users, jwt.SigningMethodHS256, []byte(cfg.JWTSecret))
-	srv, err := api.NewServer(modules, cs)
+	ss := api.NewDiskShareStore(cfg.Share.Path)
+	srv, err := api.NewServer(modules, cs, ss)
 	if err != nil {
 		log.Fatal("failed to initialise server:", err)
 	}

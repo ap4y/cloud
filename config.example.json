@@ -4,6 +4,9 @@
   "users": {
     "ap4y": "$2b$10$fEWhY87kzeaV3hUEB6phTuyWjpv73V5m.YcqTxHXnvqEGIou1tXGO"
   },
+  "share": {
+    "path": "./"
+  }
   "gallery": {
     "path": "/mnt/media/Photos/Export/",
     "cache": "/tmp/cloud/"
