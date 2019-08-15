@@ -75,6 +75,7 @@ func main() {
 			mux.Get("/", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
 			mux.Get("/images/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
 			mux.Get("/static/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
+			mux.Get("/sockjs-node/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
 		}
 	}
 
