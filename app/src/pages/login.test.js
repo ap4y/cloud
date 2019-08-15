@@ -39,7 +39,7 @@ it("performs auth", () => {
       resetAuthError={() => {
         state.resetAuth = true;
       }}
-      performAuth={(username, password) => {
+      signIn={(username, password) => {
         state.username = username;
         state.password = password;
       }}

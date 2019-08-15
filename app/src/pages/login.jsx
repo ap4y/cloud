@@ -5,7 +5,7 @@ import { Redirect } from "react-router-dom";
 
 import { Alert } from "../components/Typography";
 
-import { performAuth, resetAuthError, resetErrorMessage } from "../actions";
+import { signIn, resetAuthError, resetErrorMessage } from "../actions";
 
 const Container = styled.div`
   display: flex;
@@ -27,11 +27,11 @@ export class LoginForm extends React.Component {
     this.setState({ [field]: target.value });
   };
 
-  _performAuth = () => {
+  performAuth = () => {
     const { username, password } = this.state;
     this.props.resetAuthError();
     this.props.resetErrorMessage();
-    this.props.performAuth(username, password);
+    this.props.signIn(username, password);
   };
 
   render() {
@@ -41,7 +41,7 @@ export class LoginForm extends React.Component {
 
     return (
       <Container>
-        <form onSubmit={this._performAuth}>
+        <form onSubmit={this.performAuth}>
           <label>Username: </label>
           <input type="text" onChange={this._handleChange("username")} />
           <label>Password:</label>
@@ -56,5 +56,5 @@ export class LoginForm extends React.Component {
 
 export default connect(
   ({ authToken, errorMessage }) => ({ authToken, errorMessage }),
-  { performAuth, resetErrorMessage, resetAuthError }
+  { signIn, resetErrorMessage, resetAuthError }
 )(LoginForm);

@@ -80,7 +80,7 @@ export const AUTH_REQUEST = "AUTH_REQUEST";
 export const AUTH_SUCCESS = "AUTH_SUCCESS";
 export const AUTH_FAILURE = "AUTH_FAILURE";
 
-export function performAuth(username, password) {
+export function signIn(username, password) {
   return dispatch => {
     dispatch({ type: AUTH_REQUEST });
 
