@@ -11,17 +11,17 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi"
 )
 
-// TODO: expirations
-
 // Share stores share data.
 type Share struct {
-	Slug  string   `json:"slug"`
-	Type  Module   `json:"type"`
-	Items []string `json:"items"`
+	Slug      string    `json:"slug"`
+	Type      Module    `json:"type"`
+	Items     []string  `json:"items"`
+	ExpiresAt time.Time `json:"expires_at"`
 }
 
 // ShareStore manages share metadata.
@@ -30,6 +30,10 @@ type ShareStore interface {
 	Save(share *Share) error
 	// Get return share metadata.
 	Get(slug string) (*Share, error)
+	// Remove removes share metadata.
+	Remove(slug string) error
+	// Expire removes all expired shares.
+	Expire() error
 }
 
 type diskShareStore struct {
@@ -68,6 +72,37 @@ func (store *diskShareStore) Get(slug string) (*Share, error) {
 	}
 
 	return share, nil
+}
+
+func (store *diskShareStore) Remove(slug string) error {
+	path := filepath.Join(store.dir, slug)
+	return os.Remove(path)
+}
+
+func (store *diskShareStore) Expire() error {
+	path := filepath.Join(store.dir, "*")
+	matches, err := filepath.Glob(path)
+	if err != nil {
+		return fmt.Errorf("file: %s", err)
+	}
+
+	for _, match := range matches {
+		_, slug := filepath.Split(match)
+		share, err := store.Get(slug)
+		if err != nil {
+			continue
+		}
+
+		if share.ExpiresAt.After(time.Now()) {
+			continue
+		}
+
+		if err := store.Remove(slug); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 type wrapResponseWriter struct {

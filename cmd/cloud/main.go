@@ -8,6 +8,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"time"
 
 	"github.com/ap4y/cloud/api"
 	"github.com/ap4y/cloud/gallery"
@@ -51,6 +52,22 @@ func main() {
 		log.Fatal("failed to decode config file:", err)
 	}
 
+	srv, err := setupServer(cfg)
+	if err != nil {
+		log.Fatal("failed to initialise server:", err)
+	}
+
+	if *devURL != "" {
+		setupDevProxy(*devURL, srv)
+	}
+
+	log.Println("Serving on", *addr)
+	if err := http.ListenAndServe(*addr, srv); err != nil {
+		log.Fatal("failed to start server:", err)
+	}
+}
+
+func setupServer(cfg *config) (http.Handler, error) {
 	modules := map[api.Module]http.Handler{}
 	for _, module := range cfg.Modules {
 		if module == "gallery" {
@@ -66,28 +83,30 @@ func main() {
 
 	cs := api.NewMemoryCredentialsStorage(cfg.Users, jwt.SigningMethodHS256, []byte(cfg.JWTSecret))
 	ss := api.NewDiskShareStore(cfg.Share.Path)
-	srv, err := api.NewServer(modules, cs, ss)
+
+	expireTicker := time.NewTicker(time.Hour)
+	go func() {
+		for range expireTicker.C {
+			if err := ss.Expire(); err != nil {
+				log.Println("failed to expire shares:", err)
+			}
+		}
+	}()
+
+	return api.NewServer(modules, cs, ss)
+}
+
+func setupDevProxy(devURL string, handler http.Handler) {
+	rpURL, err := url.Parse(devURL)
 	if err != nil {
-		log.Fatal("failed to initialise server:", err)
+		log.Fatal("invalid dev url:", err)
 	}
 
-	if *devURL != "" {
-		rpURL, err := url.Parse(*devURL)
-		if err != nil {
-			log.Fatal("invalid dev url:", err)
-		}
-
-		if mux, ok := srv.(*chi.Mux); ok {
-			mux.Get("/", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
-			mux.Get("/images/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
-			mux.Get("/static/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
-			mux.Get("/sockjs-node/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
-		}
-	}
-
-	log.Println("Serving on", *addr)
-	if err := http.ListenAndServe(*addr, srv); err != nil {
-		log.Fatal("failed to start server:", err)
+	if mux, ok := handler.(*chi.Mux); ok {
+		mux.Get("/", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
+		mux.Get("/images/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
+		mux.Get("/static/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
+		mux.Get("/sockjs-node/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
 	}
 }
 

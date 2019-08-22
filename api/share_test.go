@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/assert"
@@ -77,6 +78,42 @@ func TestShareAuthenticator(t *testing.T) {
 	}
 }
 
+func TestShareStore(t *testing.T) {
+	dir, err := ioutil.TempDir("", "shares")
+	require.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	store := NewDiskShareStore(dir)
+
+	share := &Share{Slug: "foo", Type: ModuleGallery, Items: []string{"foo", "bar"}, ExpiresAt: time.Time{}}
+	t.Run("Save", func(t *testing.T) {
+		require.NoError(t, store.Save(share))
+	})
+
+	t.Run("Get", func(t *testing.T) {
+		res, err := store.Get("foo")
+		require.NoError(t, err)
+		assert.Equal(t, share, res)
+	})
+
+	t.Run("Remove", func(t *testing.T) {
+		require.NoError(t, store.Remove("foo"))
+
+		res, err := store.Get("foo")
+		require.Error(t, err)
+		assert.Nil(t, res)
+	})
+
+	t.Run("Expire", func(t *testing.T) {
+		require.NoError(t, store.Save(share))
+		require.NoError(t, store.Expire())
+
+		res, err := store.Get("foo")
+		require.Error(t, err)
+		assert.Nil(t, res)
+	})
+}
+
 func TestShareHandler(t *testing.T) {
 	dir, err := ioutil.TempDir("", "shares")
 	require.NoError(t, err)
@@ -89,7 +126,7 @@ func TestShareHandler(t *testing.T) {
 
 	t.Run("Create", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		body := "{\"type\":\"gallery\",\"items\":[\"foo\",\"bar\"]}"
+		body := "{\"type\":\"gallery\",\"items\":[\"foo\",\"bar\"],\"expires_at\":\"1970-01-01T00:00:00Z\"}"
 		req := httptest.NewRequest("POST", "http://cloud.api/", strings.NewReader(body))
 		handler.ServeHTTP(w, req)
 
@@ -101,10 +138,11 @@ func TestShareHandler(t *testing.T) {
 
 		require.NotNil(t, share.Slug)
 		assert.Equal(t, ModuleGallery, string(share.Type))
+		assert.Equal(t, int64(0), share.ExpiresAt.Unix())
 	})
 
 	t.Run("Fetch", func(t *testing.T) {
-		share := &Share{Slug: "foo", Type: ModuleGallery, Items: []string{"foo", "bar"}}
+		share := &Share{Slug: "foo", Type: ModuleGallery, Items: []string{"foo", "bar"}, ExpiresAt: time.Time{}}
 		require.NoError(t, store.Save(share))
 
 		w := httptest.NewRecorder()
