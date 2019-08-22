@@ -6,7 +6,7 @@
   },
   "share": {
     "path": "./"
-  }
+  },
   "gallery": {
     "path": "/mnt/media/Photos/Export/",
     "cache": "/tmp/cloud/"
