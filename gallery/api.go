@@ -1,13 +1,13 @@
 package gallery
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"path/filepath"
 	"time"
 
+	"github.com/ap4y/cloud/internal/httputil"
 	"github.com/go-chi/chi"
 )
 
@@ -36,32 +36,24 @@ func NewGalleryAPI(source Source, cache Cache) http.Handler {
 }
 
 func (api *galleryAPI) listAlbums(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	albums, err := api.source.Albums()
 	if err != nil {
-		http.Error(w, fmt.Sprint("failed to fetch albums:", err), http.StatusBadRequest)
+		httputil.Error(w, fmt.Sprint("failed to fetch albums:", err), http.StatusBadRequest)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(albums); err != nil {
-		http.Error(w, fmt.Sprint("failed to encode albums:", err), http.StatusBadRequest)
-	}
+	httputil.Respond(w, albums)
 }
 
 func (api *galleryAPI) listAlbumImages(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	galleryName := chi.URLParam(req, "path")
 	images, err := api.source.Images(galleryName)
 	if err != nil {
-		http.Error(w, fmt.Sprint("failed to fetch images:", err), http.StatusBadRequest)
+		httputil.Error(w, fmt.Sprint("failed to fetch images:", err), http.StatusBadRequest)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(images); err != nil {
-		http.Error(w, fmt.Sprint("failed to encode images:", err), http.StatusBadRequest)
-	}
+	httputil.Respond(w, images)
 }
 
 func (api *galleryAPI) getImage(w http.ResponseWriter, req *http.Request) {
@@ -111,22 +103,18 @@ func (api *galleryAPI) getImageThumbnail(w http.ResponseWriter, req *http.Reques
 }
 
 func (api *galleryAPI) getImageEXIF(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	imgPath := filepath.Join(chi.URLParam(req, "path"), chi.URLParam(req, "file"))
 	file, err := api.source.Image(imgPath)
 	if err != nil {
-		http.Error(w, fmt.Sprint("failed to fetch image:", err), http.StatusNotFound)
+		httputil.Error(w, fmt.Sprint("failed to fetch image:", err), http.StatusNotFound)
 		return
 	}
 
 	exif, err := EXIF(file)
 	if err != nil {
-		http.Error(w, fmt.Sprint("failed to parse exif:", err), http.StatusNotFound)
+		httputil.Error(w, fmt.Sprint("failed to parse exif:", err), http.StatusNotFound)
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(exif); err != nil {
-		http.Error(w, fmt.Sprint("failed to encode exif data:", err), http.StatusBadRequest)
-	}
+	httputil.Respond(w, exif)
 }

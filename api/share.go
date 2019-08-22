@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ap4y/cloud/internal/httputil"
 	"github.com/go-chi/chi"
 )
 
@@ -164,50 +165,42 @@ func ShareAuthenticator(store ShareStore) func(next http.Handler) http.Handler {
 
 func getShareHandler(store ShareStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
 		slug := chi.URLParam(req, "slug")
 		if slug == "" {
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			httputil.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
 
 		share, err := store.Get(slug)
 		if err != nil {
-			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			httputil.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
 
-		if err := json.NewEncoder(w).Encode(share); err != nil {
-			http.Error(w, fmt.Sprintf("Failed to encode json: %s", err), http.StatusBadRequest)
-		}
+		httputil.Respond(w, share)
 	}
 }
 
 func createShareHandler(store ShareStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var share *Share
-		w.Header().Set("Content-Type", "application/json")
-
 		if err := json.NewDecoder(req.Body).Decode(&share); err != nil {
-			http.Error(w, fmt.Sprintf("Failed to decode json: %s", err), http.StatusBadRequest)
+			httputil.Error(w, fmt.Sprintf("Failed to decode json: %s", err), http.StatusBadRequest)
 			return
 		}
 
 		slug := make([]byte, 10)
 		if _, err := rand.Read(slug); err != nil {
-			http.Error(w, fmt.Sprintf("Failed to generate slug: %s", err), http.StatusBadRequest)
+			httputil.Error(w, fmt.Sprintf("Failed to generate slug: %s", err), http.StatusBadRequest)
 			return
 		}
 
 		share.Slug = base64.StdEncoding.EncodeToString(slug)
 		if err := store.Save(share); err != nil {
-			http.Error(w, fmt.Sprintf("Failed to save: %s", err), http.StatusBadRequest)
+			httputil.Error(w, fmt.Sprintf("Failed to save: %s", err), http.StatusBadRequest)
 			return
 		}
 
-		if err := json.NewEncoder(w).Encode(share); err != nil {
-			http.Error(w, fmt.Sprintf("Failed to encode json: %s", err), http.StatusBadRequest)
-		}
+		httputil.Respond(w, share)
 	}
 }

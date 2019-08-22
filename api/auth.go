@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/ap4y/cloud/internal/httputil"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
 	"golang.org/x/crypto/bcrypt"
@@ -89,22 +90,19 @@ func AuthHandler(credentials CredentialsStorage) http.Handler {
 	mux := chi.NewRouter()
 	mux.Post("/sign_in", func(w http.ResponseWriter, req *http.Request) {
 		body := map[string]string{}
-		w.Header().Set("Content-Type", "application/json")
 
 		if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
-			http.Error(w, fmt.Sprintf("Failed to decode json: %s", err), http.StatusBadRequest)
+			httputil.Error(w, fmt.Sprintf("Failed to decode json: %s", err), http.StatusBadRequest)
 			return
 		}
 
 		token, err := credentials.Authenticate(body["username"], body["password"])
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Failed to authenticate user: %s", err), http.StatusBadRequest)
+			httputil.Error(w, fmt.Sprintf("Failed to authenticate user: %s", err), http.StatusBadRequest)
 			return
 		}
 
-		if err := json.NewEncoder(w).Encode(map[string]string{"token": token}); err != nil {
-			http.Error(w, fmt.Sprintf("Failed to encode json: %s", err), http.StatusBadRequest)
-		}
+		httputil.Respond(w, map[string]string{"token": token})
 	})
 
 	return mux
@@ -121,7 +119,7 @@ func Authenticator(credentials CredentialsStorage) func(next http.Handler) http.
 
 			username, err := credentials.Validate(token)
 			if err != nil {
-				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				httputil.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 				return
 			}
 

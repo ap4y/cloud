@@ -33,10 +33,10 @@ func TestAuth(t *testing.T) {
 			username string
 			password string
 			status   int
-			err      string
+			res      string
 		}{
-			{"unknown user", "foo", "bar", http.StatusBadRequest, "Failed to authenticate user: invalid username or password\n"},
-			{"invalid password", "test", "bar", http.StatusBadRequest, "Failed to authenticate user: invalid username or password\n"},
+			{"unknown user", "foo", "bar", http.StatusBadRequest, "{\"error\":\"Failed to authenticate user: invalid username or password\"}\n"},
+			{"invalid password", "test", "bar", http.StatusBadRequest, "{\"error\":\"Failed to authenticate user: invalid username or password\"}\n"},
 			{"valid", "test", "changeme", http.StatusOK, "{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoidGVzdCJ9.wk1swko8GbuwRMRuTR6q_x7AZQGbbwm8sZLyg90afbs\"}\n"},
 		}
 
@@ -51,8 +51,8 @@ func TestAuth(t *testing.T) {
 				resp := w.Result()
 				require.Equal(t, tc.status, resp.StatusCode)
 
-				err, _ := ioutil.ReadAll(resp.Body)
-				assert.Equal(t, tc.err, string(err))
+				res, _ := ioutil.ReadAll(resp.Body)
+				assert.Equal(t, tc.res, string(res))
 			})
 		}
 	})
