@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -23,10 +24,12 @@ func NewGalleryAPI(source Source, cache Cache) http.Handler {
 
 	mux.Route("/", func(r chi.Router) {
 		r.Get("/", api.listAlbums)
-		r.Get("/{galleryName}/images", api.listAlbumImages)
-		r.Get("/images/*", api.getImage)
-		r.Get("/thumbnails/*", api.getImageThumbnail)
-		r.Get("/exif/*", api.getImageEXIF)
+		r.Route("/{path}", func(r chi.Router) {
+			r.Get("/images", api.listAlbumImages)
+			r.Get("/image/{file}", api.getImage)
+			r.Get("/thumbnail/{file}", api.getImageThumbnail)
+			r.Get("/exif/{file}", api.getImageEXIF)
+		})
 	})
 
 	return api
@@ -49,7 +52,7 @@ func (api *galleryAPI) listAlbums(w http.ResponseWriter, req *http.Request) {
 func (api *galleryAPI) listAlbumImages(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	galleryName := chi.URLParam(req, "galleryName")
+	galleryName := chi.URLParam(req, "path")
 	images, err := api.source.Images(galleryName)
 	if err != nil {
 		http.Error(w, fmt.Sprint("failed to fetch images:", err), http.StatusBadRequest)
@@ -62,7 +65,7 @@ func (api *galleryAPI) listAlbumImages(w http.ResponseWriter, req *http.Request)
 }
 
 func (api *galleryAPI) getImage(w http.ResponseWriter, req *http.Request) {
-	imgPath := chi.URLParam(req, "*")
+	imgPath := filepath.Join(chi.URLParam(req, "path"), chi.URLParam(req, "file"))
 	file, err := api.source.Image(imgPath)
 	if err != nil {
 		http.Error(w, fmt.Sprint("failed to fetch image:", err), http.StatusNotFound)
@@ -79,7 +82,7 @@ func (api *galleryAPI) getImage(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *galleryAPI) getImageThumbnail(w http.ResponseWriter, req *http.Request) {
-	imgPath := chi.URLParam(req, "*")
+	imgPath := filepath.Join(chi.URLParam(req, "path"), chi.URLParam(req, "file"))
 	if thumb, modTime := api.cache.Thumbnail(imgPath); thumb != nil {
 		http.ServeContent(w, req, imgPath, modTime, thumb)
 		return
@@ -110,7 +113,7 @@ func (api *galleryAPI) getImageThumbnail(w http.ResponseWriter, req *http.Reques
 func (api *galleryAPI) getImageEXIF(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	imgPath := chi.URLParam(req, "*")
+	imgPath := filepath.Join(chi.URLParam(req, "path"), chi.URLParam(req, "file"))
 	file, err := api.source.Image(imgPath)
 	if err != nil {
 		http.Error(w, fmt.Sprint("failed to fetch image:", err), http.StatusNotFound)

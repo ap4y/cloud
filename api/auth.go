@@ -15,13 +15,6 @@ import (
 // UserAuthKey defines usename key in jwt token.
 const UserAuthKey = "user"
 
-// UsernameCtxKey defines username request context key.
-var UsernameCtxKey = &contextKey{"Username"}
-
-type contextKey struct {
-	name string
-}
-
 // CredentialsStorage stores and validates user credentials.
 type CredentialsStorage interface {
 	// Authenticate returns jwt token if provided password matches to a

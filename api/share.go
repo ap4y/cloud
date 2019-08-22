@@ -1,6 +1,8 @@
 package api
 
 import (
+	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
@@ -8,12 +10,12 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/go-chi/chi"
 )
 
 // TODO: expirations
-// TODO: module integration (unrestrict content)
 
 // Share stores share data.
 type Share struct {
@@ -68,11 +70,73 @@ func (store *diskShareStore) Get(slug string) (*Share, error) {
 	return share, nil
 }
 
+type wrapResponseWriter struct {
+	http.ResponseWriter
+	buf        bytes.Buffer
+	statusCode int
+}
+
+func (w *wrapResponseWriter) Write(buf []byte) (int, error) {
+	return w.buf.Write(buf)
+}
+
+func (w *wrapResponseWriter) WriteHeader(statusCode int) {
+	w.statusCode = statusCode
+}
+
+// ShareAuthenticator returns new share authentication middleware.
+func ShareAuthenticator(store ShareStore) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			slug := chi.URLParam(req, "slug")
+			if slug == "" {
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
+
+			share, err := store.Get(slug)
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
+
+			ctx := context.WithValue(req.Context(), ShareCtxKey, share)
+			wrapper := &wrapResponseWriter{ResponseWriter: w}
+			next.ServeHTTP(wrapper, req.WithContext(ctx))
+
+			path := chi.URLParam(req, "path")
+			if path == "" {
+				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+				return
+			}
+
+			file := chi.URLParam(req, "file")
+			fullPath := filepath.Join(path, file)
+			for _, item := range share.Items {
+				if strings.HasPrefix(item, fullPath) {
+					w.Write(wrapper.buf.Bytes())
+					if wrapper.statusCode != 0 {
+						w.WriteHeader(wrapper.statusCode)
+					}
+					return
+				}
+			}
+
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		})
+	}
+}
+
 func getShareHandler(store ShareStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		slug := chi.URLParam(req, "slug")
+		if slug == "" {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+
 		share, err := store.Get(slug)
 		if err != nil {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)

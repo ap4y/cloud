@@ -9,6 +9,16 @@ import (
 	"github.com/go-chi/chi/middleware"
 )
 
+type contextKey struct {
+	name string
+}
+
+// UsernameCtxKey defines username request context key.
+var UsernameCtxKey = &contextKey{"Username"}
+
+// ShareCtxKey defines share request context key.
+var ShareCtxKey = &contextKey{"Share"}
+
 // Module defines supported module
 type Module string
 
@@ -22,30 +32,41 @@ func NewServer(modules map[Module]http.Handler, cs CredentialsStorage, ss ShareS
 	mux := chi.NewRouter()
 	mux.Use(middleware.Logger)
 
-	apiMux := chi.NewRouter()
-	mux.Mount("/api", apiMux)
+	mux.Route("/api", func(apiMux chi.Router) {
+		apiMux.Mount("/user", AuthHandler(cs))
 
-	apiMux.Mount("/user", AuthHandler(cs))
-	apiMux.Get("/share/{slug}", getShareHandler(ss))
-	apiMux.Group(func(r chi.Router) {
-		r.Use(Authenticator(cs))
+		apiMux.Group(func(r chi.Router) {
+			r.Use(Authenticator(cs))
 
-		r.Get("/modules", func(w http.ResponseWriter, res *http.Request) {
 			moduleIds := []Module{}
 			for module := range modules {
 				moduleIds = append(moduleIds, module)
 			}
 
-			if err := json.NewEncoder(w).Encode(map[string][]Module{"modules": moduleIds}); err != nil {
-				http.Error(w, fmt.Sprintf("Failed to encode json: %s", err), http.StatusBadRequest)
+			r.Get("/modules", func(w http.ResponseWriter, res *http.Request) {
+				if err := json.NewEncoder(w).Encode(map[string][]Module{"modules": moduleIds}); err != nil {
+					http.Error(w, fmt.Sprintf("Failed to encode json: %s", err), http.StatusBadRequest)
+				}
+			})
+
+			r.Post("/share", createShareHandler(ss))
+
+			for module, handler := range modules {
+				r.Mount("/"+string(module), handler)
 			}
 		})
 
-		r.Post("/share", createShareHandler(ss))
+		apiMux.Route("/share/{slug}", func(r chi.Router) {
+			r.Get("/", getShareHandler(ss))
 
-		for module, handler := range modules {
-			r.Mount("/"+string(module), handler)
-		}
+			r.Group(func(r chi.Router) {
+				r.Use(ShareAuthenticator(ss))
+
+				for module, handler := range modules {
+					r.Mount("/"+string(module), handler)
+				}
+			})
+		})
 	})
 
 	return mux, nil

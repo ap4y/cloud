@@ -62,7 +62,7 @@ func TestGalleryAPI(t *testing.T) {
 
 	t.Run("getImage", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "http://cloud.api/images/album1/test.jpg", nil)
+		req := httptest.NewRequest("GET", "http://cloud.api/album1/image/test.jpg", nil)
 		api.ServeHTTP(w, req)
 
 		resp := w.Result()
@@ -72,7 +72,7 @@ func TestGalleryAPI(t *testing.T) {
 
 	t.Run("getImageThumbnail", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "http://cloud.api/thumbnails/album1/test.jpg", nil)
+		req := httptest.NewRequest("GET", "http://cloud.api/album1/thumbnail/test.jpg", nil)
 		api.ServeHTTP(w, req)
 
 		resp := w.Result()
@@ -82,7 +82,7 @@ func TestGalleryAPI(t *testing.T) {
 
 	t.Run("getImageEXIF", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "http://cloud.api/exif/album1/test.jpg", nil)
+		req := httptest.NewRequest("GET", "http://cloud.api/album1/exif/test.jpg", nil)
 		api.ServeHTTP(w, req)
 
 		resp := w.Result()
