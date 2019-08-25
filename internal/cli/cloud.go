@@ -83,10 +83,7 @@ func setupDevProxy(devURL string, handler http.Handler) error {
 	}
 
 	if mux, ok := handler.(*chi.Mux); ok {
-		mux.Get("/", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
-		mux.Get("/images/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
-		mux.Get("/static/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
-		mux.Get("/sockjs-node/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
+		mux.Get("/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
 	}
 
 	return nil

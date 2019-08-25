@@ -1,7 +1,13 @@
 import React, { Component } from "react";
 import styled from "@emotion/styled";
 import { connect } from "react-redux";
-import { HashRouter, Route, NavLink, Switch, Redirect } from "react-router-dom";
+import {
+  BrowserRouter,
+  Route,
+  NavLink,
+  Switch,
+  Redirect
+} from "react-router-dom";
 
 import AlbumsList from "./pages/albums";
 import LoginForm from "./pages/login";
@@ -140,7 +146,7 @@ class App extends Component {
     const { navItems, sidebarItems, contentItems } = this.renderModules();
 
     return (
-      <HashRouter>
+      <BrowserRouter>
         <PageContainer>
           <Sidepanel collapsed={collapsed || navItems.length === 0}>
             {navItems.length > 0 && (
@@ -179,7 +185,7 @@ class App extends Component {
             </Switch>
           </Content>
         </PageContainer>
-      </HashRouter>
+      </BrowserRouter>
     );
   }
 }
