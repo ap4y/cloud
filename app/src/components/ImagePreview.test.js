@@ -45,6 +45,7 @@ it("renders image preview", () => {
     <ImagePreview
       images={images}
       match={{ path: `/test/:imageName`, params: { imageName: image.name } }}
+      galleryName="bar"
       authToken="foo"
     />
   );
@@ -54,7 +55,7 @@ it("renders image preview", () => {
       .find("img")
       .first()
       .prop("src")
-  ).toEqual("/api/gallery/images/test/Test.jpg?jwt=foo");
+  ).toEqual("/api/gallery/bar/image/test/Test.jpg?jwt=foo");
 });
 
 it("renders navigation chevrons", () => {
@@ -95,10 +96,12 @@ it("renders exif data", () => {
 });
 
 it("renders thumbnail", () => {
-  const wrapper = shallow(<GalleryItem image={image} authToken="foo" />);
+  const wrapper = shallow(
+    <GalleryItem image={image} gallery="foo" authToken="foo" />
+  );
 
   expect(wrapper.find("img").prop("src")).toEqual(
-    "/api/gallery/thumbnails/test/Test.jpg?jwt=foo"
+    "/api/gallery/foo/thumbnail/test/Test.jpg?jwt=foo"
   );
   expect(wrapper.find("figcaption").text()).toEqual("Test");
 });

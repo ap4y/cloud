@@ -33,12 +33,12 @@ const Figure = styled.figure`
   }
 `;
 
-export const GalleryItem = ({ image, cellRef, authToken, selected }) => {
+export const GalleryItem = ({ image, authToken, gallery, selected }) => {
   return (
-    <Figure ref={cellRef} selected={selected}>
+    <Figure selected={selected}>
       <img
         alt={image.name}
-        src={`/api/gallery/thumbnails/${image.path}?jwt=${authToken}`}
+        src={`/api/gallery/${gallery}/thumbnail/${image.path}?jwt=${authToken}`}
       />
       <figcaption>{image.name}</figcaption>
     </Figure>
@@ -176,32 +176,50 @@ const Toolbar = styled.header`
 `;
 
 class ImagePreview extends Component {
-  cellRef = React.createRef();
   previewRef = React.createRef();
+  thumbsRef = React.createRef();
 
-  state = { fullscreen: false, exif: null };
+  state = { fullscreen: false, exif: null, selectedIdx: 0 };
 
   componentDidMount() {
     document.body.style.overflow = "hidden";
     document.onfullscreenchange = e => {
       if (!document.fullscreenElement) this.setState({ fullscreen: false });
     };
-    window.setTimeout(() => this.centerCell(), 400);
+
+    const { images, match } = this.props;
+    const selectedIdx = images.findIndex(
+      image => image.name === match.params.imageName
+    );
+    this.setState({ selectedIdx }, this.centerCell);
   }
 
   componentWillUnmount() {
     document.body.style.overflow = null;
   }
 
-  componentDidUpdate() {
-    this.centerCell();
+  componentDidUpdate(prevProps) {
+    const { images, match } = this.props;
+
+    if (
+      images === prevProps.images &&
+      match.params.imageName === prevProps.match.params.imageName
+    )
+      return;
+
+    const selectedIdx = images.findIndex(
+      image => image.name === match.params.imageName
+    );
+    this.setState({ selectedIdx }, this.centerCell);
   }
 
   centerCell() {
-    const cell = this.cellRef.current;
-    if (!cell) return;
+    const thumbs = this.thumbsRef.current;
+    if (!thumbs) return;
 
-    cell.scrollIntoView({ inline: "center", behavior: "smooth" });
+    const { selectedIdx } = this.state;
+    const cell = thumbs.children[selectedIdx];
+    if (cell) cell.scrollIntoView({ inline: "center", behavior: "smooth" });
   }
 
   imagePath = image => this.props.match.path.replace(":imageName", image.name);
@@ -238,22 +256,20 @@ class ImagePreview extends Component {
 
     if (this.state.exif) {
       this.setState({ exif: null });
-    } else {
-      const image = this.props.images.find(
-        image => image.name === this.props.match.params.imageName
-      );
-      apiClient.do(`/gallery/exif/${image.path}`).then(exif => {
-        this.setState({ exif });
-      });
+      return;
     }
+
+    const { images, galleryName } = this.props;
+    const image = images[this.state.selectedIdx];
+    apiClient.do(`/gallery/${galleryName}/exif/${image.path}`).then(exif => {
+      this.setState({ exif });
+    });
   };
 
   render() {
-    const { fullscreen } = this.state;
-    const { images, match, authToken } = this.props;
-    const selectedIdx = images.findIndex(
-      image => image.name === match.params.imageName
-    );
+    const { fullscreen, selectedIdx } = this.state;
+    const { images, match, authToken, galleryName } = this.props;
+
     const selectedImage = images[selectedIdx];
     const prevImage =
       images[selectedIdx === 0 ? images.length - 1 : selectedIdx - 1];
@@ -265,13 +281,9 @@ class ImagePreview extends Component {
         <NavLink to={this.imagePath(image)}>
           <GalleryItem
             selected={idx === selectedIdx}
+            gallery={galleryName}
             image={image}
             authToken={authToken}
-            cellRef={
-              selectedImage && image.name === selectedImage.name
-                ? this.cellRef
-                : React.createRef()
-            }
           />
         </NavLink>
       </li>
@@ -282,7 +294,7 @@ class ImagePreview extends Component {
           <div>
             {selectedImage && (
               <a
-                href={`/api/gallery/images/${selectedImage.path}?jwt=${authToken}`}
+                href={`/api/gallery/${galleryName}/image/${selectedImage.path}?jwt=${authToken}`}
                 download={selectedImage.path.replace("/", "_")}
               >
                 <i className="material-icons-round">get_app</i>
@@ -320,7 +332,7 @@ class ImagePreview extends Component {
 
             <img
               alt={selectedImage.name}
-              src={`/api/gallery/images/${selectedImage.path}?jwt=${authToken}`}
+              src={`/api/gallery/${galleryName}/image/${selectedImage.path}?jwt=${authToken}`}
             />
 
             <Link
@@ -332,7 +344,9 @@ class ImagePreview extends Component {
           </ImageContainer>
         )}
 
-        <Thumbs hidden={fullscreen}>{galleryItems}</Thumbs>
+        <Thumbs ref={this.thumbsRef} hidden={fullscreen}>
+          {galleryItems}
+        </Thumbs>
       </Container>
     );
   }

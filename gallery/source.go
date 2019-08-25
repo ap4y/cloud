@@ -111,8 +111,12 @@ func (ds *diskSource) images(folderName string) ([]*Image, error) {
 			return nil
 		}
 
-		relPath, _ := filepath.Rel(ds.basePath, path)
-		images = append(images, &Image{strings.Replace(fi.Name(), ext, "", -1), relPath, fi.ModTime()})
+		image := &Image{
+			Name:    strings.Replace(fi.Name(), ext, "", -1),
+			Path:    fi.Name(),
+			ModTime: fi.ModTime(),
+		}
+		images = append(images, image)
 		return nil
 	})
 

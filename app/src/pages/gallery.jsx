@@ -48,12 +48,16 @@ const Figure = styled.figure`
   }
 `;
 
-export const ImageCell = ({ image: { name, path, updated_at }, authToken }) => {
+export const ImageCell = ({
+  image: { name, path, updated_at },
+  gallery,
+  authToken
+}) => {
   return (
     <Figure>
       <img
         alt={name}
-        src={`/api/gallery/thumbnails/${path}?jwt=${authToken}`}
+        src={`/api/gallery/${gallery}/thumbnail/${path}?jwt=${authToken}`}
       />
       <figcaption>
         <span>{name}</span>
@@ -104,12 +108,18 @@ export class ImageGrid extends Component {
     this.props.fetchAlbum(this.props.galleryName);
   }
 
+  share = () => {};
+
   render() {
-    const { images, galleryName, authToken } = this.props;
+    const { images, galleryName, authToken, match } = this.props;
     const imageItems = images.map(image => {
       return (
-        <NavLink key={image.name} to={`${this.props.match.url}/${image.name}`}>
-          <ImageCell image={image} authToken={authToken} />
+        <NavLink key={image.name} to={`${match.url}/${image.name}`}>
+          <ImageCell
+            image={image}
+            gallery={match.params.galleryName}
+            authToken={authToken}
+          />
         </NavLink>
       );
     });
@@ -118,14 +128,14 @@ export class ImageGrid extends Component {
         <Toolbar>
           <h2>{galleryName}</h2>
           <div>
-            <a>
+            <a href="#share" onClick={this.share}>
               <i className="material-icons-round">share</i>
             </a>
           </div>
         </Toolbar>
         <Images>{imageItems}</Images>
         <Route
-          path={`${this.props.match.url}/:imageName`}
+          path={`${match.url}/:imageName`}
           render={props => (
             <ImagePreview
               authToken={authToken}
