@@ -22,7 +22,8 @@ func TestShareAuthenticator(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(dir)
 
-	store := NewDiskShareStore(dir)
+	store, err := NewDiskShareStore(dir)
+	require.NoError(t, err)
 	share := &Share{Slug: "bar", Type: ModuleGallery, Items: []string{"foo/test.jpg"}}
 	require.NoError(t, store.Save(share))
 
@@ -83,7 +84,8 @@ func TestShareStore(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(dir)
 
-	store := NewDiskShareStore(dir)
+	store, err := NewDiskShareStore(dir)
+	require.NoError(t, err)
 
 	share := &Share{Slug: "foo", Type: ModuleGallery, Items: []string{"foo", "bar"}, ExpiresAt: time.Time{}}
 	t.Run("Save", func(t *testing.T) {
@@ -119,7 +121,8 @@ func TestShareHandler(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(dir)
 
-	store := NewDiskShareStore(dir)
+	store, err := NewDiskShareStore(dir)
+	require.NoError(t, err)
 	handler := chi.NewRouter()
 	handler.Get("/{slug}", getShareHandler(store))
 	handler.Post("/", createShareHandler(store))

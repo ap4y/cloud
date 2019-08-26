@@ -62,7 +62,10 @@ func setupServer(cfg *Config) (http.Handler, error) {
 	}
 
 	cs := api.NewMemoryCredentialsStorage(cfg.Users, jwt.SigningMethodHS256, []byte(cfg.JWTSecret))
-	ss := api.NewDiskShareStore(cfg.Share.Path)
+	ss, err := api.NewDiskShareStore(cfg.Share.Path)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create share store: %s", err)
+	}
 
 	expireTicker := time.NewTicker(time.Hour)
 	go func() {

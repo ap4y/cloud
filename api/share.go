@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -43,8 +44,18 @@ type diskShareStore struct {
 }
 
 // NewDiskShareStore returns a new on-disk implementation of the ShareStore.
-func NewDiskShareStore(dir string) ShareStore {
-	return &diskShareStore{dir}
+func NewDiskShareStore(dir string) (ShareStore, error) {
+	if dir == "" {
+		return nil, errors.New("dir can't be empty")
+	}
+
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		if err := os.Mkdir(dir, 0755); err != nil {
+			return nil, fmt.Errorf("failed to create share dir: %s", err)
+		}
+	}
+
+	return &diskShareStore{dir}, nil
 }
 
 func (store *diskShareStore) Save(share *Share) error {
