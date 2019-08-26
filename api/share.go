@@ -21,6 +21,7 @@ import (
 type Share struct {
 	Slug      string    `json:"slug"`
 	Type      Module    `json:"type"`
+	Name      string    `json:"name"`
 	Items     []string  `json:"items"`
 	ExpiresAt time.Time `json:"expires_at"`
 }
@@ -186,6 +187,16 @@ func createShareHandler(store ShareStore) http.HandlerFunc {
 		var share *Share
 		if err := json.NewDecoder(req.Body).Decode(&share); err != nil {
 			httputil.Error(w, fmt.Sprintf("Failed to decode json: %s", err), http.StatusBadRequest)
+			return
+		}
+
+		valid := false
+		if share.Type == ModuleGallery {
+			valid = share.Name != ""
+		}
+
+		if !valid {
+			httputil.Error(w, "Invalid share", http.StatusUnprocessableEntity)
 			return
 		}
 

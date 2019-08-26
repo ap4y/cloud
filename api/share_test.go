@@ -126,7 +126,7 @@ func TestShareHandler(t *testing.T) {
 
 	t.Run("Create", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		body := "{\"type\":\"gallery\",\"items\":[\"foo\",\"bar\"],\"expires_at\":\"1970-01-01T00:00:00Z\"}"
+		body := "{\"type\":\"gallery\",\"name\":\"test\",\"items\":[\"foo\",\"bar\"],\"expires_at\":\"1970-01-01T00:00:00Z\"}"
 		req := httptest.NewRequest("POST", "http://cloud.api/", strings.NewReader(body))
 		handler.ServeHTTP(w, req)
 
@@ -139,6 +139,16 @@ func TestShareHandler(t *testing.T) {
 		require.NotNil(t, share.Slug)
 		assert.Equal(t, ModuleGallery, string(share.Type))
 		assert.Equal(t, int64(0), share.ExpiresAt.Unix())
+	})
+
+	t.Run("Create - invalid", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		body := "{\"type\":\"gallery\",\"items\":[\"foo\",\"bar\"],\"expires_at\":\"1970-01-01T00:00:00Z\"}"
+		req := httptest.NewRequest("POST", "http://cloud.api/", strings.NewReader(body))
+		handler.ServeHTTP(w, req)
+
+		res := w.Result()
+		require.Equal(t, http.StatusUnprocessableEntity, res.StatusCode)
 	})
 
 	t.Run("Fetch", func(t *testing.T) {
