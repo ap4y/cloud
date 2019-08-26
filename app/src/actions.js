@@ -14,14 +14,15 @@ AuthError.prototype = Object.create(Error.prototype, {
   }
 });
 
-function handleError(dispatch, type) {
+function handleError(dispatch, type, rethrow = false) {
   return e => {
     if (e instanceof AuthError) {
       dispatch({ type: AUTH_ERROR, error: e.message });
-      return;
+    } else {
+      dispatch({ type: type, error: e.message });
     }
 
-    dispatch({ type: type, error: e.message });
+    if (rethrow) throw e;
   };
 }
 
@@ -149,5 +150,30 @@ export function fetchAlbum(galleryName) {
         images
       });
     }, handleError(dispatch, ALBUM_FAILURE));
+  };
+}
+
+export const CREATE_SHARE_REQUEST = "CREATE_SHARE_REQUEST";
+export const CREATE_SHARE_SUCCESS = "CREATE_SHARE_SUCCESS";
+export const CREATE_SHARE_FAILURE = "CREATE_SHARE_FAILURE";
+
+export function shareAlbum(albumName, images, expireAt) {
+  const share = {
+    type: "gallery",
+    name: albumName,
+    items: images.map(({ path }) => path),
+    expires_at: expireAt
+  };
+
+  return dispatch => {
+    dispatch({ type: CREATE_SHARE_REQUEST });
+
+    return apiClient.do("/share", "POST", share).then(share => {
+      dispatch({
+        type: CREATE_SHARE_SUCCESS,
+        share
+      });
+      return share;
+    }, handleError(dispatch, CREATE_SHARE_FAILURE, true));
   };
 }

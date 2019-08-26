@@ -2,12 +2,13 @@ import React from "react";
 import { shallow } from "enzyme";
 import { ImageGrid, ImageCell } from "./gallery";
 
+const image = {
+  name: "Test",
+  path: "test/Test.jpg",
+  updated_at: new Date(0).toString()
+};
+
 it("renders image list", () => {
-  const image = {
-    name: "Test",
-    path: "test/Test.jpg",
-    updated_at: new Date().toString()
-  };
   const images = [
     image,
     {
@@ -36,12 +37,6 @@ it("renders image list", () => {
 });
 
 it("renders image cell", () => {
-  const image = {
-    name: "Test",
-    path: "test/Test.jpg",
-    updated_at: new Date(0).toString()
-  };
-
   const wrapper = shallow(
     <ImageCell image={image} gallery="bar" authToken="foo" />
   );
@@ -52,4 +47,42 @@ it("renders image cell", () => {
   expect(wrapper.find("img").prop("src")).toEqual(
     "/api/gallery/bar/thumbnail/test/Test.jpg?jwt=foo"
   );
+});
+
+it("toggles share popup", () => {
+  const images = [image];
+  const wrapper = shallow(
+    <ImageGrid
+      galleryName="Test"
+      images={images}
+      match={{ url: "/test", params: { galleryName: "bar" } }}
+      fetchAlbum={() => {}}
+    />
+  );
+
+  expect(wrapper.find("SharePopup").exists()).toBeFalsy();
+  wrapper.setState({ showSharing: true });
+  expect(wrapper.find("SharePopup").exists()).toBeTruthy();
+});
+
+it("creates shares", () => {
+  let shared = false;
+  const images = [image];
+  const wrapper = shallow(
+    <ImageGrid
+      galleryName="Test"
+      images={images}
+      match={{ url: "/test", params: { galleryName: "bar" } }}
+      fetchAlbum={() => {}}
+      shareAlbum={() => {
+        shared = true;
+        return new Promise(() => {});
+      }}
+    />
+  );
+
+  wrapper.setState({ showSharing: true });
+  expect(wrapper.find("SharePopup").exists()).toBeTruthy();
+  wrapper.find("SharePopup").invoke("onShare")();
+  expect(shared).toBeTruthy();
 });

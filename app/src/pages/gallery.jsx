@@ -4,7 +4,8 @@ import { connect } from "react-redux";
 import { NavLink, Route } from "react-router-dom";
 
 import ImagePreview from "../components/ImagePreview";
-import { fetchAlbum } from "../actions";
+import SharePopup from "../components/SharePopup";
+import { fetchAlbum, shareAlbum } from "../actions";
 
 const Figure = styled.figure`
   position: relative;
@@ -52,34 +53,42 @@ export const ImageCell = ({
   image: { name, path, updated_at },
   gallery,
   authToken
-}) => {
-  return (
-    <Figure>
-      <img
-        alt={name}
-        src={`/api/gallery/${gallery}/thumbnail/${path}?jwt=${authToken}`}
-      />
-      <figcaption>
-        <span>{name}</span>
-        <small>
-          <time dateTime={updated_at}>
-            {new Date(updated_at).toLocaleString()}
-          </time>
-        </small>
-      </figcaption>
-    </Figure>
-  );
-};
+}) => (
+  <Figure>
+    <img
+      alt={name}
+      src={`/api/gallery/${gallery}/thumbnail/${path}?jwt=${authToken}`}
+    />
+    <figcaption>
+      <span>{name}</span>
+      <small>
+        <time dateTime={updated_at}>
+          {new Date(updated_at).toLocaleString()}
+        </time>
+      </small>
+    </figcaption>
+  </Figure>
+);
 
 const Toolbar = styled.div`
   display: flex;
   align-items: baseline;
   justify-content: space-between;
 
-  a {
-    display: block;
-    height: 2rem;
-    color: var(--secondary-color);
+  > div {
+    position: relative;
+
+    > a {
+      display: block;
+      height: 2rem;
+      color: var(--secondary-color);
+    }
+
+    > div {
+      position: absolute;
+      right: -1rem;
+      top: 3.5rem;
+    }
   }
 `;
 
@@ -98,6 +107,8 @@ const Images = styled.div`
 `;
 
 export class ImageGrid extends Component {
+  state = { showSharing: false, sharingSlug: null, sharingError: null };
+
   componentDidMount() {
     this.props.fetchAlbum(this.props.galleryName);
   }
@@ -108,16 +119,27 @@ export class ImageGrid extends Component {
     this.props.fetchAlbum(this.props.galleryName);
   }
 
-  share = () => {};
+  toggleSharing = e => {
+    e.preventDefault();
+    this.setState({ showSharing: !this.state.showSharing });
+  };
+
+  createShare = expireAt => {
+    const { images, galleryName, shareAlbum } = this.props;
+    shareAlbum(galleryName, images, expireAt)
+      .then(share => this.setState({ sharingSlug: share.slug }))
+      .catch(e => this.setState({ sharingError: e.message }));
+  };
 
   render() {
     const { images, galleryName, authToken, match } = this.props;
+    const { showSharing, sharingSlug, sharingError } = this.state;
     const imageItems = images.map(image => {
       return (
         <NavLink key={image.name} to={`${match.url}/${image.name}`}>
           <ImageCell
             image={image}
-            gallery={match.params.galleryName}
+            gallery={galleryName}
             authToken={authToken}
           />
         </NavLink>
@@ -128,9 +150,17 @@ export class ImageGrid extends Component {
         <Toolbar>
           <h2>{galleryName}</h2>
           <div>
-            <a href="#share" onClick={this.share}>
+            <a href="#share" onClick={this.toggleSharing}>
               <i className="material-icons-round">share</i>
             </a>
+            {showSharing && (
+              <SharePopup
+                items={images}
+                onShare={this.createShare}
+                slug={sharingSlug}
+                error={sharingError}
+              />
+            )}
           </div>
         </Toolbar>
         <Images>{imageItems}</Images>
@@ -159,5 +189,5 @@ export default connect(
       authToken: authToken
     };
   },
-  { fetchAlbum }
+  { fetchAlbum, shareAlbum }
 )(ImageGrid);
