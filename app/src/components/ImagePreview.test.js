@@ -1,6 +1,6 @@
 import React from "react";
 import { shallow } from "enzyme";
-import ImagePreview, { GalleryItem } from "./ImagePreview";
+import ImagePreview, { AlbumItem } from "./ImagePreview";
 
 const image = {
   name: "Test",
@@ -25,16 +25,16 @@ it("renders image thumbnails", () => {
     />
   );
 
-  expect(wrapper.find("GalleryItem").length).toEqual(2);
+  expect(wrapper.find("AlbumItem").length).toEqual(2);
   expect(
     wrapper
-      .find("GalleryItem")
+      .find("AlbumItem")
       .first()
       .prop("image")
   ).toEqual(image);
   expect(
     wrapper
-      .find("GalleryItem")
+      .find("AlbumItem")
       .first()
       .prop("selected")
   ).toEqual(true);
@@ -45,7 +45,7 @@ it("renders image preview", () => {
     <ImagePreview
       images={images}
       match={{ path: `/test/:imageName`, params: { imageName: image.name } }}
-      galleryName="bar"
+      albumName="bar"
       authToken="foo"
     />
   );
@@ -97,7 +97,7 @@ it("renders exif data", () => {
 
 it("renders thumbnail", () => {
   const wrapper = shallow(
-    <GalleryItem image={image} gallery="foo" authToken="foo" />
+    <AlbumItem image={image} album="foo" authToken="foo" />
   );
 
   expect(wrapper.find("img").prop("src")).toEqual(

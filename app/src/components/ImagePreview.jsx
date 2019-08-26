@@ -33,12 +33,12 @@ const Figure = styled.figure`
   }
 `;
 
-export const GalleryItem = ({ image, authToken, gallery, selected }) => {
+export const AlbumItem = ({ image, authToken, album, selected }) => {
   return (
     <Figure selected={selected}>
       <img
         alt={image.name}
-        src={`/api/gallery/${gallery}/thumbnail/${image.path}?jwt=${authToken}`}
+        src={`/api/gallery/${album}/thumbnail/${image.path}?jwt=${authToken}`}
       />
       <figcaption>{image.name}</figcaption>
     </Figure>
@@ -259,16 +259,16 @@ class ImagePreview extends Component {
       return;
     }
 
-    const { images, galleryName } = this.props;
+    const { images, albumName } = this.props;
     const image = images[this.state.selectedIdx];
-    apiClient.do(`/gallery/${galleryName}/exif/${image.path}`).then(exif => {
+    apiClient.do(`/gallery/${albumName}/exif/${image.path}`).then(exif => {
       this.setState({ exif });
     });
   };
 
   render() {
     const { fullscreen, selectedIdx } = this.state;
-    const { images, match, authToken, galleryName } = this.props;
+    const { images, match, authToken, albumName } = this.props;
 
     const selectedImage = images[selectedIdx];
     const prevImage =
@@ -276,12 +276,12 @@ class ImagePreview extends Component {
     const nextImage =
       images[selectedIdx === images.length - 1 ? 0 : selectedIdx + 1];
 
-    const galleryItems = images.map((image, idx) => (
+    const albumItems = images.map((image, idx) => (
       <li key={image.name}>
         <NavLink to={this.imagePath(image)}>
-          <GalleryItem
+          <AlbumItem
             selected={idx === selectedIdx}
-            gallery={galleryName}
+            album={albumName}
             image={image}
             authToken={authToken}
           />
@@ -294,7 +294,7 @@ class ImagePreview extends Component {
           <div>
             {selectedImage && (
               <a
-                href={`/api/gallery/${galleryName}/image/${selectedImage.path}?jwt=${authToken}`}
+                href={`/api/gallery/${albumName}/image/${selectedImage.path}?jwt=${authToken}`}
                 download={selectedImage.path.replace("/", "_")}
               >
                 <i className="material-icons-round">get_app</i>
@@ -310,7 +310,7 @@ class ImagePreview extends Component {
             </a>
           </div>
 
-          <h4>{this.props.galleryName}</h4>
+          <h4>{albumName}</h4>
 
           <NavLink exact to={match.path.replace("/:imageName", "")}>
             <i className="material-icons-round">close</i>
@@ -332,7 +332,7 @@ class ImagePreview extends Component {
 
             <img
               alt={selectedImage.name}
-              src={`/api/gallery/${galleryName}/image/${selectedImage.path}?jwt=${authToken}`}
+              src={`/api/gallery/${albumName}/image/${selectedImage.path}?jwt=${authToken}`}
             />
 
             <Link
@@ -345,7 +345,7 @@ class ImagePreview extends Component {
         )}
 
         <Thumbs ref={this.thumbsRef} hidden={fullscreen}>
-          {galleryItems}
+          {albumItems}
         </Thumbs>
       </Container>
     );

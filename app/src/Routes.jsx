@@ -15,7 +15,7 @@ class GalleryRoutesContainer extends Component {
     return (
       <div>
         <Switch>
-          <Route path="/gallery/:galleryName" component={ImageGrid} />
+          <Route path="/gallery/:albumName" component={ImageGrid} />
           {albums.length > 0 && <Redirect to={`/gallery/${albums[0].name}`} />}
           <Route render={() => <h2>No albums in gallery</h2>} />
         </Switch>

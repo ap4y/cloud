@@ -19,9 +19,9 @@ it("renders image list", () => {
   ];
   const wrapper = shallow(
     <ImageGrid
-      galleryName="Test"
+      albumName="Test"
       images={images}
-      match={{ url: "/test", params: { galleryName: "bar" } }}
+      match={{ url: "/test", params: { albumName: "bar" } }}
       fetchAlbum={() => {}}
     />
   );
@@ -53,9 +53,9 @@ it("toggles share popup", () => {
   const images = [image];
   const wrapper = shallow(
     <ImageGrid
-      galleryName="Test"
+      albumName="Test"
       images={images}
-      match={{ url: "/test", params: { galleryName: "bar" } }}
+      match={{ url: "/test", params: { albumName: "bar" } }}
       fetchAlbum={() => {}}
     />
   );
@@ -70,9 +70,9 @@ it("creates shares", () => {
   const images = [image];
   const wrapper = shallow(
     <ImageGrid
-      galleryName="Test"
+      albumName="Test"
       images={images}
-      match={{ url: "/test", params: { galleryName: "bar" } }}
+      match={{ url: "/test", params: { albumName: "bar" } }}
       fetchAlbum={() => {}}
       shareAlbum={() => {
         shared = true;

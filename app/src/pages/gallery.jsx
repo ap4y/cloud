@@ -110,13 +110,13 @@ export class ImageGrid extends Component {
   state = { showSharing: false, sharingSlug: null, sharingError: null };
 
   componentDidMount() {
-    this.props.fetchAlbum(this.props.galleryName);
+    this.props.fetchAlbum(this.props.albumName);
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.galleryName === this.props.galleryName) return;
+    if (prevProps.albumName === this.props.albumName) return;
 
-    this.props.fetchAlbum(this.props.galleryName);
+    this.props.fetchAlbum(this.props.albumName);
   }
 
   toggleSharing = e => {
@@ -125,30 +125,26 @@ export class ImageGrid extends Component {
   };
 
   createShare = expireAt => {
-    const { images, galleryName, shareAlbum } = this.props;
-    shareAlbum(galleryName, images, expireAt)
+    const { images, albumName, shareAlbum } = this.props;
+    shareAlbum(albumName, images, expireAt)
       .then(share => this.setState({ sharingSlug: share.slug }))
       .catch(e => this.setState({ sharingError: e.message }));
   };
 
   render() {
-    const { images, galleryName, authToken, match } = this.props;
+    const { images, albumName, authToken, match } = this.props;
     const { showSharing, sharingSlug, sharingError } = this.state;
     const imageItems = images.map(image => {
       return (
         <NavLink key={image.name} to={`${match.url}/${image.name}`}>
-          <ImageCell
-            image={image}
-            gallery={galleryName}
-            authToken={authToken}
-          />
+          <ImageCell image={image} gallery={albumName} authToken={authToken} />
         </NavLink>
       );
     });
     return (
       <div>
         <Toolbar>
-          <h2>{galleryName}</h2>
+          <h2>{albumName}</h2>
           <div>
             <a href="#share" onClick={this.toggleSharing}>
               <i className="material-icons-round">share</i>
@@ -170,7 +166,7 @@ export class ImageGrid extends Component {
             <ImagePreview
               authToken={authToken}
               images={images}
-              galleryName={galleryName}
+              albumName={albumName}
               {...props}
             />
           )}
@@ -182,10 +178,10 @@ export class ImageGrid extends Component {
 
 export default connect(
   ({ albumImages, authToken }, props) => {
-    const { galleryName } = props.match.params;
+    const { albumName } = props.match.params;
     return {
-      galleryName,
-      images: albumImages[galleryName] || [],
+      albumName,
+      images: albumImages[albumName] || [],
       authToken: authToken
     };
   },

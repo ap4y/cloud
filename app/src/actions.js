@@ -139,14 +139,14 @@ export const ALBUM_REQUEST = "ALBUM_REQUEST";
 export const ALBUM_SUCCESS = "ALBUM_SUCCESS";
 export const ALBUM_FAILURE = "ALBUM_FAILURE";
 
-export function fetchAlbum(galleryName) {
+export function fetchAlbum(albumName) {
   return dispatch => {
     dispatch({ type: ALBUM_REQUEST });
 
-    return apiClient.do(`/gallery/${galleryName}/images`).then(images => {
+    return apiClient.do(`/gallery/${albumName}/images`).then(images => {
       dispatch({
         type: ALBUM_SUCCESS,
-        galleryName,
+        albumName,
         images
       });
     }, handleError(dispatch, ALBUM_FAILURE));

@@ -27,7 +27,7 @@ function albumImages(state = {}, action) {
   switch (action.type) {
     case ActionTypes.ALBUM_SUCCESS:
       return Object.assign({}, state, {
-        [action.galleryName]: action.images
+        [action.albumName]: action.images
       });
     default:
       return state;
