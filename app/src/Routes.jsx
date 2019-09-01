@@ -46,8 +46,6 @@ class ShareRoutesContainer extends Component {
   renderRoutes = share => {
     if (!share) return <div />;
 
-    const { match } = this.props;
-
     switch (share.type) {
       case "gallery":
         return this.galleryRoutes(share);

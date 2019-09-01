@@ -86,17 +86,10 @@ const Toolbar = styled.div`
 `;
 
 const Images = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-gap: 2rem;
   margin: 0 -1rem;
-
-  a {
-    flex: 1 0 300px;
-    max-width: 50%;
-    padding: 0 1rem;
-    margin-bottom: 2rem;
-  }
 `;
 
 export class ImageGrid extends Component {
@@ -160,9 +153,11 @@ export class ImageGrid extends Component {
         <Toolbar>
           <h2>{albumName}</h2>
           <div>
-            <a href="#share" onClick={this.toggleSharing}>
-              <i className="material-icons-round">share</i>
-            </a>
+            {authToken && (
+              <a href="#share" onClick={this.toggleSharing}>
+                <i className="material-icons-round">share</i>
+              </a>
+            )}
             {showSharing && (
               <SharePopup
                 items={images}

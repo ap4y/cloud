@@ -59,14 +59,16 @@ class SharePopup extends Component {
         <h4>{`Sharing ${items.length} ${
           items.length === 1 ? "item" : "items"
         }`}</h4>
-        <div>
-          <label>Expire At:</label>
-          <input
-            type="date"
-            value={expireAt.toISOString().substr(0, 10)}
-            onChange={this.updateExpireAt}
-          />
-        </div>
+        {!slug && (
+          <div>
+            <label>Expire At:</label>
+            <input
+              type="date"
+              value={expireAt.toISOString().substr(0, 10)}
+              onChange={this.updateExpireAt}
+            />
+          </div>
+        )}
 
         {slug && (
           <p>

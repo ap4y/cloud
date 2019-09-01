@@ -32,28 +32,23 @@ const PageContainer = styled.div`
 
 const Sidepanel = styled.aside`
   flex: 0 0 auto;
-  position: relative;
+  position: sticky;
+  height: 100vh;
+  top: 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   max-width: ${({ collapsed }) => (collapsed ? 0 : 30)}%;
-  height: 100vh;
-  padding: 4rem 2rem;
+  padding: 4rem ${({ collapsed }) => (collapsed ? 1 : 2)}rem;
 
   nav {
-    position: sticky;
-    top: 2rem;
     overflow: hidden;
-  }
-
-  div {
   }
 `;
 
 const SettingsBar = styled.div`
   display: flex;
   justify-content: center;
-  overflow: hidden;
 
   a {
     display: flex;
