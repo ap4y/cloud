@@ -28,6 +28,8 @@ type Share struct {
 
 // ShareStore manages share metadata.
 type ShareStore interface {
+	// All returns all stores shares.
+	All() ([]*Share, error)
 	// Save persists share metadata.
 	Save(share *Share) error
 	// Get return share metadata.
@@ -55,6 +57,27 @@ func NewDiskShareStore(dir string) (ShareStore, error) {
 	}
 
 	return &diskShareStore{dir}, nil
+}
+
+func (store *diskShareStore) All() ([]*Share, error) {
+	path := filepath.Join(store.dir, "*")
+	matches, err := filepath.Glob(path)
+	if err != nil {
+		return nil, fmt.Errorf("file: %s", err)
+	}
+
+	shares := make([]*Share, 0)
+	for _, match := range matches {
+		_, slug := filepath.Split(match)
+		share, err := store.Get(slug)
+		if err != nil {
+			return nil, err
+		}
+
+		shares = append(shares, share)
+	}
+
+	return shares, nil
 }
 
 func (store *diskShareStore) Save(share *Share) error {
@@ -92,24 +115,17 @@ func (store *diskShareStore) Remove(slug string) error {
 }
 
 func (store *diskShareStore) Expire() error {
-	path := filepath.Join(store.dir, "*")
-	matches, err := filepath.Glob(path)
+	shares, err := store.All()
 	if err != nil {
-		return fmt.Errorf("file: %s", err)
+		return err
 	}
 
-	for _, match := range matches {
-		_, slug := filepath.Split(match)
-		share, err := store.Get(slug)
-		if err != nil {
-			continue
-		}
-
+	for _, share := range shares {
 		if share.ExpiresAt.After(time.Now()) {
 			continue
 		}
 
-		if err := store.Remove(slug); err != nil {
+		if err := store.Remove(share.Slug); err != nil {
 			return err
 		}
 	}
@@ -182,54 +198,79 @@ func ShareAuthenticator(store ShareStore) func(next http.Handler) http.Handler {
 	}
 }
 
-func getShareHandler(store ShareStore) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		slug := chi.URLParam(req, "slug")
-		if slug == "" {
-			httputil.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
-
-		share, err := store.Get(slug)
-		if err != nil {
-			httputil.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			return
-		}
-
-		httputil.Respond(w, share)
-	}
+type shareHandler struct {
+	store ShareStore
 }
 
-func createShareHandler(store ShareStore) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		var share *Share
-		if err := json.NewDecoder(req.Body).Decode(&share); err != nil {
-			httputil.Error(w, fmt.Sprintf("Failed to decode json: %s", err), http.StatusBadRequest)
-			return
-		}
-
-		valid := false
-		if share.Type == ModuleGallery {
-			valid = share.Name != ""
-		}
-
-		if !valid {
-			httputil.Error(w, "Invalid share", http.StatusUnprocessableEntity)
-			return
-		}
-
-		slug := make([]byte, 10)
-		if _, err := rand.Read(slug); err != nil {
-			httputil.Error(w, fmt.Sprintf("Failed to generate slug: %s", err), http.StatusBadRequest)
-			return
-		}
-
-		share.Slug = base64.StdEncoding.EncodeToString(slug)
-		if err := store.Save(share); err != nil {
-			httputil.Error(w, fmt.Sprintf("Failed to save: %s", err), http.StatusBadRequest)
-			return
-		}
-
-		httputil.Respond(w, share)
+func (sh *shareHandler) listShares(w http.ResponseWriter, req *http.Request) {
+	shares, err := sh.store.All()
+	if err != nil {
+		httputil.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
 	}
+
+	httputil.Respond(w, shares)
+}
+
+func (sh *shareHandler) getShare(w http.ResponseWriter, req *http.Request) {
+	slug := chi.URLParam(req, "slug")
+	if slug == "" {
+		httputil.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+
+	share, err := sh.store.Get(slug)
+	if err != nil {
+		httputil.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+
+	httputil.Respond(w, share)
+}
+
+func (sh *shareHandler) createShare(w http.ResponseWriter, req *http.Request) {
+	var share *Share
+	if err := json.NewDecoder(req.Body).Decode(&share); err != nil {
+		httputil.Error(w, fmt.Sprintf("Failed to decode json: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	valid := false
+	if share.Type == ModuleGallery {
+		valid = share.Name != ""
+	}
+
+	if !valid {
+		httputil.Error(w, "Invalid share", http.StatusUnprocessableEntity)
+		return
+	}
+
+	slug := make([]byte, 10)
+	if _, err := rand.Read(slug); err != nil {
+		httputil.Error(w, fmt.Sprintf("Failed to generate slug: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	share.Slug = base64.StdEncoding.EncodeToString(slug)
+	if err := sh.store.Save(share); err != nil {
+		httputil.Error(w, fmt.Sprintf("Failed to save: %s", err), http.StatusBadRequest)
+		return
+	}
+
+	httputil.Respond(w, share)
+}
+
+func (sh *shareHandler) removeShare(w http.ResponseWriter, req *http.Request) {
+	slug := chi.URLParam(req, "slug")
+	if slug == "" {
+		httputil.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+
+	if err := sh.store.Remove(slug); err != nil {
+		httputil.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+
+	httputil.Respond(w, map[string]string{})
 }

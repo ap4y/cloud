@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -92,6 +91,13 @@ func TestShareStore(t *testing.T) {
 		require.NoError(t, store.Save(share))
 	})
 
+	t.Run("All", func(t *testing.T) {
+		res, err := store.All()
+		require.NoError(t, err)
+		require.Len(t, res, 1)
+		assert.Equal(t, share, res[0])
+	})
+
 	t.Run("Get", func(t *testing.T) {
 		res, err := store.Get("foo")
 		require.NoError(t, err)
@@ -123,9 +129,55 @@ func TestShareHandler(t *testing.T) {
 
 	store, err := NewDiskShareStore(dir)
 	require.NoError(t, err)
+
+	sh := &shareHandler{store}
 	handler := chi.NewRouter()
-	handler.Get("/{slug}", getShareHandler(store))
-	handler.Post("/", createShareHandler(store))
+	handler.Get("/{slug}", sh.getShare)
+	handler.Delete("/{slug}", sh.removeShare)
+	handler.Post("/", sh.createShare)
+	handler.Get("/", sh.listShares)
+
+	share := &Share{Slug: "foo", Type: ModuleGallery, Items: []string{"foo", "bar"}, ExpiresAt: time.Time{}}
+	require.NoError(t, store.Save(share))
+
+	t.Run("List", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "http://cloud.api/", nil)
+		handler.ServeHTTP(w, req)
+
+		res := w.Result()
+		require.Equal(t, http.StatusOK, res.StatusCode)
+
+		shares := make([]*Share, 0)
+		require.NoError(t, json.NewDecoder(res.Body).Decode(&shares))
+		require.Len(t, shares, 1)
+	})
+
+	t.Run("Fetch", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "http://cloud.api/foo", nil)
+		handler.ServeHTTP(w, req)
+
+		res := w.Result()
+		require.Equal(t, http.StatusOK, res.StatusCode)
+
+		resShare := &Share{}
+		require.NoError(t, json.NewDecoder(res.Body).Decode(resShare))
+		require.NotNil(t, resShare.Slug)
+	})
+
+	t.Run("Remove", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("DELETE", "http://cloud.api/foo", nil)
+		handler.ServeHTTP(w, req)
+
+		res := w.Result()
+		require.Equal(t, http.StatusOK, res.StatusCode)
+
+		shares, err := store.All()
+		require.NoError(t, err)
+		assert.Len(t, shares, 0)
+	})
 
 	t.Run("Create", func(t *testing.T) {
 		w := httptest.NewRecorder()
@@ -152,22 +204,5 @@ func TestShareHandler(t *testing.T) {
 
 		res := w.Result()
 		require.Equal(t, http.StatusUnprocessableEntity, res.StatusCode)
-	})
-
-	t.Run("Fetch", func(t *testing.T) {
-		share := &Share{Slug: "foo", Type: ModuleGallery, Items: []string{"foo", "bar"}, ExpiresAt: time.Time{}}
-		require.NoError(t, store.Save(share))
-
-		w := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "http://cloud.api/foo", nil)
-		ctx := context.WithValue(req.Context(), ShareCtxKey, share)
-		handler.ServeHTTP(w, req.WithContext(ctx))
-
-		res := w.Result()
-		require.Equal(t, http.StatusOK, res.StatusCode)
-
-		resShare := &Share{}
-		require.NoError(t, json.NewDecoder(res.Body).Decode(resShare))
-		require.NotNil(t, resShare.Slug)
 	})
 }

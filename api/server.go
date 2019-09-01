@@ -32,6 +32,7 @@ func NewServer(modules map[Module]http.Handler, cs CredentialsStorage, ss ShareS
 	mux := chi.NewRouter()
 	mux.Use(middleware.Logger)
 
+	sh := &shareHandler{ss}
 	mux.Route("/api", func(apiMux chi.Router) {
 		apiMux.Mount("/user", AuthHandler(cs))
 
@@ -49,7 +50,9 @@ func NewServer(modules map[Module]http.Handler, cs CredentialsStorage, ss ShareS
 				}
 			})
 
-			r.Post("/share", createShareHandler(ss))
+			r.Get("/share", sh.listShares)
+			r.Post("/share", sh.createShare)
+			r.Delete("/share/{slug}", sh.removeShare)
 
 			for module, handler := range modules {
 				r.Mount("/"+string(module), handler)
@@ -57,7 +60,7 @@ func NewServer(modules map[Module]http.Handler, cs CredentialsStorage, ss ShareS
 		})
 
 		apiMux.Route("/share/{slug}", func(r chi.Router) {
-			r.Get("/", getShareHandler(ss))
+			r.Get("/", sh.getShare)
 
 			r.Group(func(r chi.Router) {
 				r.Use(ShareAuthenticator(ss))
