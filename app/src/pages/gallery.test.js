@@ -20,6 +20,7 @@ it("renders image list", () => {
   const wrapper = shallow(
     <ImageGrid
       albumName="Test"
+      authToken="foo"
       images={images}
       match={{ url: "/test", params: { albumName: "bar" } }}
       fetchAlbum={() => {}}
@@ -34,19 +35,21 @@ it("renders image list", () => {
       .first()
       .prop("image")
   ).toEqual(image);
+  expect(
+    wrapper
+      .find("ImageCell")
+      .first()
+      .prop("src")
+  ).toEqual("/api/test/thumbnail/test/Test.jpg?jwt=foo");
 });
 
 it("renders image cell", () => {
-  const wrapper = shallow(
-    <ImageCell image={image} gallery="bar" authToken="foo" />
-  );
+  const wrapper = shallow(<ImageCell image={image} src="test.jpg" />);
 
   expect(wrapper.find("figcaption").text()).toEqual(
     "Test1/1/1970, 12:00:00 PM"
   );
-  expect(wrapper.find("img").prop("src")).toEqual(
-    "/api/gallery/bar/thumbnail/test/Test.jpg?jwt=foo"
-  );
+  expect(wrapper.find("img").prop("src")).toEqual("test.jpg");
 });
 
 it("toggles share popup", () => {
@@ -85,4 +88,22 @@ it("creates shares", () => {
   expect(wrapper.find("SharePopup").exists()).toBeTruthy();
   wrapper.find("SharePopup").invoke("onShare")();
   expect(shared).toBeTruthy();
+});
+
+it("requests shares", () => {
+  let result = {};
+  const wrapper = shallow(
+    <ImageGrid
+      albumName="Test"
+      share="foo"
+      images={[]}
+      match={{ url: "/test", params: { albumName: "bar" } }}
+      fetchAlbum={(album, share) => {
+        result = { album, share };
+      }}
+    />
+  );
+
+  expect(result.album).toEqual("Test");
+  expect(result.share).toEqual("foo");
 });

@@ -139,17 +139,37 @@ export const ALBUM_REQUEST = "ALBUM_REQUEST";
 export const ALBUM_SUCCESS = "ALBUM_SUCCESS";
 export const ALBUM_FAILURE = "ALBUM_FAILURE";
 
-export function fetchAlbum(albumName) {
+export function fetchAlbum(albumName, shareSlug) {
+  const pathPrefix = shareSlug ? `/share/${shareSlug}` : "";
+
   return dispatch => {
     dispatch({ type: ALBUM_REQUEST });
 
-    return apiClient.do(`/gallery/${albumName}/images`).then(images => {
-      dispatch({
-        type: ALBUM_SUCCESS,
-        albumName,
-        images
-      });
-    }, handleError(dispatch, ALBUM_FAILURE));
+    return apiClient
+      .do(`${pathPrefix}/gallery/${albumName}/images`)
+      .then(images => {
+        dispatch({
+          type: ALBUM_SUCCESS,
+          albumName,
+          images
+        });
+      }, handleError(dispatch, ALBUM_FAILURE));
+  };
+}
+
+export const EXIF_REQUEST = "EXIF_REQUEST";
+export const EXIF_SUCCESS = "EXIF_SUCCESS";
+export const EXIF_FAILURE = "EXIF_FAILURE";
+
+export function fetchExif(albumName, file, shareSlug) {
+  const pathPrefix = shareSlug ? `/share/${shareSlug}` : "";
+
+  return dispatch => {
+    dispatch({ type: EXIF_REQUEST });
+
+    return apiClient
+      .do(`${pathPrefix}/gallery/${albumName}/exif/${file}`)
+      .then(exif => exif, handleError(dispatch, EXIF_FAILURE, true));
   };
 }
 
@@ -175,5 +195,23 @@ export function shareAlbum(albumName, images, expireAt) {
       });
       return share;
     }, handleError(dispatch, CREATE_SHARE_FAILURE, true));
+  };
+}
+
+export const SHARE_REQUEST = "SHARE_REQUEST";
+export const SHARE_SUCCESS = "SHARE_SUCCESS";
+export const SHARE_FAILURE = "SHARE_FAILURE";
+
+export function fetchShare(slug) {
+  return dispatch => {
+    dispatch({ type: SHARE_REQUEST });
+
+    return apiClient.do(`/share/${slug}`).then(share => {
+      dispatch({
+        type: SHARE_SUCCESS,
+        share
+      });
+      return share;
+    }, handleError(dispatch, SHARE_FAILURE, true));
   };
 }

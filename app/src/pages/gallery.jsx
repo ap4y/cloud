@@ -5,7 +5,7 @@ import { NavLink, Route } from "react-router-dom";
 
 import ImagePreview from "../components/ImagePreview";
 import SharePopup from "../components/SharePopup";
-import { fetchAlbum, shareAlbum } from "../actions";
+import { fetchAlbum, shareAlbum, fetchExif } from "../actions";
 
 const Figure = styled.figure`
   position: relative;
@@ -49,16 +49,9 @@ const Figure = styled.figure`
   }
 `;
 
-export const ImageCell = ({
-  image: { name, path, updated_at },
-  gallery,
-  authToken
-}) => (
+export const ImageCell = ({ image: { name, path, updated_at }, src }) => (
   <Figure>
-    <img
-      alt={name}
-      src={`/api/gallery/${gallery}/thumbnail/${path}?jwt=${authToken}`}
-    />
+    <img alt={name} src={src} />
     <figcaption>
       <span>{name}</span>
       <small>
@@ -110,14 +103,19 @@ export class ImageGrid extends Component {
   state = { showSharing: false, sharingSlug: null, sharingError: null };
 
   componentDidMount() {
-    this.props.fetchAlbum(this.props.albumName);
+    this.fetchAlbum();
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.albumName === this.props.albumName) return;
 
-    this.props.fetchAlbum(this.props.albumName);
+    this.fetchAlbum();
   }
+
+  fetchAlbum = () => {
+    const { fetchAlbum, albumName, share } = this.props;
+    fetchAlbum(albumName, share);
+  };
 
   toggleSharing = e => {
     e.preventDefault();
@@ -131,13 +129,29 @@ export class ImageGrid extends Component {
       .catch(e => this.setState({ sharingError: e.message }));
   };
 
+  imageURL = ({ path }) => {
+    const { authToken, match } = this.props;
+
+    return (
+      `/api${match.url}/thumbnail/${path}` +
+      (authToken ? `?jwt=${authToken}` : "")
+    );
+  };
+
   render() {
-    const { images, albumName, authToken, match } = this.props;
+    const {
+      images,
+      albumName,
+      authToken,
+      share,
+      match,
+      fetchExif
+    } = this.props;
     const { showSharing, sharingSlug, sharingError } = this.state;
     const imageItems = images.map(image => {
       return (
         <NavLink key={image.name} to={`${match.url}/${image.name}`}>
-          <ImageCell image={image} gallery={albumName} authToken={authToken} />
+          <ImageCell image={image} src={this.imageURL(image)} />
         </NavLink>
       );
     });
@@ -164,9 +178,11 @@ export class ImageGrid extends Component {
           path={`${match.url}/:imageName`}
           render={props => (
             <ImagePreview
-              authToken={authToken}
               images={images}
+              authToken={authToken}
               albumName={albumName}
+              share={share}
+              fetchExif={fetchExif}
               {...props}
             />
           )}
@@ -178,12 +194,13 @@ export class ImageGrid extends Component {
 
 export default connect(
   ({ albumImages, authToken }, props) => {
-    const { albumName } = props.match.params;
+    const { albumName, slug } = props.match.params;
     return {
       albumName,
+      share: slug,
       images: albumImages[albumName] || [],
       authToken: authToken
     };
   },
-  { fetchAlbum, shareAlbum }
+  { fetchAlbum, shareAlbum, fetchExif }
 )(ImageGrid);

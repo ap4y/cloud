@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/ap4y/cloud/internal/httputil"
@@ -132,6 +131,13 @@ func (w *wrapResponseWriter) WriteHeader(statusCode int) {
 	w.statusCode = statusCode
 }
 
+func (w *wrapResponseWriter) Flush(out http.ResponseWriter) {
+	out.Write(w.buf.Bytes())
+	if w.statusCode != 0 {
+		out.WriteHeader(w.statusCode)
+	}
+}
+
 // ShareAuthenticator returns new share authentication middleware.
 func ShareAuthenticator(store ShareStore) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -153,19 +159,20 @@ func ShareAuthenticator(store ShareStore) func(next http.Handler) http.Handler {
 			next.ServeHTTP(wrapper, req.WithContext(ctx))
 
 			path := chi.URLParam(req, "path")
-			if path == "" {
+			if path == "" || path != share.Name {
 				http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 				return
 			}
 
 			file := chi.URLParam(req, "file")
-			fullPath := filepath.Join(path, file)
+			if file == "" {
+				wrapper.Flush(w)
+				return
+			}
+
 			for _, item := range share.Items {
-				if strings.HasPrefix(item, fullPath) {
-					w.Write(wrapper.buf.Bytes())
-					if wrapper.statusCode != 0 {
-						w.WriteHeader(wrapper.statusCode)
-					}
+				if item == file {
+					wrapper.Flush(w)
 					return
 				}
 			}

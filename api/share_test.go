@@ -24,7 +24,7 @@ func TestShareAuthenticator(t *testing.T) {
 
 	store, err := NewDiskShareStore(dir)
 	require.NoError(t, err)
-	share := &Share{Slug: "bar", Type: ModuleGallery, Items: []string{"foo/test.jpg"}}
+	share := &Share{Slug: "bar", Type: ModuleGallery, Name: "foo", Items: []string{"test.jpg"}}
 	require.NoError(t, store.Save(share))
 
 	var ctxShare *Share

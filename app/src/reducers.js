@@ -34,6 +34,19 @@ function albumImages(state = {}, action) {
   }
 }
 
+function share(state = { current: null, loading: false }, action) {
+  switch (action.type) {
+    case ActionTypes.SHARE_REQUEST:
+      return { ...state, loading: true };
+    case ActionTypes.SHARE_SUCCESS:
+      return { current: action.share, loading: false };
+    case ActionTypes.SHARE_FAILURE:
+      return { ...state, loading: false };
+    default:
+      return state;
+  }
+}
+
 function authToken(state = localStorage.getItem("authToken"), action) {
   switch (action.type) {
     case ActionTypes.AUTH_SUCCESS:
@@ -72,6 +85,7 @@ export default combineReducers({
   modules,
   gallery,
   albumImages,
+  share,
   authToken,
   authError,
   errorMessage

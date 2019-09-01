@@ -16,6 +16,7 @@ const SharePopupContainer = styled.div`
 
   div {
     display: flex;
+    align-items: baseline;
   }
 
   input {

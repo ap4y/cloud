@@ -11,7 +11,7 @@ import {
 
 import AlbumsList from "./pages/albums";
 import LoginForm from "./pages/login";
-import { GalleryRoutes } from "./Routes";
+import { ShareRoutes, GalleryRoutes } from "./Routes";
 import { apiClient, fetchModules, signOut } from "./actions";
 
 const supportedModules = {
@@ -177,6 +177,7 @@ class App extends Component {
 
           <Content>
             <Switch>
+              <Route path="/share/:slug" component={ShareRoutes} />
               <Route path="/login" component={LoginForm} />
               {authError && <Redirect to="/login" />}
               {contentItems}

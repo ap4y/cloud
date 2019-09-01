@@ -4,8 +4,6 @@ import { NavLink, Link } from "react-router-dom";
 
 import EXIFData from "./ImageEXIF";
 
-import { apiClient } from "../actions";
-
 const Figure = styled.figure`
   margin: 0;
   position: relative;
@@ -33,13 +31,10 @@ const Figure = styled.figure`
   }
 `;
 
-export const AlbumItem = ({ image, authToken, album, selected }) => {
+export const AlbumItem = ({ image, src, selected }) => {
   return (
     <Figure selected={selected}>
-      <img
-        alt={image.name}
-        src={`/api/gallery/${album}/thumbnail/${image.path}?jwt=${authToken}`}
-      />
+      <img alt={image.name} src={src} />
       <figcaption>{image.name}</figcaption>
     </Figure>
   );
@@ -259,16 +254,25 @@ class ImagePreview extends Component {
       return;
     }
 
-    const { images, albumName } = this.props;
+    const { images, albumName, share } = this.props;
     const image = images[this.state.selectedIdx];
-    apiClient.do(`/gallery/${albumName}/exif/${image.path}`).then(exif => {
+    this.props.fetchExif(albumName, image.path, share).then(exif => {
       this.setState({ exif });
     });
   };
 
+  imageURL = ({ path }, type = "image") => {
+    const { authToken, match } = this.props;
+
+    const baseURL = match.url.replace(match.params.imageName, "");
+    return (
+      `/api${baseURL}${type}/${path}` + (authToken ? `?jwt=${authToken}` : "")
+    );
+  };
+
   render() {
     const { fullscreen, selectedIdx } = this.state;
-    const { images, match, authToken, albumName } = this.props;
+    const { images, match, albumName } = this.props;
 
     const selectedImage = images[selectedIdx];
     const prevImage =
@@ -281,9 +285,8 @@ class ImagePreview extends Component {
         <NavLink to={this.imagePath(image)}>
           <AlbumItem
             selected={idx === selectedIdx}
-            album={albumName}
             image={image}
-            authToken={authToken}
+            src={this.imageURL(image, "thumbnail")}
           />
         </NavLink>
       </li>
@@ -294,7 +297,7 @@ class ImagePreview extends Component {
           <div>
             {selectedImage && (
               <a
-                href={`/api/gallery/${albumName}/image/${selectedImage.path}?jwt=${authToken}`}
+                href={this.imageURL(selectedImage)}
                 download={selectedImage.path.replace("/", "_")}
               >
                 <i className="material-icons-round">get_app</i>
@@ -330,10 +333,7 @@ class ImagePreview extends Component {
               <i className="material-icons-round">chevron_left</i>
             </Link>
 
-            <img
-              alt={selectedImage.name}
-              src={`/api/gallery/${albumName}/image/${selectedImage.path}?jwt=${authToken}`}
-            />
+            <img alt={selectedImage.name} src={this.imageURL(selectedImage)} />
 
             <Link
               to={this.imagePath(nextImage)}
