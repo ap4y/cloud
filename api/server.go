@@ -50,9 +50,9 @@ func NewServer(modules map[Module]http.Handler, cs CredentialsStorage, ss ShareS
 				}
 			})
 
-			r.Get("/share", sh.listShares)
-			r.Post("/share", sh.createShare)
-			r.Delete("/share/{slug}", sh.removeShare)
+			r.Get("/shares", sh.listShares)
+			r.Post("/shares", sh.createShare)
+			r.Delete("/shares/{slug}", sh.removeShare)
 
 			for module, handler := range modules {
 				r.Mount("/"+string(module), handler)

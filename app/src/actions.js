@@ -188,7 +188,7 @@ export function shareAlbum(albumName, images, expireAt) {
   return dispatch => {
     dispatch({ type: CREATE_SHARE_REQUEST });
 
-    return apiClient.do("/share", "POST", share).then(share => {
+    return apiClient.do("/shares", "POST", share).then(share => {
       dispatch({
         type: CREATE_SHARE_SUCCESS,
         share
@@ -213,5 +213,33 @@ export function fetchShare(slug) {
       });
       return share;
     }, handleError(dispatch, SHARE_FAILURE, true));
+  };
+}
+
+export const SHARES_SUCCESS = "SHARES_SUCCESS";
+export const SHARES_FAILURE = "SHARES_FAILURE";
+
+export function fetchShares() {
+  return dispatch => {
+    return apiClient.do("/shares").then(shares => {
+      dispatch({
+        type: SHARES_SUCCESS,
+        shares
+      });
+    }, handleError(dispatch, SHARES_FAILURE));
+  };
+}
+
+export const SHARE_REMOVE_SUCCESS = "SHARE_REMOVE_SUCCESS";
+export const SHARE_REMOVE_FAILURE = "SHARE_REMOVE_FAILURE";
+
+export function removeShare(slug) {
+  return dispatch => {
+    return apiClient.do(`/shares/${slug}`, "DELETE").then(() => {
+      dispatch({
+        type: SHARE_REMOVE_SUCCESS,
+        slug
+      });
+    }, handleError(dispatch, SHARE_REMOVE_FAILURE));
   };
 }

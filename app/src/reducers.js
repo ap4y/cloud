@@ -34,6 +34,20 @@ function albumImages(state = {}, action) {
   }
 }
 
+function shares(state = { items: [] }, action) {
+  switch (action.type) {
+    case ActionTypes.SHARES_SUCCESS:
+      return { ...state, items: action.shares };
+    case ActionTypes.SHARE_REMOVE_SUCCESS:
+      return {
+        ...state,
+        items: state.items.filter(({ slug }) => slug !== action.slug)
+      };
+    default:
+      return state;
+  }
+}
+
 function share(state = { current: null, loading: false }, action) {
   switch (action.type) {
     case ActionTypes.SHARE_REQUEST:
@@ -85,6 +99,7 @@ export default combineReducers({
   modules,
   gallery,
   albumImages,
+  shares,
   share,
   authToken,
   authError,

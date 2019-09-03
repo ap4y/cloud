@@ -12,6 +12,7 @@ import {
 import AlbumsList from "./pages/albums";
 import LoginForm from "./pages/login";
 import { ShareRoutes, GalleryRoutes } from "./Routes";
+import SharesList from "./pages/shares";
 import Sidepanel from "./components/Sidepanel";
 import { apiClient, fetchModules, signOut } from "./actions";
 
@@ -93,13 +94,34 @@ class App extends Component {
     return (
       <BrowserRouter>
         <PageContainer>
+          <Switch>
+            <Route path="/shares" />
+            <Route
+              render={() => (
+                <Sidepanel
+                  modules={navItems}
+                  items={sidebarItems}
+                  collapsed={collapsed}
+                  onCollapse={() => this.setState({ collapsed: !collapsed })}
+                  onSignOut={this.props.signOut}
+                />
+              )}
+            />
+          </Switch>
           <Content>
             <Switch>
               <Route path="/share/:slug" component={ShareRoutes} />
+
               <Route path="/login" component={LoginForm} />
               {authError && <Redirect to="/login" />}
+
+              {modules.length > 0 && (
+                <Route path="/shares" component={SharesList} />
+              )}
+
               {contentItems}
               {modules.length > 0 && <Redirect to={`/${modules[0]}`} />}
+
               <Route render={() => <h2>No active modules</h2>} />
             </Switch>
           </Content>
