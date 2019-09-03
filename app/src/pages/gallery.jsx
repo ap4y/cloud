@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled";
 import { connect } from "react-redux";
 import { NavLink, Route } from "react-router-dom";
@@ -92,109 +92,91 @@ const Images = styled.div`
   margin: 0 -1rem;
 `;
 
-export class ImageGrid extends Component {
-  state = { showSharing: false, sharingSlug: null, sharingError: null };
+export const ImageGrid = ({
+  images,
+  share,
+  albumName,
+  authToken,
+  match,
+  fetchAlbum,
+  fetchExif,
+  shareAlbum
+}) => {
+  const [showSharing, setShowSharing] = useState(false);
+  const [sharingSlug, setSharingSlug] = useState(null);
+  const [sharingError, setSharingError] = useState(null);
 
-  componentDidMount() {
-    this.fetchAlbum();
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.albumName === this.props.albumName) return;
-
-    this.fetchAlbum();
-  }
-
-  fetchAlbum = () => {
-    const { fetchAlbum, albumName, share } = this.props;
+  useEffect(() => {
     fetchAlbum(albumName, share);
-  };
+  }, [albumName, share, fetchAlbum]);
 
-  toggleSharing = e => {
+  const toggleSharing = e => {
     e.preventDefault();
-    this.setState({ showSharing: !this.state.showSharing });
+    setShowSharing(!showSharing);
   };
 
-  createShare = expireAt => {
-    const { images, albumName, shareAlbum } = this.props;
+  const createShare = expireAt => {
     shareAlbum(albumName, images, expireAt)
-      .then(share => this.setState({ sharingSlug: share.slug }))
-      .catch(e => this.setState({ sharingError: e.message }));
+      .then(share => setSharingSlug(share))
+      .catch(e => setSharingError(e.message));
   };
 
-  finalizeSharing = () => {
-    this.setState({
-      showSharing: false,
-      sharingSlug: null,
-      sharingError: null
-    });
+  const finalizeSharing = () => {
+    setShowSharing(false);
+    setSharingSlug(null);
+    setSharingError(null);
   };
 
-  imageURL = ({ path }) => {
-    const { authToken, match } = this.props;
+  const imageURL = ({ path }) =>
+    `/api${match.url}/thumbnail/${path}` +
+    (authToken ? `?jwt=${authToken}` : "");
 
+  const imageItems = images.map(image => {
     return (
-      `/api${match.url}/thumbnail/${path}` +
-      (authToken ? `?jwt=${authToken}` : "")
+      <NavLink key={image.name} to={`${match.url}/${image.name}`}>
+        <ImageCell image={image} src={imageURL(image)} />
+      </NavLink>
     );
-  };
+  });
 
-  render() {
-    const {
-      images,
-      albumName,
-      authToken,
-      share,
-      match,
-      fetchExif
-    } = this.props;
-    const { showSharing, sharingSlug, sharingError } = this.state;
-    const imageItems = images.map(image => {
-      return (
-        <NavLink key={image.name} to={`${match.url}/${image.name}`}>
-          <ImageCell image={image} src={this.imageURL(image)} />
-        </NavLink>
-      );
-    });
-    return (
-      <div>
-        <Toolbar>
-          <h2>{albumName}</h2>
-          <div>
-            {authToken && (
-              <a href="#share" onClick={this.toggleSharing}>
-                <i className="material-icons-round">share</i>
-              </a>
-            )}
-            {showSharing && (
-              <SharePopup
-                items={images}
-                onShare={this.createShare}
-                slug={sharingSlug}
-                error={sharingError}
-                onClose={this.finalizeSharing}
-              />
-            )}
-          </div>
-        </Toolbar>
-        <Images>{imageItems}</Images>
-        <Route
-          path={`${match.url}/:imageName`}
-          render={props => (
-            <ImagePreview
-              images={images}
-              authToken={authToken}
-              albumName={albumName}
-              share={share}
-              fetchExif={fetchExif}
-              {...props}
+  return (
+    <div>
+      <Toolbar>
+        <h2>{albumName}</h2>
+        <div>
+          {authToken && (
+            <a href="#share" onClick={toggleSharing}>
+              <i className="material-icons-round">share</i>
+            </a>
+          )}
+          {showSharing && (
+            <SharePopup
+              items={images}
+              onShare={createShare}
+              slug={sharingSlug}
+              error={sharingError}
+              onClose={finalizeSharing}
             />
           )}
-        />
-      </div>
-    );
-  }
-}
+        </div>
+      </Toolbar>
+      <Images>{imageItems}</Images>
+      <Route
+        path={`${match.url}/:imageName`}
+        render={props => (
+          <ImagePreview
+            images={images}
+            authToken={authToken}
+            albumName={albumName}
+            share={share}
+            fetchExif={fetchExif}
+            {...props}
+          />
+        )}
+      />
+    </div>
+  );
+};
 
 export default connect(
   ({ albumImages, authToken }, props) => {

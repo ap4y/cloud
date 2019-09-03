@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "@emotion/styled";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
@@ -20,39 +20,45 @@ const Container = styled.div`
   }
 `;
 
-export class LoginForm extends React.Component {
-  state = { username: "", password: "" };
+export const LoginForm = ({
+  authToken,
+  errorMessage,
+  location,
+  signIn,
+  resetErrorMessage,
+  resetAuthError
+}) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  _handleChange = field => ({ target }) => {
-    this.setState({ [field]: target.value });
+  const { from } = location.state || { from: { pathname: "/" } };
+  if (authToken) return <Redirect to={from} />;
+
+  const performAuth = () => {
+    resetAuthError();
+    resetErrorMessage();
+    signIn(username, password);
   };
 
-  performAuth = () => {
-    const { username, password } = this.state;
-    this.props.resetAuthError();
-    this.props.resetErrorMessage();
-    this.props.signIn(username, password);
-  };
-
-  render() {
-    const { from } = this.props.location.state || { from: { pathname: "/" } };
-    const { errorMessage } = this.props;
-    if (this.props.authToken) return <Redirect to={from} />;
-
-    return (
-      <Container>
-        <form onSubmit={this.performAuth}>
-          <label>Username: </label>
-          <input type="text" onChange={this._handleChange("username")} />
-          <label>Password:</label>
-          <input type="password" onChange={this._handleChange("password")} />
-          {errorMessage && <Alert>Invalid username or password.</Alert>}
-          <input type="submit" value="Login" />
-        </form>
-      </Container>
-    );
-  }
-}
+  return (
+    <Container>
+      <form onSubmit={performAuth}>
+        <label>Username: </label>
+        <input
+          type="text"
+          onChange={({ target }) => setUsername(target.value)}
+        />
+        <label>Password:</label>
+        <input
+          type="password"
+          onChange={({ target }) => setPassword(target.value)}
+        />
+        {errorMessage && <Alert>Invalid username or password.</Alert>}
+        <input type="submit" value="Login" />
+      </form>
+    </Container>
+  );
+};
 
 export default connect(
   ({ authToken, errorMessage }) => ({ authToken, errorMessage }),

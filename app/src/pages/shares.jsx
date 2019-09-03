@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useEffect } from "react";
 import styled from "@emotion/styled";
 import { connect } from "react-redux";
 import { NavLink } from "react-router-dom";
@@ -78,12 +78,12 @@ const BackLink = styled(NavLink)`
   display: flex;
 `;
 
-export class SharesList extends Component {
-  componentDidMount() {
-    this.props.fetchShares();
-  }
+export const SharesList = ({ shares, authToken, fetchShares, removeShare }) => {
+  useEffect(() => {
+    fetchShares();
+  });
 
-  renderShares = shares =>
+  const renderShares = shares =>
     shares.map(({ slug, name, expires_at, items, type }) => (
       <Share key={slug}>
         <h3>
@@ -95,15 +95,11 @@ export class SharesList extends Component {
         </h3>
 
         {type === "gallery" && (
-          <GalleryItems
-            gallery={name}
-            items={items}
-            authToken={this.props.authToken}
-          />
+          <GalleryItems gallery={name} items={items} authToken={authToken} />
         )}
 
         <div>
-          <button onClick={() => this.props.removeShare(slug)}>
+          <button onClick={() => removeShare(slug)}>
             <i className="material-icons-round">delete</i> Remove
           </button>
 
@@ -117,22 +113,18 @@ export class SharesList extends Component {
       </Share>
     ));
 
-  render() {
-    const { shares } = this.props;
-
-    return (
-      <div>
-        <h1>Shares</h1>
-        {this.renderShares(shares)}
-        {shares.length === 0 && <h2>No active shares</h2>}
-        <BackLink to="/">
-          <i className="material-icons-round">arrow_back_ios</i>
-          Back
-        </BackLink>
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <h1>Shares</h1>
+      {renderShares(shares)}
+      {shares.length === 0 && <h2>No active shares</h2>}
+      <BackLink to="/">
+        <i className="material-icons-round">arrow_back_ios</i>
+        Back
+      </BackLink>
+    </div>
+  );
+};
 
 export default connect(
   ({ shares: { items }, authToken }) => ({ shares: items, authToken }),

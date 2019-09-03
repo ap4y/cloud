@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "@emotion/styled";
 import { NavLink, Link } from "react-router-dom";
 
@@ -170,60 +170,54 @@ const Toolbar = styled.header`
   }
 `;
 
-class ImagePreview extends Component {
-  previewRef = React.createRef();
-  thumbsRef = React.createRef();
+const ImagePreview = ({
+  images,
+  albumName,
+  share,
+  match,
+  authToken,
+  fetchExif
+}) => {
+  const [fullscreen, setFullscreen] = useState(false);
+  const [exif, setExif] = useState(null);
+  const [selectedIdx, setSelectedIdx] = useState(0);
 
-  state = { fullscreen: false, exif: null, selectedIdx: 0 };
+  const previewRef = useRef(null);
+  const thumbsRef = useRef(null);
 
-  componentDidMount() {
+  useEffect(() => {
     document.body.style.overflow = "hidden";
     document.onfullscreenchange = e => {
-      if (!document.fullscreenElement) this.setState({ fullscreen: false });
+      if (!document.fullscreenElement) setFullscreen(false);
     };
 
-    const { images, match } = this.props;
+    return () => {
+      document.body.style.overflow = null;
+    };
+  });
+
+  useEffect(() => {
     const selectedIdx = images.findIndex(
       image => image.name === match.params.imageName
     );
-    this.setState({ selectedIdx }, this.centerCell);
-  }
+    setSelectedIdx(selectedIdx);
+  }, [images, match.params.imageName]);
 
-  componentWillUnmount() {
-    document.body.style.overflow = null;
-  }
-
-  componentDidUpdate(prevProps) {
-    const { images, match } = this.props;
-
-    if (
-      images === prevProps.images &&
-      match.params.imageName === prevProps.match.params.imageName
-    )
-      return;
-
-    const selectedIdx = images.findIndex(
-      image => image.name === match.params.imageName
-    );
-    this.setState({ selectedIdx }, this.centerCell);
-  }
-
-  centerCell() {
-    const thumbs = this.thumbsRef.current;
+  useEffect(() => {
+    const thumbs = thumbsRef.current;
     if (!thumbs) return;
 
-    const { selectedIdx } = this.state;
     const cell = thumbs.children[selectedIdx];
     if (cell) cell.scrollIntoView({ inline: "center", behavior: "smooth" });
-  }
+  }, [selectedIdx]);
 
-  imagePath = image => this.props.match.path.replace(":imageName", image.name);
+  const imagePath = image => match.path.replace(":imageName", image.name);
 
-  toggleFullscreen = e => {
+  const toggleFullscreen = e => {
     e.preventDefault();
 
-    const fs = this.state.fullscreen,
-      el = fs ? document : this.previewRef.current;
+    const fs = fullscreen,
+      el = fs ? document : previewRef.current;
 
     var func;
     if (fs) {
@@ -242,114 +236,99 @@ class ImagePreview extends Component {
 
     if (func) {
       func.call(el);
-      this.setState({ fullscreen: !fs });
+      setFullscreen(!fs);
     }
   };
 
-  toggleEXIF = e => {
+  const toggleEXIF = e => {
     e.preventDefault();
 
-    if (this.state.exif) {
-      this.setState({ exif: null });
+    if (exif) {
+      setExif(null);
       return;
     }
 
-    const { images, albumName, share } = this.props;
-    const image = images[this.state.selectedIdx];
-    this.props.fetchExif(albumName, image.path, share).then(exif => {
-      this.setState({ exif });
+    const image = images[selectedIdx];
+    fetchExif(albumName, image.path, share).then(exif => {
+      setExif(exif);
     });
   };
 
-  imageURL = ({ path }, type = "image") => {
-    const { authToken, match } = this.props;
-
+  const imageURL = ({ path }, type = "image") => {
     const baseURL = match.url.replace(match.params.imageName, "");
     return (
       `/api${baseURL}${type}/${path}` + (authToken ? `?jwt=${authToken}` : "")
     );
   };
 
-  render() {
-    const { fullscreen, selectedIdx } = this.state;
-    const { images, match, albumName } = this.props;
+  const selectedImage = images[selectedIdx];
+  const prevImage =
+    images[selectedIdx === 0 ? images.length - 1 : selectedIdx - 1];
+  const nextImage =
+    images[selectedIdx === images.length - 1 ? 0 : selectedIdx + 1];
 
-    const selectedImage = images[selectedIdx];
-    const prevImage =
-      images[selectedIdx === 0 ? images.length - 1 : selectedIdx - 1];
-    const nextImage =
-      images[selectedIdx === images.length - 1 ? 0 : selectedIdx + 1];
+  const albumItems = images.map((image, idx) => (
+    <li key={image.name}>
+      <NavLink to={imagePath(image)}>
+        <AlbumItem
+          selected={idx === selectedIdx}
+          image={image}
+          src={imageURL(image, "thumbnail")}
+        />
+      </NavLink>
+    </li>
+  ));
 
-    const albumItems = images.map((image, idx) => (
-      <li key={image.name}>
-        <NavLink to={this.imagePath(image)}>
-          <AlbumItem
-            selected={idx === selectedIdx}
-            image={image}
-            src={this.imageURL(image, "thumbnail")}
-          />
+  return (
+    <Container ref={previewRef}>
+      <Toolbar>
+        <div>
+          {selectedImage && (
+            <a
+              href={imageURL(selectedImage)}
+              download={selectedImage.path.replace("/", "_")}
+            >
+              <i className="material-icons-round">get_app</i>
+            </a>
+          )}
+          <a href="#exif" onClick={toggleEXIF}>
+            <i className="material-icons-round">info</i>
+          </a>
+          <a href="#fullscreen" onClick={toggleFullscreen}>
+            <i className="material-icons-round">
+              {fullscreen ? "fullscreen_exit" : "fullscreen"}
+            </i>
+          </a>
+        </div>
+
+        <h4>{albumName}</h4>
+
+        <NavLink exact to={match.path.replace("/:imageName", "")}>
+          <i className="material-icons-round">close</i>
         </NavLink>
-      </li>
-    ));
-    return (
-      <Container ref={this.previewRef}>
-        <Toolbar>
-          <div>
-            {selectedImage && (
-              <a
-                href={this.imageURL(selectedImage)}
-                download={selectedImage.path.replace("/", "_")}
-              >
-                <i className="material-icons-round">get_app</i>
-              </a>
-            )}
-            <a href="#exif" onClick={this.toggleEXIF}>
-              <i className="material-icons-round">info</i>
-            </a>
-            <a href="#fullscreen" onClick={this.toggleFullscreen}>
-              <i className="material-icons-round">
-                {fullscreen ? "fullscreen_exit" : "fullscreen"}
-              </i>
-            </a>
-          </div>
+      </Toolbar>
 
-          <h4>{albumName}</h4>
+      <EXIFContainer>{exif && <EXIFData exif={exif} />}</EXIFContainer>
 
-          <NavLink exact to={match.path.replace("/:imageName", "")}>
-            <i className="material-icons-round">close</i>
-          </NavLink>
-        </Toolbar>
+      {selectedImage && (
+        <ImageContainer>
+          <Link to={imagePath(prevImage)} onClick={() => setExif(null)}>
+            <i className="material-icons-round">chevron_left</i>
+          </Link>
 
-        <EXIFContainer>
-          {this.state.exif && <EXIFData exif={this.state.exif} />}
-        </EXIFContainer>
+          <img alt={selectedImage.name} src={imageURL(selectedImage)} />
 
-        {selectedImage && (
-          <ImageContainer>
-            <Link
-              to={this.imagePath(prevImage)}
-              onClick={() => this.setState({ exif: null })}
-            >
-              <i className="material-icons-round">chevron_left</i>
-            </Link>
+          <Link to={imagePath(nextImage)} onClick={() => setExif(null)}>
+            <i className="material-icons-round">chevron_right</i>
+          </Link>
+        </ImageContainer>
+      )}
 
-            <img alt={selectedImage.name} src={this.imageURL(selectedImage)} />
-
-            <Link
-              to={this.imagePath(nextImage)}
-              onClick={() => this.setState({ exif: null })}
-            >
-              <i className="material-icons-round">chevron_right</i>
-            </Link>
-          </ImageContainer>
-        )}
-
-        <Thumbs ref={this.thumbsRef} hidden={fullscreen}>
-          {albumItems}
-        </Thumbs>
-      </Container>
-    );
-  }
-}
+      <Thumbs ref={thumbsRef} hidden={fullscreen}>
+        {albumItems}
+      </Thumbs>
+    </Container>
+  );
+};
 
 export default ImagePreview;

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import styled from "@emotion/styled";
 import { connect } from "react-redux";
 import { NavLink } from "react-router-dom";
@@ -39,26 +39,24 @@ const Badge = styled.small`
   font-weight: bold;
 `;
 
-export class AlbumsList extends Component {
-  render() {
-    const albumItems = this.props.albums.map(({ name, items_count }) => (
-      <li key={name}>
-        <NavLink to={`${this.props.match.url}/${name}`}>
-          <span>{name}</span>
+export const AlbumsList = ({ albums, match }) => {
+  const albumItems = albums.map(({ name, items_count }) => (
+    <li key={name}>
+      <NavLink to={`${match.url}/${name}`}>
+        <span>{name}</span>
 
-          <Badge>{items_count}</Badge>
-        </NavLink>
-      </li>
-    ));
+        <Badge>{items_count}</Badge>
+      </NavLink>
+    </li>
+  ));
 
-    return (
-      <div>
-        <h2>Albums</h2>
-        <Albums>{albumItems}</Albums>
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <h2>Albums</h2>
+      <Albums>{albumItems}</Albums>
+    </div>
+  );
+};
 
 export default connect(
   ({ gallery: { albums } }) => ({ albums }),

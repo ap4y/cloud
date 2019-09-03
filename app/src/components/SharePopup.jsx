@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import styled from "@emotion/styled";
 
 import { Alert } from "./Typography";
@@ -42,48 +42,42 @@ const SharePopupContainer = styled.div`
   }
 `;
 
-class SharePopup extends Component {
-  state = { expireAt: null };
+const SharePopup = ({ items, slug, error, onShare, onClose }) => {
+  const [expireAt, setExpireAt] = useState(null);
 
-  updateExpireAt = ({ target }) => {
-    this.setState({ expireAt: new Date(target.value) });
-  };
+  return (
+    <SharePopupContainer>
+      <h4>{`Sharing ${items.length} ${
+        items.length === 1 ? "item" : "items"
+      }`}</h4>
+      {!slug && (
+        <div>
+          <label>Expire At:</label>
+          <input
+            type="date"
+            onChange={({ target }) => setExpireAt(new Date(target.value))}
+          />
+        </div>
+      )}
 
-  render() {
-    const { items, onShare, onClose, error, slug } = this.props;
-    const { expireAt } = this.state;
+      {slug && (
+        <p>
+          <a
+            href={`${window.location.origin}/share/${slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i className="material-icons-round">link</i>
+            Share Link
+          </a>
+        </p>
+      )}
+      {error && <Alert>{error}</Alert>}
 
-    return (
-      <SharePopupContainer>
-        <h4>{`Sharing ${items.length} ${
-          items.length === 1 ? "item" : "items"
-        }`}</h4>
-        {!slug && (
-          <div>
-            <label>Expire At:</label>
-            <input type="date" onChange={this.updateExpireAt} />
-          </div>
-        )}
-
-        {slug && (
-          <p>
-            <a
-              href={`${window.location.origin}/share/${slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <i className="material-icons-round">link</i>
-              Share Link
-            </a>
-          </p>
-        )}
-        {error && <Alert>{error}</Alert>}
-
-        {!slug && <button onClick={() => onShare(expireAt)}>Share</button>}
-        {slug && <button onClick={onClose}>Ok</button>}
-      </SharePopupContainer>
-    );
-  }
-}
+      {!slug && <button onClick={() => onShare(expireAt)}>Share</button>}
+      {slug && <button onClick={onClose}>Ok</button>}
+    </SharePopupContainer>
+  );
+};
 
 export default SharePopup;
