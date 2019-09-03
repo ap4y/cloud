@@ -83,40 +83,39 @@ export const SharesList = ({ shares, authToken, fetchShares, removeShare }) => {
     fetchShares();
   });
 
-  const renderShares = shares =>
-    shares.map(({ slug, name, expires_at, items, type }) => (
-      <Share key={slug}>
-        <h3>
-          <a href={`/share/${slug}`}>
-            <i className="material-icons-round">link</i>
-          </a>
+  const shareItems = shares.map(({ slug, name, expires_at, items, type }) => (
+    <Share key={slug}>
+      <h3>
+        <a href={`/share/${slug}`}>
+          <i className="material-icons-round">link</i>
+        </a>
 
-          {name}
-        </h3>
+        {name}
+      </h3>
 
-        {type === "gallery" && (
-          <GalleryItems gallery={name} items={items} authToken={authToken} />
+      {type === "gallery" && (
+        <GalleryItems gallery={name} items={items} authToken={authToken} />
+      )}
+
+      <div>
+        <button onClick={() => removeShare(slug)}>
+          <i className="material-icons-round">delete</i> Remove
+        </button>
+
+        {expires_at && (
+          <div>
+            <i className="material-icons-round">access_time</i>
+            {new Date(expires_at).toLocaleDateString()}
+          </div>
         )}
-
-        <div>
-          <button onClick={() => removeShare(slug)}>
-            <i className="material-icons-round">delete</i> Remove
-          </button>
-
-          {expires_at && (
-            <div>
-              <i className="material-icons-round">access_time</i>
-              {new Date(expires_at).toLocaleDateString()}
-            </div>
-          )}
-        </div>
-      </Share>
-    ));
+      </div>
+    </Share>
+  ));
 
   return (
     <div>
       <h1>Shares</h1>
-      {renderShares(shares)}
+      {shareItems}
       {shares.length === 0 && <h2>No active shares</h2>}
       <BackLink to="/">
         <i className="material-icons-round">arrow_back_ios</i>

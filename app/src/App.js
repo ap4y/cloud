@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled";
 import { connect } from "react-redux";
 import {
@@ -44,92 +44,75 @@ const Content = styled.main`
     rgba(184, 194, 215, 0.1) 0px 5px 7px;
 `;
 
-class App extends Component {
-  state = { collapsed: false };
+const App = ({ modules, authError, authToken, fetchModules, signOut }) => {
+  const [collapsed, setCollapsed] = useState(false);
 
-  componentDidMount() {
-    apiClient.token = this.props.authToken;
-    this.props.fetchModules();
-  }
+  useEffect(() => {
+    apiClient.token = authToken;
+    fetchModules();
+  }, [authToken, fetchModules]);
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.authToken === this.props.authToken) return;
-    apiClient.token = this.props.authToken;
-    this.props.fetchModules();
-  }
+  let navItems = [],
+    sidebarItems = [],
+    contentItems = [];
 
-  renderModules = () => {
-    const { modules } = this.props;
+  modules.forEach(module => {
+    const component = supportedModules[module];
+    if (!component) return;
 
-    let navItems = [],
-      sidebarItems = [],
-      contentItems = [];
-    modules.forEach(module => {
-      const component = supportedModules[module];
-      if (!component) return;
-
-      navItems.push(
-        <li key={module}>
-          <NavLink to={module}>{component.icon}</NavLink>
-        </li>
-      );
-
-      sidebarItems.push(
-        <Route key={module} path={`/${module}`} component={component.sidebar} />
-      );
-
-      contentItems.push(
-        <Route key={module} path={`/${module}`} component={component.content} />
-      );
-    });
-
-    return { navItems, sidebarItems, contentItems };
-  };
-
-  render() {
-    const { collapsed } = this.state;
-    const { modules, authError } = this.props;
-    const { navItems, sidebarItems, contentItems } = this.renderModules();
-
-    return (
-      <BrowserRouter>
-        <PageContainer>
-          <Switch>
-            <Route path="/shares" />
-            <Route
-              render={() => (
-                <Sidepanel
-                  modules={navItems}
-                  items={sidebarItems}
-                  collapsed={collapsed}
-                  onCollapse={() => this.setState({ collapsed: !collapsed })}
-                  onSignOut={this.props.signOut}
-                />
-              )}
-            />
-          </Switch>
-          <Content>
-            <Switch>
-              <Route path="/share/:slug" component={ShareRoutes} />
-
-              <Route path="/login" component={LoginForm} />
-              {authError && <Redirect to="/login" />}
-
-              {modules.length > 0 && (
-                <Route path="/shares" component={SharesList} />
-              )}
-
-              {contentItems}
-              {modules.length > 0 && <Redirect to={`/${modules[0]}`} />}
-
-              <Route render={() => <h2>No active modules</h2>} />
-            </Switch>
-          </Content>
-        </PageContainer>
-      </BrowserRouter>
+    navItems.push(
+      <li key={module}>
+        <NavLink to={module}>{component.icon}</NavLink>
+      </li>
     );
-  }
-}
+
+    sidebarItems.push(
+      <Route key={module} path={`/${module}`} component={component.sidebar} />
+    );
+
+    contentItems.push(
+      <Route key={module} path={`/${module}`} component={component.content} />
+    );
+  });
+
+  return (
+    <BrowserRouter>
+      <PageContainer>
+        <Switch>
+          <Route path="/shares" />
+          <Route
+            render={() => (
+              <Sidepanel
+                modules={navItems}
+                items={sidebarItems}
+                collapsed={collapsed}
+                onCollapse={() => setCollapsed(!collapsed)}
+                onSignOut={signOut}
+              />
+            )}
+          />
+        </Switch>
+        <Content>
+          <Switch>
+            <Route path="/share/:slug" component={ShareRoutes} />
+
+            <Route path="/login" component={LoginForm} />
+            {authError && <Redirect to="/login" />}
+
+            {modules.length > 0 && (
+              <Route path="/shares" component={SharesList} />
+            )}
+
+            {contentItems}
+            {modules.length > 0 && <Redirect to={`/${modules[0]}`} />}
+
+            <Route render={() => <h2>No active modules</h2>} />
+          </Switch>
+        </Content>
+      </PageContainer>
+    </BrowserRouter>
+  );
+};
 
 export default connect(
   ({ modules, authError, authToken }) => ({ modules, authError, authToken }),
