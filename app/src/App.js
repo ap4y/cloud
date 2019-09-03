@@ -12,6 +12,7 @@ import {
 import AlbumsList from "./pages/albums";
 import LoginForm from "./pages/login";
 import { ShareRoutes, GalleryRoutes } from "./Routes";
+import Sidepanel from "./components/Sidepanel";
 import { apiClient, fetchModules, signOut } from "./actions";
 
 const supportedModules = {
@@ -30,60 +31,9 @@ const PageContainer = styled.div`
   background: var(--primary-background-color);
 `;
 
-const Sidepanel = styled.aside`
-  flex: 0 0 auto;
-  position: sticky;
-  height: 100vh;
-  top: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  max-width: ${({ collapsed }) => (collapsed ? 0 : 30)}%;
-  padding: 4rem ${({ collapsed }) => (collapsed ? 1 : 2)}rem;
-
-  nav {
-    overflow: hidden;
-  }
-`;
-
-const SettingsBar = styled.div`
-  display: flex;
-  justify-content: center;
-
-  a {
-    display: flex;
-    align-items: center;
-
-    color: var(--secondary-color);
-  }
-
-  a small {
-    margin-left: 0.5rem;
-  }
-`;
-
-const CollapseButton = styled.a`
-  display: flex;
-  align-items: center;
-  position: absolute;
-  top: 3.5rem;
-  right: -1rem;
-  width: 3rem;
-  height: 3rem;
-  cursor: pointer;
-
-  background: white;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-  box-shadow: rgba(184, 194, 215, 0.25) 0px 4px 6px,
-    rgba(184, 194, 215, 0.1) 0px 5px 7px;
-
-  color: var(--secondary-color);
-`;
-
 const Content = styled.main`
   flex: 1;
-  margin: 2rem 2rem 2rem 0;
+  margin: 2rem;
   padding: 2rem 3rem;
   z-index: 1;
 
@@ -143,33 +93,6 @@ class App extends Component {
     return (
       <BrowserRouter>
         <PageContainer>
-          <Sidepanel collapsed={collapsed || navItems.length === 0}>
-            {navItems.length > 0 && (
-              <CollapseButton
-                onClick={() => this.setState({ collapsed: !collapsed })}
-              >
-                <i className="material-icons-round">
-                  {collapsed ? "arrow_right" : "arrow_left"}
-                </i>
-              </CollapseButton>
-            )}
-
-            {navItems.length > 1 && (
-              <nav>
-                <ul>{navItems}</ul>
-              </nav>
-            )}
-
-            <nav>{sidebarItems}</nav>
-
-            <SettingsBar>
-              <a href="#lougout" onClick={this.props.signOut}>
-                <i className="material-icons-round">power_settings_new</i>{" "}
-                <small>Logout</small>
-              </a>
-            </SettingsBar>
-          </Sidepanel>
-
           <Content>
             <Switch>
               <Route path="/share/:slug" component={ShareRoutes} />
