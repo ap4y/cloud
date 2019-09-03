@@ -1,5 +1,6 @@
 import React from "react";
-import { shallow } from "enzyme";
+import { shallow, mount } from "enzyme";
+import { HashRouter } from "react-router-dom";
 import { ImageGrid, ImageCell } from "./gallery";
 
 const image = {
@@ -64,7 +65,10 @@ it("toggles share popup", () => {
   );
 
   expect(wrapper.find("SharePopup").exists()).toBeFalsy();
-  wrapper.setState({ showSharing: true });
+  wrapper
+    .find("a")
+    .at(0)
+    .simulate("click", { preventDefault: () => {} });
   expect(wrapper.find("SharePopup").exists()).toBeTruthy();
 });
 
@@ -84,7 +88,10 @@ it("creates shares", () => {
     />
   );
 
-  wrapper.setState({ showSharing: true });
+  wrapper
+    .find("a")
+    .at(0)
+    .simulate("click", { preventDefault: () => {} });
   expect(wrapper.find("SharePopup").exists()).toBeTruthy();
   wrapper.find("SharePopup").invoke("onShare")();
   expect(shared).toBeTruthy();
@@ -92,16 +99,18 @@ it("creates shares", () => {
 
 it("requests shares", () => {
   let result = {};
-  const wrapper = shallow(
-    <ImageGrid
-      albumName="Test"
-      share="foo"
-      images={[]}
-      match={{ url: "/test", params: { albumName: "bar" } }}
-      fetchAlbum={(album, share) => {
-        result = { album, share };
-      }}
-    />
+  const wrapper = mount(
+    <HashRouter>
+      <ImageGrid
+        albumName="Test"
+        share="foo"
+        images={[]}
+        match={{ url: "/test", params: { albumName: "bar" } }}
+        fetchAlbum={(album, share) => {
+          result = { album, share };
+        }}
+      />
+    </HashRouter>
   );
 
   expect(result.album).toEqual("Test");

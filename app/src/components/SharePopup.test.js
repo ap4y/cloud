@@ -21,9 +21,9 @@ it("renders errors", () => {
 it("renders share link", () => {
   const wrapper = shallow(<SharePopup items={["foo", "bar"]} slug="foo" />);
 
-  expect(wrapper.find("p").text()).toEqual("Share Link");
+  expect(wrapper.find("p").text()).toEqual("linkShare Link");
   expect(wrapper.find("a").prop("href")).toEqual("http://localhost/share/foo");
-  expect(wrapper.find("button").exists()).toBeFalsy();
+  expect(wrapper.find("button").text()).toEqual("Ok");
 });
 
 it("shares link", () => {
@@ -35,6 +35,7 @@ it("shares link", () => {
     />
   );
 
+  wrapper.find("input").simulate("change", { target: { value: 0 } });
   wrapper.find("button").simulate("click");
   expect(res).not.toBeNull();
 });

@@ -99,7 +99,7 @@ it("renders navigation chevrons", () => {
   ).toEqual("/test/Test 2");
 });
 
-it("renders exif data", () => {
+it("renders exif data", async () => {
   const wrapper = shallow(
     <ImagePreview
       images={images}
@@ -109,10 +109,16 @@ it("renders exif data", () => {
         params: { imageName: image.name }
       }}
       authToken="foo"
+      fetchExif={() => new Promise(r => r({ foo: "bar" }))}
     />
   );
 
-  wrapper.setState({ exif: { foo: "bar" } });
+  wrapper
+    .find("a")
+    .findWhere(n => n.prop("href") === "#exif")
+    .simulate("click", { preventDefault: () => {} });
+  await new Promise(r => setTimeout(r, 100));
+
   expect(wrapper.exists("EXIFData")).toBeTruthy();
   expect(wrapper.find("EXIFData").prop("exif")).toEqual({ foo: "bar" });
 });

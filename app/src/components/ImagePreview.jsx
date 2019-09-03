@@ -211,6 +211,8 @@ const ImagePreview = ({
     if (cell) cell.scrollIntoView({ inline: "center", behavior: "smooth" });
   }, [selectedIdx]);
 
+  const selectedImage = images[selectedIdx];
+
   const imagePath = image => match.path.replace(":imageName", image.name);
 
   const toggleFullscreen = e => {
@@ -248,10 +250,7 @@ const ImagePreview = ({
       return;
     }
 
-    const image = images[selectedIdx];
-    fetchExif(albumName, image.path, share).then(exif => {
-      setExif(exif);
-    });
+    fetchExif(albumName, selectedImage.path, share).then(exif => setExif(exif));
   };
 
   const imageURL = ({ path }, type = "image") => {
@@ -261,7 +260,6 @@ const ImagePreview = ({
     );
   };
 
-  const selectedImage = images[selectedIdx];
   const prevImage =
     images[selectedIdx === 0 ? images.length - 1 : selectedIdx - 1];
   const nextImage =

@@ -144,7 +144,7 @@ export const ImageGrid = ({
       <Toolbar>
         <h2>{albumName}</h2>
         <div>
-          {authToken && (
+          {!share && (
             <a href="#share" onClick={toggleSharing}>
               <i className="material-icons-round">share</i>
             </a>
