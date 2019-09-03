@@ -15,9 +15,7 @@ function modules(state = [], action) {
 function gallery(state = { albums: [] }, action) {
   switch (action.type) {
     case ActionTypes.GALLERY_SUCCESS:
-      return Object.assign({}, state, {
-        albums: action.albums
-      });
+      return { ...state, albums: action.albums };
     default:
       return state;
   }
@@ -26,9 +24,7 @@ function gallery(state = { albums: [] }, action) {
 function albumImages(state = {}, action) {
   switch (action.type) {
     case ActionTypes.ALBUM_SUCCESS:
-      return Object.assign({}, state, {
-        [action.albumName]: action.images
-      });
+      return { ...state, [action.albumName]: action.images };
     default:
       return state;
   }
@@ -50,12 +46,8 @@ function shares(state = { items: [] }, action) {
 
 function share(state = { current: null, loading: false }, action) {
   switch (action.type) {
-    case ActionTypes.SHARE_REQUEST:
-      return { ...state, loading: true };
     case ActionTypes.SHARE_SUCCESS:
       return { current: action.share, loading: false };
-    case ActionTypes.SHARE_FAILURE:
-      return { ...state, loading: false };
     default:
       return state;
   }
