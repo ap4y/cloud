@@ -35,23 +35,22 @@ const SharePopupContainer = styled.div`
     border-width: 0 10px 10px 10px;
     border-color: transparent transparent var(--outline-color) transparent;
   }
+
+  a {
+    display: flex;
+    justify-content: center;
+  }
 `;
 
 class SharePopup extends Component {
-  state = { expireAt: new Date() };
-
-  componentDidMount() {
-    let expireAt = new Date();
-    expireAt.setDate(expireAt.getDate() + 7);
-    this.setState({ expireAt });
-  }
+  state = { expireAt: null };
 
   updateExpireAt = ({ target }) => {
     this.setState({ expireAt: new Date(target.value) });
   };
 
   render() {
-    const { items, onShare, error, slug } = this.props;
+    const { items, onShare, onClose, error, slug } = this.props;
     const { expireAt } = this.state;
 
     return (
@@ -62,11 +61,7 @@ class SharePopup extends Component {
         {!slug && (
           <div>
             <label>Expire At:</label>
-            <input
-              type="date"
-              value={expireAt.toISOString().substr(0, 10)}
-              onChange={this.updateExpireAt}
-            />
+            <input type="date" onChange={this.updateExpireAt} />
           </div>
         )}
 
@@ -77,6 +72,7 @@ class SharePopup extends Component {
               target="_blank"
               rel="noopener noreferrer"
             >
+              <i className="material-icons-round">link</i>
               Share Link
             </a>
           </p>
@@ -84,6 +80,7 @@ class SharePopup extends Component {
         {error && <Alert>{error}</Alert>}
 
         {!slug && <button onClick={() => onShare(expireAt)}>Share</button>}
+        {slug && <button onClick={onClose}>Ok</button>}
       </SharePopupContainer>
     );
   }

@@ -122,6 +122,14 @@ export class ImageGrid extends Component {
       .catch(e => this.setState({ sharingError: e.message }));
   };
 
+  finalizeSharing = () => {
+    this.setState({
+      showSharing: false,
+      sharingSlug: null,
+      sharingError: null
+    });
+  };
+
   imageURL = ({ path }) => {
     const { authToken, match } = this.props;
 
@@ -164,6 +172,7 @@ export class ImageGrid extends Component {
                 onShare={this.createShare}
                 slug={sharingSlug}
                 error={sharingError}
+                onClose={this.finalizeSharing}
               />
             )}
           </div>
