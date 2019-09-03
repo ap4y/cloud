@@ -19,11 +19,11 @@ import (
 
 // Share stores share data.
 type Share struct {
-	Slug      string    `json:"slug"`
-	Type      Module    `json:"type"`
-	Name      string    `json:"name"`
-	Items     []string  `json:"items"`
-	ExpiresAt time.Time `json:"expires_at"`
+	Slug      string   `json:"slug"`
+	Type      Module   `json:"type"`
+	Name      string   `json:"name"`
+	Items     []string `json:"items"`
+	ExpiresAt NilTime  `json:"expires_at"`
 }
 
 // ShareStore manages share metadata.
@@ -251,7 +251,7 @@ func (sh *shareHandler) createShare(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	share.Slug = base64.StdEncoding.EncodeToString(slug)
+	share.Slug = base64.URLEncoding.EncodeToString(slug)
 	if err := sh.store.Save(share); err != nil {
 		httputil.Error(w, fmt.Sprintf("Failed to save: %s", err), http.StatusBadRequest)
 		return

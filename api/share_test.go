@@ -86,7 +86,7 @@ func TestShareStore(t *testing.T) {
 	store, err := NewDiskShareStore(dir)
 	require.NoError(t, err)
 
-	share := &Share{Slug: "foo", Type: ModuleGallery, Items: []string{"foo", "bar"}, ExpiresAt: time.Time{}}
+	share := &Share{Slug: "foo", Type: ModuleGallery, Items: []string{"foo", "bar"}, ExpiresAt: NilTime{time.Time{}}}
 	t.Run("Save", func(t *testing.T) {
 		require.NoError(t, store.Save(share))
 	})
@@ -137,7 +137,7 @@ func TestShareHandler(t *testing.T) {
 	handler.Post("/", sh.createShare)
 	handler.Get("/", sh.listShares)
 
-	share := &Share{Slug: "foo", Type: ModuleGallery, Items: []string{"foo", "bar"}, ExpiresAt: time.Time{}}
+	share := &Share{Slug: "foo", Type: ModuleGallery, Items: []string{"foo", "bar"}, ExpiresAt: NilTime{time.Time{}}}
 	require.NoError(t, store.Save(share))
 
 	t.Run("List", func(t *testing.T) {
