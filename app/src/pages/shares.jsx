@@ -8,11 +8,18 @@ import { fetchShares, removeShare } from "../actions";
 const Thumbs = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-auto-rows: 100px;
   grid-gap: 1rem;
   margin-bottom: 1rem;
 
+  div {
+    overflow: hidden;
+  }
+
   img {
-    margin: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 `;
 
@@ -20,11 +27,12 @@ const GalleryItems = ({ gallery, items, authToken }) => {
   return (
     <Thumbs>
       {items.map((item, idx) => (
-        <img
-          key={idx}
-          src={`/api/gallery/${gallery}/thumbnail/${item}?jwt=${authToken}`}
-          alt=""
-        />
+        <div key={idx}>
+          <img
+            src={`/api/gallery/${gallery}/thumbnail/${item}?jwt=${authToken}`}
+            alt=""
+          />
+        </div>
       ))}
     </Thumbs>
   );
