@@ -29,10 +29,17 @@ function handleError(dispatch, type = null, rethrow = false) {
 class APIClient {
   constructor(url) {
     this.url = url;
+    this.authToken = localStorage.getItem("authToken");
   }
 
   set token(token) {
     this.authToken = token;
+  }
+
+  imageURL(gallery, path, type = "image", share = null) {
+    if (share) return `/api/share/${share}/gallery/${gallery}/${type}/${path}`;
+
+    return `/api/gallery/${gallery}/${type}/${path}?jwt=${this.authToken}`;
   }
 
   do(path, method, body, headers) {

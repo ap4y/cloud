@@ -19,13 +19,12 @@ const images = [
 it("renders image thumbnails", () => {
   const wrapper = shallow(
     <ImagePreview
+      albumName="bar"
       images={images}
       match={{
-        url: "/test/Test",
         path: "/test/:imageName",
         params: { imageName: image.name }
       }}
-      authToken="foo"
     />
   );
 
@@ -47,7 +46,7 @@ it("renders image thumbnails", () => {
       .find("AlbumItem")
       .first()
       .prop("src")
-  ).toEqual("/api/test/thumbnail/test/Test.jpg?jwt=foo");
+  ).toEqual("/api/gallery/bar/thumbnail/test/Test.jpg?jwt=foo");
 });
 
 it("renders image preview", () => {
@@ -55,12 +54,10 @@ it("renders image preview", () => {
     <ImagePreview
       images={images}
       match={{
-        url: "/test/Test",
         path: "/test/:imageName",
         params: { imageName: image.name }
       }}
       albumName="bar"
-      authToken="foo"
     />
   );
 
@@ -69,7 +66,7 @@ it("renders image preview", () => {
       .find("img")
       .first()
       .prop("src")
-  ).toEqual("/api/test/image/test/Test.jpg?jwt=foo");
+  ).toEqual("/api/gallery/bar/image/test/Test.jpg?jwt=foo");
 });
 
 it("renders navigation chevrons", () => {
@@ -77,11 +74,9 @@ it("renders navigation chevrons", () => {
     <ImagePreview
       images={images}
       match={{
-        url: "/test/Test",
         path: "/test/:imageName",
         params: { imageName: image.name }
       }}
-      authToken="foo"
     />
   );
 
@@ -104,11 +99,9 @@ it("renders exif data", async () => {
     <ImagePreview
       images={images}
       match={{
-        url: "/test/Test",
         path: "/test/:imageName",
         params: { imageName: image.name }
       }}
-      authToken="foo"
       fetchExif={() => new Promise(r => r({ foo: "bar" }))}
     />
   );

@@ -5,7 +5,7 @@ import { NavLink, Route } from "react-router-dom";
 
 import ImagePreview from "../components/ImagePreview";
 import SharePopup from "../components/SharePopup";
-import { fetchAlbum, shareAlbum, fetchExif } from "../actions";
+import { apiClient, fetchAlbum, shareAlbum, fetchExif } from "../actions";
 
 const Figure = styled.figure`
   position: relative;
@@ -96,7 +96,6 @@ export const ImageGrid = ({
   images,
   share,
   albumName,
-  authToken,
   match,
   fetchAlbum,
   fetchExif,
@@ -127,14 +126,13 @@ export const ImageGrid = ({
     setSharingError(null);
   };
 
-  const imageURL = ({ path }) =>
-    `/api${match.url}/thumbnail/${path}` +
-    (authToken ? `?jwt=${authToken}` : "");
-
   const imageItems = images.map(image => {
     return (
       <NavLink key={image.name} to={`${match.url}/${image.name}`}>
-        <ImageCell image={image} src={imageURL(image)} />
+        <ImageCell
+          image={image}
+          src={apiClient.imageURL(albumName, image.path, "thumbnail", share)}
+        />
       </NavLink>
     );
   });
@@ -166,7 +164,6 @@ export const ImageGrid = ({
         render={props => (
           <ImagePreview
             images={images}
-            authToken={authToken}
             albumName={albumName}
             share={share}
             fetchExif={fetchExif}
@@ -179,13 +176,12 @@ export const ImageGrid = ({
 };
 
 export default connect(
-  ({ albumImages, authToken }, props) => {
+  ({ albumImages }, props) => {
     const { albumName, slug } = props.match.params;
     return {
       albumName,
       share: slug,
-      images: albumImages[albumName] || [],
-      authToken: authToken
+      images: albumImages[albumName] || []
     };
   },
   { fetchAlbum, shareAlbum, fetchExif }

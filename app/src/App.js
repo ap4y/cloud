@@ -14,7 +14,7 @@ import LoginForm from "./pages/login";
 import { ShareRoutes, GalleryRoutes } from "./Routes";
 import SharesList from "./pages/shares";
 import Sidepanel from "./components/Sidepanel";
-import { apiClient, fetchModules, signOut } from "./actions";
+import { fetchModules, signOut } from "./actions";
 
 const supportedModules = {
   gallery: {
@@ -44,13 +44,12 @@ const Content = styled.main`
     rgba(184, 194, 215, 0.1) 0px 5px 7px;
 `;
 
-const App = ({ modules, authError, authToken, fetchModules, signOut }) => {
+const App = ({ modules, authError, fetchModules, signOut }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    apiClient.token = authToken;
     fetchModules();
-  }, [authToken, fetchModules]);
+  });
 
   let navItems = [],
     sidebarItems = [],
@@ -114,6 +113,6 @@ const App = ({ modules, authError, authToken, fetchModules, signOut }) => {
 };
 
 export default connect(
-  ({ modules, authError, authToken }) => ({ modules, authError, authToken }),
+  ({ modules, authError }) => ({ modules, authError }),
   { fetchModules, signOut }
 )(App);

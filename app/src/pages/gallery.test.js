@@ -21,9 +21,8 @@ it("renders image list", () => {
   const wrapper = shallow(
     <ImageGrid
       albumName="Test"
-      authToken="foo"
       images={images}
-      match={{ url: "/test", params: { albumName: "bar" } }}
+      match={{ params: { albumName: "bar" } }}
       fetchAlbum={() => {}}
     />
   );
@@ -41,7 +40,7 @@ it("renders image list", () => {
       .find("ImageCell")
       .first()
       .prop("src")
-  ).toEqual("/api/test/thumbnail/test/Test.jpg?jwt=foo");
+  ).toEqual("/api/gallery/Test/thumbnail/test/Test.jpg?jwt=foo");
 });
 
 it("renders image cell", () => {
@@ -59,7 +58,7 @@ it("toggles share popup", () => {
     <ImageGrid
       albumName="Test"
       images={images}
-      match={{ url: "/test", params: { albumName: "bar" } }}
+      match={{ params: { albumName: "bar" } }}
       fetchAlbum={() => {}}
     />
   );
@@ -79,7 +78,7 @@ it("creates shares", () => {
     <ImageGrid
       albumName="Test"
       images={images}
-      match={{ url: "/test", params: { albumName: "bar" } }}
+      match={{ params: { albumName: "bar" } }}
       fetchAlbum={() => {}}
       shareAlbum={() => {
         shared = true;
@@ -105,7 +104,7 @@ it("requests shares", () => {
         albumName="Test"
         share="foo"
         images={[]}
-        match={{ url: "/test", params: { albumName: "bar" } }}
+        match={{ params: { albumName: "bar" } }}
         fetchAlbum={(album, share) => {
           result = { album, share };
         }}

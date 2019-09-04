@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { connect } from "react-redux";
 import { NavLink } from "react-router-dom";
 
-import { fetchShares, removeShare } from "../actions";
+import { apiClient, fetchShares, removeShare } from "../actions";
 
 const Thumbs = styled.div`
   display: grid;
@@ -23,15 +23,12 @@ const Thumbs = styled.div`
   }
 `;
 
-const GalleryItems = ({ gallery, items, authToken }) => {
+const GalleryItems = ({ gallery, items }) => {
   return (
     <Thumbs>
       {items.map((item, idx) => (
         <div key={idx}>
-          <img
-            src={`/api/gallery/${gallery}/thumbnail/${item}?jwt=${authToken}`}
-            alt=""
-          />
+          <img src={apiClient.imageURL(gallery, item, "thumbnail")} alt="" />
         </div>
       ))}
     </Thumbs>
@@ -78,7 +75,7 @@ const BackLink = styled(NavLink)`
   display: flex;
 `;
 
-export const SharesList = ({ shares, authToken, fetchShares, removeShare }) => {
+export const SharesList = ({ shares, fetchShares, removeShare }) => {
   useEffect(() => {
     fetchShares();
   });
@@ -93,9 +90,7 @@ export const SharesList = ({ shares, authToken, fetchShares, removeShare }) => {
         {name}
       </h3>
 
-      {type === "gallery" && (
-        <GalleryItems gallery={name} items={items} authToken={authToken} />
-      )}
+      {type === "gallery" && <GalleryItems gallery={name} items={items} />}
 
       <div>
         <button onClick={() => removeShare(slug)}>
@@ -126,6 +121,6 @@ export const SharesList = ({ shares, authToken, fetchShares, removeShare }) => {
 };
 
 export default connect(
-  ({ shares: { items }, authToken }) => ({ shares: items, authToken }),
+  ({ shares: { items } }) => ({ shares: items }),
   { fetchShares, removeShare }
 )(SharesList);

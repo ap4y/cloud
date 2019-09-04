@@ -4,6 +4,8 @@ import { NavLink, Link } from "react-router-dom";
 
 import EXIFData from "./ImageEXIF";
 
+import { apiClient } from "../actions";
+
 const Figure = styled.figure`
   margin: 0;
   position: relative;
@@ -170,14 +172,7 @@ const Toolbar = styled.header`
   }
 `;
 
-const ImagePreview = ({
-  images,
-  albumName,
-  share,
-  match,
-  authToken,
-  fetchExif
-}) => {
+const ImagePreview = ({ images, albumName, share, match, fetchExif }) => {
   const [fullscreen, setFullscreen] = useState(false);
   const [exif, setExif] = useState(null);
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -253,12 +248,8 @@ const ImagePreview = ({
     fetchExif(albumName, selectedImage.path, share).then(exif => setExif(exif));
   };
 
-  const imageURL = ({ path }, type = "image") => {
-    const baseURL = match.url.replace(match.params.imageName, "");
-    return (
-      `/api${baseURL}${type}/${path}` + (authToken ? `?jwt=${authToken}` : "")
-    );
-  };
+  const imageURL = ({ path }, type = "image") =>
+    apiClient.imageURL(albumName, path, type, share);
 
   const prevImage =
     images[selectedIdx === 0 ? images.length - 1 : selectedIdx - 1];
