@@ -78,7 +78,7 @@ const BackLink = styled(NavLink)`
 export const SharesList = ({ shares, fetchShares, removeShare }) => {
   useEffect(() => {
     fetchShares();
-  });
+  }, [fetchShares]);
 
   const shareItems = shares.map(({ slug, name, expires_at, items, type }) => (
     <Share key={slug}>

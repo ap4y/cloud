@@ -189,7 +189,7 @@ const ImagePreview = ({ images, albumName, share, match, fetchExif }) => {
     return () => {
       document.body.style.overflow = null;
     };
-  });
+  }, []);
 
   useEffect(() => {
     const selectedIdx = images.findIndex(

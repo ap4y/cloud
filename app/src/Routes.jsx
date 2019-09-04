@@ -8,7 +8,7 @@ import { fetchGalleries, fetchShare } from "./actions";
 const GalleryRoutesContainer = ({ albums, fetchGalleries }) => {
   useEffect(() => {
     fetchGalleries();
-  });
+  }, [fetchGalleries]);
 
   return (
     <Switch>
@@ -27,7 +27,7 @@ const GalleryRoutes = connect(
 const ShareRoutesContainer = ({ share, match, fetchShare }) => {
   useEffect(() => {
     fetchShare(match.params.slug);
-  });
+  }, [fetchShare, match.params.slug]);
 
   const galleryRoutes = share => (
     <Switch>

@@ -49,7 +49,7 @@ const App = ({ modules, authError, fetchModules, signOut }) => {
 
   useEffect(() => {
     fetchModules();
-  });
+  }, [fetchModules]);
 
   let navItems = [],
     sidebarItems = [],
