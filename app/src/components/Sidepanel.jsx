@@ -60,24 +60,16 @@ const SettingsBar = styled.div`
   }
 `;
 
-const Sidepanel = ({ modules, items, collapsed, onCollapse, onSignOut }) => {
+const Sidepanel = ({ children, collapsed, onCollapse, onSignOut }) => {
   return (
-    <Container collapsed={collapsed || modules.length === 0}>
-      {modules.length > 0 && (
-        <CollapseButton onClick={onCollapse}>
-          <i className="material-icons-round">
-            {collapsed ? "arrow_right" : "arrow_left"}
-          </i>
-        </CollapseButton>
-      )}
+    <Container collapsed={collapsed}>
+      <CollapseButton onClick={onCollapse}>
+        <i className="material-icons-round">
+          {collapsed ? "arrow_right" : "arrow_left"}
+        </i>
+      </CollapseButton>
 
-      {modules.length > 1 && (
-        <nav>
-          <ul>{modules}</ul>
-        </nav>
-      )}
-
-      <nav>{items}</nav>
+      {children}
 
       <SettingsBar>
         <NavLink to="/shares">

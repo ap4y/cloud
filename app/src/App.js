@@ -75,22 +75,21 @@ const App = ({ modules, authError, authToken, fetchModules, signOut }) => {
     );
   });
 
+  const renderSidebar = () => (
+    <Sidepanel
+      collapsed={collapsed}
+      onCollapse={() => setCollapsed(!collapsed)}
+      onSignOut={signOut}
+    >
+      <nav>{sidebarItems}</nav>
+    </Sidepanel>
+  );
+
   return (
     <BrowserRouter>
       <PageContainer>
         <Switch>
-          <Route path="/shares" />
-          <Route
-            render={() => (
-              <Sidepanel
-                modules={navItems}
-                items={sidebarItems}
-                collapsed={collapsed}
-                onCollapse={() => setCollapsed(!collapsed)}
-                onSignOut={signOut}
-              />
-            )}
-          />
+          <Route path="/gallery" render={renderSidebar} />
         </Switch>
         <Content>
           <Switch>
