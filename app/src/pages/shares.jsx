@@ -23,7 +23,7 @@ const Thumbs = styled.div`
   }
 `;
 
-const GalleryItems = ({ gallery, items }) => {
+export const GalleryItems = ({ gallery, items }) => {
   return (
     <Thumbs>
       {items.map((item, idx) => (
