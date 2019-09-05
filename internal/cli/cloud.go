@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/ap4y/cloud/api"
+	"github.com/ap4y/cloud/app"
 	"github.com/ap4y/cloud/gallery"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
@@ -33,10 +34,8 @@ func Run(configPath, devURL, addr string) error {
 		return fmt.Errorf("failed to initialise server: %s", err)
 	}
 
-	if devURL != "" {
-		if err := setupDevProxy(devURL, srv); err != nil {
-			return err
-		}
+	if err := setupAssets(devURL, srv); err != nil {
+		return err
 	}
 
 	log.Println("Serving on", addr)
@@ -64,7 +63,7 @@ func setupServer(cfg *Config) (http.Handler, error) {
 	cs := api.NewMemoryCredentialsStorage(cfg.Users, jwt.SigningMethodHS256, []byte(cfg.JWTSecret))
 	ss, err := api.NewDiskShareStore(cfg.Share.Path)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to create share store: %s", err)
+		return nil, fmt.Errorf("failed to create share store: %s", err)
 	}
 
 	expireTicker := time.NewTicker(time.Hour)
@@ -79,14 +78,21 @@ func setupServer(cfg *Config) (http.Handler, error) {
 	return api.NewServer(modules, cs, ss)
 }
 
-func setupDevProxy(devURL string, handler http.Handler) error {
-	rpURL, err := url.Parse(devURL)
-	if err != nil {
-		return fmt.Errorf("invalid dev url: %s", err)
+func setupAssets(devURL string, handler http.Handler) error {
+	mux, ok := handler.(*chi.Mux)
+	if !ok {
+		return fmt.Errorf("unsupported handler")
 	}
 
-	if mux, ok := handler.(*chi.Mux); ok {
+	if devURL != "" {
+		rpURL, err := url.Parse(devURL)
+		if err != nil {
+			return fmt.Errorf("invalid dev url: %s", err)
+		}
+
 		mux.Get("/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
+	} else {
+		mux.Handle("/*", http.FileServer(app.FS(false)))
 	}
 
 	return nil
