@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import styled from "@emotion/styled/macro";
 import { connect } from "react-redux";
-import { NavLink } from "react-router-dom";
 
 import { apiClient, fetchShares, removeShare } from "../actions";
 
@@ -71,11 +70,11 @@ const Share = styled.div`
   }
 `;
 
-const BackLink = styled(NavLink)`
+const BackLink = styled.a`
   display: flex;
 `;
 
-export const SharesList = ({ shares, fetchShares, removeShare }) => {
+export const SharesList = ({ shares, fetchShares, removeShare, history }) => {
   useEffect(() => {
     fetchShares();
   }, [fetchShares]);
@@ -112,7 +111,7 @@ export const SharesList = ({ shares, fetchShares, removeShare }) => {
       <h1>Shares</h1>
       {shareItems}
       {shares.length === 0 && <h2>No active shares</h2>}
-      <BackLink to="/">
+      <BackLink href="#back" onClick={history.goBack}>
         <i className="material-icons-round">arrow_back_ios</i>
         Back
       </BackLink>

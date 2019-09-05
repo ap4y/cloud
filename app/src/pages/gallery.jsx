@@ -87,9 +87,12 @@ const Toolbar = styled.div`
 
 const Images = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   grid-gap: 2rem;
-  margin: 0 -1rem;
+
+  @media (min-width: 400px) {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
 `;
 
 export const ImageGrid = ({

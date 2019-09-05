@@ -61,7 +61,7 @@ const Thumbs = styled.ul`
   display: flex;
   margin: 0;
   padding: 0 0.5rem;
-  max-height: ${({ hidden }) => (hidden ? 0 : 15)}%;
+  max-height: ${({ hidden }) => (hidden ? 0 : 20)}%;
   overflow-x: auto;
 
   background: #3b4252;
@@ -70,14 +70,16 @@ const Thumbs = styled.ul`
   li {
     margin: 0;
     padding: 1rem 0.5rem;
-    display: block;
-    height: 100%;
   }
 
   a {
     display: block;
     height: 100%;
     color: inherit;
+  }
+
+  @media (min-width: 700px) {
+    max-height: ${({ hidden }) => (hidden ? 0 : 15)}%;
   }
 `;
 
@@ -150,10 +152,6 @@ const Toolbar = styled.header`
 
   h4 {
     margin: 0;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
   }
 
   a {
@@ -169,6 +167,15 @@ const Toolbar = styled.header`
 
   a:last-of-type {
     margin-right: 0;
+  }
+
+  @media (min-width: 700px) {
+    h4 {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   }
 `;
 

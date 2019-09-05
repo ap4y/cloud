@@ -34,18 +34,63 @@ const PageContainer = styled.div`
 
 const Content = styled.main`
   flex: 1;
-  margin: 2rem;
-  padding: 2rem 3rem;
+  position: relative;
+  margin-top: 3rem;
+
+  overflow-x: hidden;
+
+  > div {
+    padding: 2rem;
+
+    background: white;
+  }
+
+  @media (min-width: 700px) {
+    margin: -1rem 2rem 2rem 2rem;
+    overflow-x: unset;
+
+    > div {
+      padding: 2rem 3rem;
+      position: relative;
+      z-index: 1;
+
+      border-radius: 8px;
+    }
+  }
+`;
+
+const CollapseButton = styled.a`
+  position: fixed;
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  top: 0;
+  width: 100%;
   z-index: 1;
+  cursor: pointer;
 
   background: white;
-  border-radius: 8px;
-  box-shadow: rgba(184, 194, 215, 0.25) 0px 4px 6px,
-    rgba(184, 194, 215, 0.1) 0px 5px 7px;
+
+  color: var(--secondary-color);
+
+  @media (min-width: 700px) {
+    position: sticky;
+    top: 5rem;
+    margin-left: -3rem;
+    padding: 0.5rem;
+    width: auto;
+
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    box-shadow: rgba(184, 194, 215, 0.25) 0px 4px 6px,
+      rgba(184, 194, 215, 0.1) 0px 5px 7px;
+  }
 `;
 
 const App = ({ modules, authError, fetchModules, signOut }) => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(
+    document.body.clientWidth >= 700 ? false : true
+  );
 
   useEffect(() => {
     fetchModules();
@@ -75,13 +120,15 @@ const App = ({ modules, authError, fetchModules, signOut }) => {
   });
 
   const renderSidebar = () => (
-    <Sidepanel
-      collapsed={collapsed}
-      onCollapse={() => setCollapsed(!collapsed)}
-      onSignOut={signOut}
-    >
-      <nav>{sidebarItems}</nav>
+    <Sidepanel collapsed={collapsed} onSignOut={signOut}>
+      {sidebarItems}
     </Sidepanel>
+  );
+
+  const renderCollapseButton = () => (
+    <CollapseButton onClick={() => setCollapsed(!collapsed)}>
+      <i className="material-icons-round">{collapsed ? "menu" : "close"}</i>
+    </CollapseButton>
   );
 
   return (
@@ -91,21 +138,25 @@ const App = ({ modules, authError, fetchModules, signOut }) => {
           <Route path="/gallery" render={renderSidebar} />
         </Switch>
         <Content>
-          <Switch>
-            <Route path="/share/:slug" component={ShareRoutes} />
+          <Route path="/gallery" render={renderCollapseButton} />
 
-            <Route path="/login" component={LoginForm} />
-            {authError && <Redirect to="/login" />}
+          <div>
+            <Switch>
+              <Route path="/share/:slug" component={ShareRoutes} />
 
-            {modules.length > 0 && (
-              <Route path="/shares" component={SharesList} />
-            )}
+              <Route path="/login" component={LoginForm} />
+              {authError && <Redirect to="/login" />}
 
-            {contentItems}
-            {modules.length > 0 && <Redirect to={`/${modules[0]}`} />}
+              {modules.length > 0 && (
+                <Route path="/shares" component={SharesList} />
+              )}
 
-            <Route render={() => <h2>No active modules</h2>} />
-          </Switch>
+              {contentItems}
+              {modules.length > 0 && <Redirect to={`/${modules[0]}`} />}
+
+              <Route render={() => <h2>No active modules</h2>} />
+            </Switch>
+          </div>
         </Content>
       </PageContainer>
     </BrowserRouter>

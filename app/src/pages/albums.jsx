@@ -3,6 +3,16 @@ import styled from "@emotion/styled/macro";
 import { connect } from "react-redux";
 import { NavLink } from "react-router-dom";
 
+const Badge = styled.small`
+  flex: 0 0 auto;
+  padding: 0.25em 0.5em;
+
+  background: var(--outline-color);
+  border-radius: 3px;
+
+  font-weight: bold;
+`;
+
 const Albums = styled.ul`
   list-style: none;
 
@@ -20,23 +30,13 @@ const Albums = styled.ul`
     text-overflow: ellipsis;
   }
 
-  a > small {
+  ${Badge} {
     background: #e5e9f0;
   }
 
-  a.active > small {
+  a.active > ${Badge} {
     background: var(--outline-color);
   }
-`;
-
-const Badge = styled.small`
-  flex: 0 0 auto;
-  padding: 0.25em 0.5em;
-
-  background: var(--outline-color);
-  border-radius: 3px;
-
-  font-weight: bold;
 `;
 
 export const AlbumsList = ({ albums, match }) => {
