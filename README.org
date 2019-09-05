@@ -17,7 +17,7 @@ toolchain to compile the app.
 To install or update run:
 
 #+BEGIN_SRC shell
-go get -u github.com/ap4y/cloud
+go get -u github.com/ap4y/cloud/cmd/cloud
 #+END_SRC
 
 Web UI is implemented using [[https://reactjs.org/][react]] and is pre-bundled into golang
