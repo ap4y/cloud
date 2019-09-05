@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import styled from "@emotion/styled";
+import styled from "@emotion/styled/macro";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 

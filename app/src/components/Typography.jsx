@@ -1,4 +1,4 @@
-import styled from "@emotion/styled";
+import styled from "@emotion/styled/macro";
 
 export const Alert = styled.p`
   color: var(--danger-color);

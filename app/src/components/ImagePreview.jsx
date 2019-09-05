@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import styled from "@emotion/styled";
+import styled from "@emotion/styled/macro";
 import { NavLink, Link } from "react-router-dom";
 
 import EXIFData from "./ImageEXIF";

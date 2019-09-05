@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import styled from "@emotion/styled";
+import styled from "@emotion/styled/macro";
 import { connect } from "react-redux";
 import {
   BrowserRouter,

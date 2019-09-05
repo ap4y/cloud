@@ -1,5 +1,5 @@
 import React from "react";
-import styled from "@emotion/styled";
+import styled from "@emotion/styled/macro";
 import { connect } from "react-redux";
 import { NavLink } from "react-router-dom";
 
