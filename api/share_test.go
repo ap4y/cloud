@@ -16,6 +16,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestShare(t *testing.T) {
+	share := &Share{Slug: "bar", Type: ModuleGallery, Name: "foo", Items: []string{"test.jpg"}}
+
+	t.Run("Includes", func(t *testing.T) {
+		assert.False(t, share.Includes("bar", "test.jpg"))
+		assert.False(t, share.Includes("foo", "test2.jpg"))
+		assert.True(t, share.Includes("foo", "test.jpg"))
+	})
+}
 func TestShareAuthenticator(t *testing.T) {
 	dir, err := ioutil.TempDir("", "shares")
 	require.NoError(t, err)

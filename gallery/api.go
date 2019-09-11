@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	capi "github.com/ap4y/cloud/api"
 	"github.com/ap4y/cloud/internal/httputil"
 	"github.com/go-chi/chi"
 )
@@ -51,6 +52,16 @@ func (api *galleryAPI) listAlbumImages(w http.ResponseWriter, req *http.Request)
 	if err != nil {
 		httputil.Error(w, fmt.Sprint("failed to fetch images:", err), http.StatusBadRequest)
 		return
+	}
+
+	if share, ok := req.Context().Value(capi.ShareCtxKey).(*capi.Share); ok {
+		shareImages := make([]*Image, 0)
+		for _, image := range images {
+			if share.Includes(galleryName, image.Path) {
+				shareImages = append(shareImages, image)
+			}
+		}
+		images = shareImages
 	}
 
 	httputil.Respond(w, images)

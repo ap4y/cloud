@@ -1,6 +1,7 @@
 package gallery
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	capi "github.com/ap4y/cloud/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -58,6 +60,41 @@ func TestGalleryAPI(t *testing.T) {
 
 		require.Len(t, images, 1)
 		assert.Equal(t, "test", images[0].Name)
+	})
+
+	t.Run("listAlbumImages/with_share", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "http://cloud.api/album1/images", nil)
+		share := &capi.Share{Name: "album1", Items: []string{"test.jpg"}}
+		ctx := context.WithValue(req.Context(), capi.ShareCtxKey, share)
+		api.ServeHTTP(w, req.WithContext(ctx))
+
+		resp := w.Result()
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+
+		images := make([]*Image, 0)
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(&images))
+		assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+
+		require.Len(t, images, 1)
+		assert.Equal(t, "test", images[0].Name)
+	})
+
+	t.Run("listAlbumImages/with_share/no_match", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "http://cloud.api/album1/images", nil)
+		share := &capi.Share{Name: "album1", Items: []string{"foo.jpg"}}
+		ctx := context.WithValue(req.Context(), capi.ShareCtxKey, share)
+		api.ServeHTTP(w, req.WithContext(ctx))
+
+		resp := w.Result()
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+
+		images := make([]*Image, 0)
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(&images))
+		assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+
+		require.Len(t, images, 0)
 	})
 
 	t.Run("getImage", func(t *testing.T) {

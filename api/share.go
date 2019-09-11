@@ -26,6 +26,21 @@ type Share struct {
 	ExpiresAt NilTime  `json:"expires_at"`
 }
 
+// Includes returns true if share includes provided item.
+func (s *Share) Includes(name, item string) bool {
+	if s.Name != name {
+		return false
+	}
+
+	for _, i := range s.Items {
+		if item == i {
+			return true
+		}
+	}
+
+	return false
+}
+
 // ShareStore manages share metadata.
 type ShareStore interface {
 	// All returns all stores shares.
