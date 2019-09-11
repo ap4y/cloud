@@ -119,6 +119,7 @@ it("renders exif data", async () => {
 it("renders thumbnail", () => {
   const wrapper = shallow(<AlbumItem image={image} src="test.jpg" />);
 
+  wrapper.find("VisibilitySensor").invoke("onChange")(true);
   expect(wrapper.find("img").prop("src")).toEqual("test.jpg");
   expect(wrapper.find("figcaption").text()).toEqual("Test");
 });

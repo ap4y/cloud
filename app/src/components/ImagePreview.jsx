@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import styled from "@emotion/styled/macro";
 import { NavLink, Link } from "react-router-dom";
+import VisibilitySensor from "react-visibility-sensor";
 
 import EXIFData from "./ImageEXIF";
 
@@ -10,10 +11,12 @@ const Figure = styled.figure`
   margin: 0;
   position: relative;
   display: flex;
+  justify-content: center;
   height: 100%;
+  width: 200px;
+  background: var(--secondary-background-color);
 
   img {
-    max-width: none;
     object-fit: cover;
   }
 
@@ -31,14 +34,25 @@ const Figure = styled.figure`
   &:hover figcaption {
     opacity: 1;
   }
+
+  @media (min-width: 700px) {
+    width: 300px;
+  }
 `;
 
 export const AlbumItem = ({ image, src, selected }) => {
+  const [render, setRender] = useState(false);
+
   return (
-    <Figure selected={selected}>
-      <img alt={image.name} src={src} />
-      <figcaption>{image.name}</figcaption>
-    </Figure>
+    <VisibilitySensor
+      partialVisibility
+      onChange={visible => visible && setRender(true)}
+    >
+      <Figure selected={selected}>
+        {render && <img alt={image.name} src={src} />}
+        <figcaption>{image.name}</figcaption>
+      </Figure>
+    </VisibilitySensor>
   );
 };
 
@@ -61,7 +75,7 @@ const Thumbs = styled.ul`
   display: flex;
   margin: 0;
   padding: 0 0.5rem;
-  max-height: ${({ hidden }) => (hidden ? 0 : 20)}%;
+  height: ${({ hidden }) => (hidden ? 0 : 20)}%;
   overflow-x: auto;
 
   background: #3b4252;
@@ -79,7 +93,7 @@ const Thumbs = styled.ul`
   }
 
   @media (min-width: 700px) {
-    max-height: ${({ hidden }) => (hidden ? 0 : 15)}%;
+    height: ${({ hidden }) => (hidden ? 0 : 15)}%;
   }
 `;
 

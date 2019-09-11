@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled/macro";
 import { connect } from "react-redux";
 import { NavLink, Route } from "react-router-dom";
+import VisibilitySensor from "react-visibility-sensor";
 
 import ImagePreview from "../components/ImagePreview";
 import SharePopup from "../components/SharePopup";
@@ -11,6 +12,7 @@ const Figure = styled.figure`
   position: relative;
   display: flex;
   margin: 0;
+  height: 200px;
 
   background: var(--outline-color);
   border-radius: 5px;
@@ -49,19 +51,28 @@ const Figure = styled.figure`
   }
 `;
 
-export const ImageCell = ({ image: { name, path, updated_at }, src }) => (
-  <Figure>
-    <img alt={name} src={src} />
-    <figcaption>
-      <span>{name}</span>
-      <small>
-        <time dateTime={updated_at}>
-          {new Date(updated_at).toLocaleString()}
-        </time>
-      </small>
-    </figcaption>
-  </Figure>
-);
+export const ImageCell = ({ image: { name, path, updated_at }, src }) => {
+  const [render, setRender] = useState(false);
+
+  return (
+    <VisibilitySensor
+      partialVisibility
+      onChange={visible => visible && setRender(true)}
+    >
+      <Figure>
+        {render && <img alt={name} src={src} />}
+        <figcaption>
+          <span>{name}</span>
+          <small>
+            <time dateTime={updated_at}>
+              {new Date(updated_at).toLocaleString()}
+            </time>
+          </small>
+        </figcaption>
+      </Figure>
+    </VisibilitySensor>
+  );
+};
 
 const FloatingSharePopup = styled(SharePopup)`
   position: absolute;

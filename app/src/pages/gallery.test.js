@@ -46,6 +46,7 @@ it("renders image list", () => {
 it("renders image cell", () => {
   const wrapper = shallow(<ImageCell image={image} src="test.jpg" />);
 
+  wrapper.find("VisibilitySensor").invoke("onChange")(true);
   expect(wrapper.find("figcaption").text()).toEqual(
     "Test1/1/1970, 12:00:00 PM"
   );
