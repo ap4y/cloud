@@ -6,7 +6,7 @@ import { apiClient, fetchShares, removeShare } from "../actions";
 
 const Thumbs = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   grid-auto-rows: 100px;
   grid-gap: 1rem;
   margin-bottom: 1rem;

@@ -64,12 +64,12 @@ it("toggles share popup", () => {
     />
   );
 
-  expect(wrapper.find("FloatingSharePopup").exists()).toBeFalsy();
+  expect(wrapper.find("StickySharePopup").exists()).toBeFalsy();
   wrapper
     .find("a")
     .filterWhere(n => n.prop("href") === "#share")
     .simulate("click", { preventDefault: () => {} });
-  expect(wrapper.find("FloatingSharePopup").exists()).toBeTruthy();
+  expect(wrapper.find("StickySharePopup").exists()).toBeTruthy();
 });
 
 it("creates shares", () => {
@@ -92,8 +92,8 @@ it("creates shares", () => {
     .find("a")
     .filterWhere(n => n.prop("href") === "#share")
     .simulate("click", { preventDefault: () => {} });
-  expect(wrapper.find("FloatingSharePopup").exists()).toBeTruthy();
-  wrapper.find("FloatingSharePopup").invoke("onShare")();
+  expect(wrapper.find("StickySharePopup").exists()).toBeTruthy();
+  wrapper.find("StickySharePopup").invoke("onShare")();
   expect(shared).toBeTruthy();
 });
 

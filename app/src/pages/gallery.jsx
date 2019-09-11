@@ -74,10 +74,19 @@ export const ImageCell = ({ image: { name, path, updated_at }, src }) => {
   );
 };
 
-const FloatingSharePopup = styled(SharePopup)`
-  position: absolute;
-  right: -1rem;
-  top: 3.5rem;
+const StickySharePopup = styled(SharePopup)`
+  position: sticky;
+  top: 1rem;
+  width: 100%;
+  margin: 0 auto 2rem auto;
+
+  &:after {
+    display: none;
+  }
+
+  @media (min-width: 800px) {
+    max-width: 50%;
+  }
 `;
 
 const SortControl = styled.div`
@@ -133,11 +142,46 @@ const Toolbar = styled.div`
 
 const Images = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   grid-gap: 2rem;
 
   @media (min-width: 400px) {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+`;
+
+const ImageItem = styled.div`
+  position: relative;
+
+  &:before {
+    display: ${({ active }) => (active ? "block" : "none")};
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    cursor: pointer;
+  }
+
+  &:after {
+    display: ${({ active }) => (active ? "flex" : "none")};
+    content: "${({ selected }) => (selected ? "✓" : "")}";
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 25px;
+    height: 25px;
+justify-content: center;
+    align-items: center;
+    z-index: 2;
+
+    background: var(--outline-color);
+    border-radius: 15px;
+
+    color: var(--primary-text-color);
+    font-weight: 700;
   }
 `;
 
@@ -150,6 +194,7 @@ export const ImageGrid = ({
   fetchExif,
   shareAlbum
 }) => {
+  const [sharedItems, setSharedItems] = useState([]);
   const [showSharing, setShowSharing] = useState(false);
   const [sharingSlug, setSharingSlug] = useState(null);
   const [sharingError, setSharingError] = useState(null);
@@ -159,13 +204,22 @@ export const ImageGrid = ({
     fetchAlbum(albumName, share);
   }, [albumName, share, fetchAlbum]);
 
+  useEffect(() => {
+    setShowSharing(false);
+  }, [albumName]);
+
   const toggleSharing = e => {
     e.preventDefault();
-    setShowSharing(!showSharing);
+    if (showSharing) {
+      setShowSharing(false);
+    } else {
+      setSharedItems(images);
+      setShowSharing(true);
+    }
   };
 
   const createShare = expireAt => {
-    shareAlbum(albumName, images, expireAt)
+    shareAlbum(albumName, sharedItems, expireAt)
       .then(({ slug }) => setSharingSlug(slug))
       .catch(e => setSharingError(e.message));
   };
@@ -188,6 +242,16 @@ export const ImageGrid = ({
     setSorting({ ...sorting, order });
   };
 
+  const toggleSharedItem = image => {
+    if (!showSharing) return;
+
+    if (sharedItems.includes(image)) {
+      setSharedItems(sharedItems.filter(i => i !== image));
+    } else {
+      setSharedItems([...sharedItems, image]);
+    }
+  };
+
   const imageItems = images
     .sort((a, b) => {
       const up = sorting.order === "up" ? 1 : -1;
@@ -196,12 +260,24 @@ export const ImageGrid = ({
     })
     .map(image => {
       return (
-        <NavLink key={image.name} to={`${match.url}/${image.name}`}>
-          <ImageCell
-            image={image}
-            src={apiClient.imageURL(albumName, image.path, "thumbnail", share)}
-          />
-        </NavLink>
+        <ImageItem
+          key={image.name}
+          active={showSharing}
+          selected={sharedItems.includes(image)}
+          onClick={() => toggleSharedItem(image)}
+        >
+          <NavLink to={`${match.url}/${image.name}`}>
+            <ImageCell
+              image={image}
+              src={apiClient.imageURL(
+                albumName,
+                image.path,
+                "thumbnail",
+                share
+              )}
+            />
+          </NavLink>
+        </ImageItem>
       );
     });
 
@@ -236,17 +312,17 @@ export const ImageGrid = ({
               <i className="material-icons-round">share</i>
             </a>
           )}
-          {showSharing && (
-            <FloatingSharePopup
-              items={images}
-              onShare={createShare}
-              slug={sharingSlug}
-              error={sharingError}
-              onClose={finalizeSharing}
-            />
-          )}
         </div>
       </Toolbar>
+      {showSharing && (
+        <StickySharePopup
+          items={sharedItems}
+          onShare={createShare}
+          slug={sharingSlug}
+          error={sharingError}
+          onClose={finalizeSharing}
+        />
+      )}
       <Images>{imageItems}</Images>
       <Route
         path={`${match.url}/:imageName`}
