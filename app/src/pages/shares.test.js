@@ -11,7 +11,9 @@ const share = {
 };
 
 it("renders list of shares", () => {
-  const wrapper = shallow(<SharesList shares={[share]} />);
+  const wrapper = shallow(
+    <SharesList shares={[share]} history={{ goBack: () => {} }} />
+  );
 
   expect(wrapper.find("h3").length).toEqual(1);
   expect(
@@ -36,7 +38,11 @@ it("renders list of shares", () => {
 it("removes shares", () => {
   let removedSlug = null;
   const wrapper = shallow(
-    <SharesList shares={[share]} removeShare={slug => (removedSlug = slug)} />
+    <SharesList
+      shares={[share]}
+      removeShare={slug => (removedSlug = slug)}
+      history={{ goBack: () => {} }}
+    />
   );
 
   wrapper

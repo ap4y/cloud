@@ -42,11 +42,11 @@ const SharePopupContainer = styled.div`
   }
 `;
 
-const SharePopup = ({ items, slug, error, onShare, onClose }) => {
+const SharePopup = ({ className, items, slug, error, onShare, onClose }) => {
   const [expireAt, setExpireAt] = useState(null);
 
   return (
-    <SharePopupContainer>
+    <SharePopupContainer className={className}>
       <h4>{`Sharing ${items.length} ${
         items.length === 1 ? "item" : "items"
       }`}</h4>

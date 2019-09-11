@@ -35,7 +35,6 @@ const PageContainer = styled.div`
 const Content = styled.main`
   flex: 1;
   position: relative;
-  margin-top: 3rem;
 
   overflow-x: hidden;
 
@@ -46,7 +45,7 @@ const Content = styled.main`
   }
 
   @media (min-width: 700px) {
-    margin: -1rem 2rem 2rem 2rem;
+    margin: 2rem;
     overflow-x: unset;
 
     > div {
@@ -60,10 +59,11 @@ const Content = styled.main`
 `;
 
 const CollapseButton = styled.a`
-  position: fixed;
+  position: sticky;
   display: flex;
   align-items: center;
   padding: 1.5rem;
+  margin-bottom: -3rem;
   top: 0;
   width: 100%;
   z-index: 1;
@@ -74,9 +74,10 @@ const CollapseButton = styled.a`
   color: var(--secondary-color);
 
   @media (min-width: 700px) {
-    position: sticky;
+    position: fixed;
     top: 5rem;
     margin-left: -3rem;
+    margin-bottom: 0;
     padding: 0.5rem;
     width: auto;
 

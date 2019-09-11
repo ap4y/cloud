@@ -63,24 +63,59 @@ export const ImageCell = ({ image: { name, path, updated_at }, src }) => (
   </Figure>
 );
 
+const FloatingSharePopup = styled(SharePopup)`
+  position: absolute;
+  right: -1rem;
+  top: 3.5rem;
+`;
+
+const SortControl = styled.div`
+  display: flex;
+
+  a {
+    display: flex;
+    align-items: center;
+    margin-left: 4px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.1rem;
+    text-transform: uppercase;
+
+    i {
+      margin-left: -4px;
+      margin-right: -6px;
+    }
+  }
+
+  a:first-of-type {
+    margin-left: 0;
+  }
+`;
+
 const Toolbar = styled.div`
   display: flex;
+  flex-direction: column;
   align-items: baseline;
   justify-content: space-between;
 
   > div {
     position: relative;
+    display: flex;
+    margin-bottom: 2rem;
 
     > a {
       display: block;
+      margin-left: 3rem;
       height: 2rem;
       color: var(--secondary-color);
     }
+  }
+
+  @media (min-width: 700px) {
+    flex-direction: row;
 
     > div {
-      position: absolute;
-      right: -1rem;
-      top: 3.5rem;
+      margin-bottom: 0;
     }
   }
 `;
@@ -107,6 +142,7 @@ export const ImageGrid = ({
   const [showSharing, setShowSharing] = useState(false);
   const [sharingSlug, setSharingSlug] = useState(null);
   const [sharingError, setSharingError] = useState(null);
+  const [sorting, setSorting] = useState({ field: "name", order: "up" });
 
   useEffect(() => {
     fetchAlbum(albumName, share);
@@ -119,7 +155,7 @@ export const ImageGrid = ({
 
   const createShare = expireAt => {
     shareAlbum(albumName, images, expireAt)
-      .then(share => setSharingSlug(share))
+      .then(({ slug }) => setSharingSlug(slug))
       .catch(e => setSharingError(e.message));
   };
 
@@ -129,29 +165,68 @@ export const ImageGrid = ({
     setSharingError(null);
   };
 
-  const imageItems = images.map(image => {
-    return (
-      <NavLink key={image.name} to={`${match.url}/${image.name}`}>
-        <ImageCell
-          image={image}
-          src={apiClient.imageURL(albumName, image.path, "thumbnail", share)}
-        />
-      </NavLink>
-    );
-  });
+  const changeSorting = (e, field) => {
+    e.preventDefault();
+
+    if (field !== sorting.field) {
+      setSorting({ ...sorting, field });
+      return;
+    }
+
+    const order = sorting.order === "up" ? "down" : "up";
+    setSorting({ ...sorting, order });
+  };
+
+  const imageItems = images
+    .sort((a, b) => {
+      const up = sorting.order === "up" ? 1 : -1;
+      const down = sorting.order === "up" ? -1 : 1;
+      return a[sorting.field] > b[sorting.field] ? up : down;
+    })
+    .map(image => {
+      return (
+        <NavLink key={image.name} to={`${match.url}/${image.name}`}>
+          <ImageCell
+            image={image}
+            src={apiClient.imageURL(albumName, image.path, "thumbnail", share)}
+          />
+        </NavLink>
+      );
+    });
 
   return (
     <div>
       <Toolbar>
         <h2>{albumName}</h2>
         <div>
+          <SortControl>
+            <i className="material-icons-round">sort</i>
+            <a href="#name" onClick={e => changeSorting(e, "name")}>
+              <i
+                style={{
+                  visibility: sorting.field === "name" ? "" : "hidden"
+                }}
+                className="material-icons-round"
+              >{`arrow_drop_${sorting.order}`}</i>
+              Name
+            </a>
+            <a href="#date" onClick={e => changeSorting(e, "updated_at")}>
+              <i
+                style={{
+                  visibility: sorting.field === "updated_at" ? "" : "hidden"
+                }}
+                className="material-icons-round"
+              >{`arrow_drop_${sorting.order}`}</i>
+              Date
+            </a>
+          </SortControl>
           {!share && (
             <a href="#share" onClick={toggleSharing}>
               <i className="material-icons-round">share</i>
             </a>
           )}
           {showSharing && (
-            <SharePopup
+            <FloatingSharePopup
               items={images}
               onShare={createShare}
               slug={sharingSlug}
