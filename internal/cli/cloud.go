@@ -92,7 +92,14 @@ func setupAssets(devURL string, handler http.Handler) error {
 
 		mux.Get("/*", httputil.NewSingleHostReverseProxy(rpURL).ServeHTTP)
 	} else {
-		mux.Handle("/*", http.FileServer(app.FS(false)))
+		fs := app.FS(false)
+		mux.Handle("/", http.FileServer(fs))
+		mux.Handle("/static/*", http.FileServer(fs))
+		mux.NotFound(func(w http.ResponseWriter, req *http.Request) {
+			file, _ := fs.Open("/index.html")
+			stat, _ := file.Stat()
+			http.ServeContent(w, req, "index.html", stat.ModTime(), file)
+		})
 	}
 
 	return nil
