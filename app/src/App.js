@@ -14,7 +14,7 @@ import LoginForm from "./pages/login";
 import { ShareRoutes, GalleryRoutes } from "./Routes";
 import SharesList from "./pages/shares";
 import Sidepanel from "./components/Sidepanel";
-import { fetchModules, signOut } from "./actions";
+import { apiClient, fetchModules, signOut } from "./actions";
 
 const supportedModules = {
   gallery: {
@@ -49,6 +49,7 @@ const Content = styled.main`
     overflow-x: unset;
 
     > div {
+      height: 100%;
       padding: 2rem 3rem;
       position: relative;
       z-index: 1;
@@ -88,14 +89,15 @@ const CollapseButton = styled.a`
   }
 `;
 
-const App = ({ modules, authError, fetchModules, signOut }) => {
+const App = ({ modules, authError, authToken, fetchModules, signOut }) => {
   const [collapsed, setCollapsed] = useState(
     document.body.clientWidth >= 700 ? false : true
   );
 
   useEffect(() => {
+    apiClient.token = authToken;
     fetchModules();
-  }, [fetchModules]);
+  }, [fetchModules, authToken]);
 
   let navItems = [],
     sidebarItems = [],
@@ -165,6 +167,6 @@ const App = ({ modules, authError, fetchModules, signOut }) => {
 };
 
 export default connect(
-  ({ modules, authError }) => ({ modules, authError }),
+  ({ modules, authError, authToken }) => ({ modules, authError, authToken }),
   { fetchModules, signOut }
 )(App);

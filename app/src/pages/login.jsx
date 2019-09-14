@@ -34,7 +34,8 @@ export const LoginForm = ({
   const { from } = location.state || { from: { pathname: "/" } };
   if (authToken) return <Redirect to={from} />;
 
-  const performAuth = () => {
+  const performAuth = e => {
+    e.preventDefault();
     resetAuthError();
     resetErrorMessage();
     signIn(username, password);
