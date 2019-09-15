@@ -72,6 +72,19 @@ const Share = styled.div`
 
 const BackLink = styled.a`
   display: flex;
+  padding: 1rem;
+  background: white;
+  color: var(--primary-text-color);
+`;
+
+const SharesContainer = styled.div`
+  position: relative;
+
+  ${BackLink} {
+    position: absolute;
+    top: -1rem;
+    right: -1rem;
+  }
 `;
 
 export const SharesList = ({ shares, fetchShares, removeShare, history }) => {
@@ -107,15 +120,14 @@ export const SharesList = ({ shares, fetchShares, removeShare, history }) => {
   ));
 
   return (
-    <div>
+    <SharesContainer>
       <h1>Shares</h1>
+      <BackLink href="#back" onClick={history.goBack}>
+        <i className="material-icons-round">close</i>
+      </BackLink>
       {shareItems}
       {shares.length === 0 && <h2>No active shares</h2>}
-      <BackLink href="#back" onClick={history.goBack}>
-        <i className="material-icons-round">arrow_back_ios</i>
-        Back
-      </BackLink>
-    </div>
+    </SharesContainer>
   );
 };
 

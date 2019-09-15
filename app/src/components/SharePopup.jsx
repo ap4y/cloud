@@ -3,9 +3,15 @@ import styled from "@emotion/styled/macro";
 
 import { Alert } from "./Controls";
 
+const CloseButton = styled.a`
+  display: flex;
+  color: var(--primary-text-color);
+`;
+
 const SharePopupContainer = styled.div`
   width: 30rem;
   padding: 2.5rem 2.5rem 1.5rem 2.5rem;
+  position: relative;
   z-index: 10;
 
   background: white;
@@ -40,6 +46,12 @@ const SharePopupContainer = styled.div`
     display: flex;
     justify-content: center;
   }
+
+  ${CloseButton} {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
 `;
 
 const SharePopup = ({ className, items, slug, error, onShare, onClose }) => {
@@ -47,6 +59,10 @@ const SharePopup = ({ className, items, slug, error, onShare, onClose }) => {
 
   return (
     <SharePopupContainer className={className}>
+      <CloseButton href="#close" onClick={onClose}>
+        <i className="material-icons-round">close</i>
+      </CloseButton>
+
       <h4>{`Sharing ${items.length} ${
         items.length === 1 ? "item" : "items"
       }`}</h4>

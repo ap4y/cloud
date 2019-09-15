@@ -28,6 +28,7 @@ const SettingsBar = styled.div`
   flex: 0 0 auto;
   display: flex;
   justify-content: space-evenly;
+  padding-top: 1rem;
   overflow: hidden;
 
   a {

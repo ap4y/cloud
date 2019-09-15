@@ -14,7 +14,7 @@ it("renders errors", () => {
     <SharePopup items={["foo", "bar"]} error="Test error" />
   );
 
-  expect(wrapper.childAt(2).text()).toEqual("Test error");
+  expect(wrapper.find("Alert").text()).toEqual("Test error");
   expect(wrapper.find("button").exists()).toBeTruthy();
 });
 
