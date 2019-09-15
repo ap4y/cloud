@@ -63,7 +63,7 @@ it("renders image preview", () => {
 
   expect(
     wrapper
-      .find("img")
+      .find("Img")
       .first()
       .prop("src")
   ).toEqual("/api/gallery/bar/image/test/Test.jpg?jwt=foo");
@@ -82,13 +82,13 @@ it("renders navigation chevrons", () => {
 
   expect(
     wrapper
-      .find("Link")
+      .find("ArrowLink")
       .first()
       .prop("to")
   ).toEqual("/test/Test 2");
   expect(
     wrapper
-      .find("Link")
+      .find("ArrowLink")
       .last()
       .prop("to")
   ).toEqual("/test/Test 2");

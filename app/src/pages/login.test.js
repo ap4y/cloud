@@ -56,7 +56,7 @@ it("performs auth", () => {
     .children()
     .at(3)
     .simulate("change", { target: { value: "bar" } });
-  wrapper.find("form").simulate("submit");
+  wrapper.find("form").simulate("submit", { preventDefault: () => {} });
 
   expect(state.username).toEqual("foo");
   expect(state.password).toEqual("bar");
