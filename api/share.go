@@ -152,9 +152,11 @@ type wrapResponseWriter struct {
 	http.ResponseWriter
 	buf        bytes.Buffer
 	statusCode int
+	didWrite   bool
 }
 
 func (w *wrapResponseWriter) Write(buf []byte) (int, error) {
+	w.didWrite = true
 	return w.buf.Write(buf)
 }
 
@@ -162,10 +164,12 @@ func (w *wrapResponseWriter) WriteHeader(statusCode int) {
 	w.statusCode = statusCode
 }
 
-func (w *wrapResponseWriter) Flush(out http.ResponseWriter) {
-	out.Write(w.buf.Bytes())
+func (w *wrapResponseWriter) Flush() {
 	if w.statusCode != 0 {
-		out.WriteHeader(w.statusCode)
+		w.ResponseWriter.WriteHeader(w.statusCode)
+	}
+	if w.didWrite {
+		w.ResponseWriter.Write(w.buf.Bytes())
 	}
 }
 
@@ -197,13 +201,13 @@ func ShareAuthenticator(store ShareStore) func(next http.Handler) http.Handler {
 
 			file := chi.URLParam(req, "file")
 			if file == "" {
-				wrapper.Flush(w)
+				wrapper.Flush()
 				return
 			}
 
 			for _, item := range share.Items {
 				if item == file {
-					wrapper.Flush(w)
+					wrapper.Flush()
 					return
 				}
 			}
