@@ -97,6 +97,29 @@ const Thumbs = styled.ul`
   }
 `;
 
+const ArrowLink = styled(Link)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 101;
+  opacity: ${({ hidden }) => (hidden ? 0 : 1)};
+  transition: opacity 0.4s;
+
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 96px;
+  color: var(--primary-background-color);
+
+  i {
+    font-size: 48px;
+  }
+
+  @media (min-width: 700px) {
+    i {
+      font-size: 96px;
+    }
+  }
+`;
+
 const ImageContainer = styled.div`
   flex: 1;
   position: relative;
@@ -116,26 +139,14 @@ const ImageContainer = styled.div`
     position: absolute;
     top: 50%;
     transform: translate(0, -50%);
-    z-index: 101;
-    opacity: 0;
-    transition: opacity 0.4s;
-    color: var(--primary-background-color);
-  }
-
-  a i {
-    font-size: 96px;
   }
 
   a:first-of-type {
-    left: 0%;
+    left: 2rem;
   }
 
   a:last-of-type {
-    right: 0%;
-  }
-
-  &:hover a {
-    opacity: 1;
+    right: 2rem;
   }
 `;
 
@@ -165,7 +176,11 @@ const Toolbar = styled.header`
   }
 
   h4 {
-    margin: 0;
+    flex: 1 1 auto;
+    margin: 0 1rem;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   a {
@@ -195,6 +210,7 @@ const Toolbar = styled.header`
 
 const ImagePreview = ({ images, albumName, share, match, fetchExif }) => {
   const [fullscreen, setFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(true);
   const [exif, setExif] = useState(null);
   const [selectedIdx, setSelectedIdx] = useState(0);
 
@@ -213,6 +229,7 @@ const ImagePreview = ({ images, albumName, share, match, fetchExif }) => {
   }, []);
 
   useEffect(() => {
+    setExif(null);
     const selectedIdx = images.findIndex(
       image => image.name === match.params.imageName
     );
@@ -277,6 +294,8 @@ const ImagePreview = ({ images, albumName, share, match, fetchExif }) => {
   const nextImage =
     images[selectedIdx === images.length - 1 ? 0 : selectedIdx + 1];
 
+  const toggleControls = () => setShowControls(!showControls);
+
   const albumItems = images.map((image, idx) => (
     <li key={image.name}>
       <NavLink to={imagePath(image)}>
@@ -322,15 +341,19 @@ const ImagePreview = ({ images, albumName, share, match, fetchExif }) => {
 
       {selectedImage && (
         <ImageContainer>
-          <Link to={imagePath(prevImage)} onClick={() => setExif(null)}>
+          <ArrowLink hidden={!showControls} to={imagePath(prevImage)}>
             <i className="material-icons-round">chevron_left</i>
-          </Link>
+          </ArrowLink>
 
-          <img alt={selectedImage.name} src={imageURL(selectedImage)} />
+          <img
+            alt={selectedImage.name}
+            src={imageURL(selectedImage)}
+            onClick={toggleControls}
+          />
 
-          <Link to={imagePath(nextImage)} onClick={() => setExif(null)}>
+          <ArrowLink hidden={!showControls} to={imagePath(nextImage)}>
             <i className="material-icons-round">chevron_right</i>
-          </Link>
+          </ArrowLink>
         </ImageContainer>
       )}
 
