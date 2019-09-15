@@ -3,7 +3,7 @@ import styled from "@emotion/styled/macro";
 import { connect } from "react-redux";
 import { Redirect } from "react-router-dom";
 
-import { Alert } from "../components/Typography";
+import { Alert } from "../components/Controls";
 
 import { signIn, resetAuthError, resetErrorMessage } from "../actions";
 

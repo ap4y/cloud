@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "@emotion/styled/macro";
 
-import { Alert } from "./Typography";
+import { Alert } from "./Controls";
 
 const SharePopupContainer = styled.div`
   width: 30rem;

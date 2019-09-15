@@ -2,8 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import styled from "@emotion/styled/macro";
 import { NavLink, Link } from "react-router-dom";
 import VisibilitySensor from "react-visibility-sensor";
+import Img from "react-image";
 
 import EXIFData from "./ImageEXIF";
+import { Spinner } from "./Controls";
 
 import { apiClient } from "../actions";
 
@@ -123,6 +125,9 @@ const ArrowLink = styled(Link)`
 const ImageContainer = styled.div`
   flex: 1;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   img {
     position: absolute;
@@ -345,10 +350,11 @@ const ImagePreview = ({ images, albumName, share, match, fetchExif }) => {
             <i className="material-icons-round">chevron_left</i>
           </ArrowLink>
 
-          <img
+          <Img
             alt={selectedImage.name}
             src={imageURL(selectedImage)}
             onClick={toggleControls}
+            loader={<Spinner />}
           />
 
           <ArrowLink hidden={!showControls} to={imagePath(nextImage)}>
