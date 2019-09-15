@@ -85,7 +85,7 @@ const StickySharePopup = styled(SharePopup)`
   }
 
   @media (min-width: 800px) {
-    max-width: 50%;
+    max-width: 400px;
   }
 `;
 
@@ -316,7 +316,7 @@ export const ImageGrid = ({
     <div>
       <Toolbar
         albumName={albumName}
-        allowSharing={share !== null}
+        allowSharing={share === undefined}
         sorting={sorting}
         onSort={sortImages}
         onShare={toggleSharing}
