@@ -29,6 +29,10 @@ const ShareRoutesContainer = ({ share, match, fetchShare }) => {
     fetchShare(match.params.slug);
   }, [fetchShare, match.params.slug]);
 
+  useEffect(() => {
+    if (share) document.title = share.name;
+  }, [share]);
+
   const galleryRoutes = share => (
     <Switch>
       <Route path={`${match.path}/gallery/:albumName`} component={ImageGrid} />
