@@ -12,6 +12,7 @@ import (
 
 	"github.com/ap4y/cloud/api"
 	"github.com/ap4y/cloud/app"
+	"github.com/ap4y/cloud/files"
 	"github.com/ap4y/cloud/gallery"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
@@ -50,14 +51,24 @@ func Run(configPath, devURL, addr string) error {
 func setupServer(cfg *Config) (http.Handler, error) {
 	modules := map[api.Module]http.Handler{}
 	for _, module := range cfg.Modules {
-		if module == "gallery" {
-			gallery, err := galleryModule(cfg.Gallery)
+		var handler http.Handler
+		var err error
+
+		if module == api.ModuleGallery {
+			handler, err = galleryModule(cfg.Gallery)
 			if err != nil {
 				return nil, fmt.Errorf("failed to initialise gallery: %s", err)
 			}
-
-			modules[module] = gallery
 		}
+
+		if module == api.ModuleFiles {
+			handler, err = filesModule(cfg.Files)
+			if err != nil {
+				return nil, fmt.Errorf("failed to initialise gallery: %s", err)
+			}
+		}
+
+		modules[module] = handler
 	}
 
 	cs := api.NewMemoryCredentialsStorage(cfg.Users, jwt.SigningMethodHS256, []byte(cfg.JWTSecret))
@@ -117,4 +128,13 @@ func galleryModule(cfg *GalleryConfig) (http.Handler, error) {
 	}
 
 	return gallery.NewGalleryAPI(source, cache), nil
+}
+
+func filesModule(cfg *FilesConfig) (http.Handler, error) {
+	source, err := files.NewDiskSource(cfg.Path)
+	if err != nil {
+		return nil, err
+	}
+
+	return files.NewFilesAPI(source), nil
 }

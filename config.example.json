@@ -1,6 +1,6 @@
 {
   "jwt_secret": "secret",
-  "modules": ["gallery"],
+  "modules": ["gallery", "files"],
   "users": {
     "ap4y": "$2b$10$fEWhY87kzeaV3hUEB6phTuyWjpv73V5m.YcqTxHXnvqEGIou1tXGO"
   },
@@ -10,5 +10,8 @@
   "gallery": {
     "path": "/mnt/media/Photos/Export/",
     "cache": "/tmp/cloud/"
+  },
+  "files": {
+    "path": "/mnt/media/Photos/Export/"
   }
 }

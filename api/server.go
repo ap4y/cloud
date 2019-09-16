@@ -25,6 +25,9 @@ type Module string
 const (
 	// ModuleGallery represents gallery module
 	ModuleGallery = "gallery"
+
+	// ModuleFiles represents files module
+	ModuleFiles = "files"
 )
 
 // NewServer returns a new root handler for the app.

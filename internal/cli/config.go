@@ -8,6 +8,11 @@ type GalleryConfig struct {
 	Cache string `json:"cache"`
 }
 
+// FilesConfig defines files module related configuration variables for CLI.
+type FilesConfig struct {
+	Path string `json:"path"`
+}
+
 // ShareConfig defines share related configuration variables for CLI.
 type ShareConfig struct {
 	Path string `json:"path"`
@@ -20,4 +25,5 @@ type Config struct {
 	Users     map[string]string `json:"users"`
 	Share     *ShareConfig      `json:"share"`
 	Gallery   *GalleryConfig    `json:"gallery"`
+	Files     *FilesConfig      `json:"files"`
 }
