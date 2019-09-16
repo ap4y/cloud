@@ -136,6 +136,10 @@ func (store *diskShareStore) Expire() error {
 	}
 
 	for _, share := range shares {
+		if share.ExpiresAt.IsZero() {
+			continue
+		}
+
 		if share.ExpiresAt.After(time.Now()) {
 			continue
 		}

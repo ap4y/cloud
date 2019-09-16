@@ -95,7 +95,7 @@ func TestShareStore(t *testing.T) {
 	store, err := NewDiskShareStore(dir)
 	require.NoError(t, err)
 
-	share := &Share{Slug: "foo", Type: ModuleGallery, Items: []string{"foo", "bar"}, ExpiresAt: NilTime{time.Time{}}}
+	share := &Share{Slug: "foo", Type: ModuleGallery, Items: []string{"foo", "bar"}, ExpiresAt: NilTime{time.Unix(0, 0)}}
 	t.Run("Save", func(t *testing.T) {
 		require.NoError(t, store.Save(share))
 	})
@@ -123,11 +123,16 @@ func TestShareStore(t *testing.T) {
 
 	t.Run("Expire", func(t *testing.T) {
 		require.NoError(t, store.Save(share))
+		require.NoError(t, store.Save(&Share{Slug: "bar", ExpiresAt: NilTime{time.Time{}}}))
 		require.NoError(t, store.Expire())
 
 		res, err := store.Get("foo")
 		require.Error(t, err)
 		assert.Nil(t, res)
+
+		res, err = store.Get("bar")
+		require.NoError(t, err)
+		assert.NotNil(t, res)
 	})
 }
 
