@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/ap4y/cloud/internal/pathutil"
 )
 
 // Source provides album and images metadata.
@@ -68,8 +70,7 @@ func (ds *diskSource) Albums() ([]Album, error) {
 }
 
 func (ds *diskSource) Images(album string) ([]Image, error) {
-	cleanPath := strings.Replace(filepath.Clean(album), "..", "", -1)
-	images, err := ds.images(cleanPath)
+	images, err := ds.images(album)
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +79,7 @@ func (ds *diskSource) Images(album string) ([]Image, error) {
 }
 
 func (ds *diskSource) Image(imagePath string) (*os.File, error) {
-	cleanPath := strings.Replace(filepath.Clean(imagePath), "..", "", -1)
-	diskPath := filepath.Join(ds.basePath, cleanPath)
+	diskPath := pathutil.Join(ds.basePath, imagePath)
 
 	file, err := os.Open(diskPath)
 	if err != nil {
@@ -94,7 +94,7 @@ func (ds *diskSource) Image(imagePath string) (*os.File, error) {
 }
 
 func (ds *diskSource) images(folderName string) ([]Image, error) {
-	diskPath := filepath.Join(ds.basePath, folderName)
+	diskPath := pathutil.Join(ds.basePath, folderName)
 	images := make([]Image, 0)
 
 	err := filepath.Walk(diskPath, func(path string, fi os.FileInfo, err error) error {

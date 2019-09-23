@@ -6,8 +6,9 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
+
+	"github.com/ap4y/cloud/internal/pathutil"
 )
 
 // ItemType defines entity types supported by sources.
@@ -61,14 +62,30 @@ func NewDiskSource(basePath string) (Source, error) {
 }
 
 func (ds *diskSource) Tree() (*Item, error) {
-	items := map[string]*Item{}
+	items := map[string]*Item{
+		"/": &Item{
+			Type:     ItemTypeDirectory,
+			Name:     "/",
+			Path:     "/",
+			ModTime:  time.Now(),
+			Children: make([]*Item, 0),
+		},
+	}
+
 	err := filepath.Walk(ds.basePath, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return fmt.Errorf("walk %s: %s", path, err)
 		}
 
-		relPath := strings.ReplaceAll(path, ds.basePath, "")
-		dirPath := strings.ReplaceAll(relPath, "/"+fi.Name(), "")
+		if path == ds.basePath {
+			return nil
+		}
+
+		rel, err := filepath.Rel(ds.basePath, path)
+		if err != nil {
+			return fmt.Errorf("rel %s: %s", path, err)
+		}
+		relPath := "/" + rel
 
 		var item *Item
 		if fi.IsDir() {
@@ -79,7 +96,7 @@ func (ds *diskSource) Tree() (*Item, error) {
 				ModTime:  fi.ModTime(),
 				Children: make([]*Item, 0),
 			}
-			items[relPath] = item
+			items[relPath+string(filepath.Separator)] = item
 		} else {
 			item = &Item{
 				Type:    ItemTypeFile,
@@ -89,9 +106,9 @@ func (ds *diskSource) Tree() (*Item, error) {
 			}
 		}
 
-		if path != ds.basePath {
-			items[dirPath].Children = append(items[dirPath].Children, item)
-		}
+		dirPath, _ := filepath.Split(relPath)
+		items[dirPath].Children = append(items[dirPath].Children, item)
+
 		return nil
 	})
 
@@ -99,18 +116,11 @@ func (ds *diskSource) Tree() (*Item, error) {
 		return nil, fmt.Errorf("walk: %s", err)
 	}
 
-	return &Item{
-		Type:     ItemTypeDirectory,
-		Name:     "/",
-		Path:     "/",
-		ModTime:  time.Now(),
-		Children: (items[""].Children),
-	}, nil
+	return items["/"], nil
 }
 
 func (ds *diskSource) File(filePath string) (*os.File, error) {
-	cleanPath := strings.ReplaceAll(filepath.Clean(filePath), "..", "")
-	diskPath := filepath.Join(ds.basePath, cleanPath)
+	diskPath := pathutil.Join(ds.basePath, filePath)
 
 	file, err := os.Open(diskPath)
 	if err != nil {
@@ -121,8 +131,7 @@ func (ds *diskSource) File(filePath string) (*os.File, error) {
 }
 
 func (ds *diskSource) Save(r io.Reader, filePath string) (*Item, error) {
-	cleanPath := filepath.Clean(strings.ReplaceAll(filePath, "..", ""))
-	diskPath := filepath.Join(ds.basePath, cleanPath)
+	diskPath := pathutil.Join(ds.basePath, filePath)
 
 	file, err := os.OpenFile(diskPath, os.O_RDWR|os.O_CREATE, 0600)
 	if err != nil {
@@ -133,28 +142,37 @@ func (ds *diskSource) Save(r io.Reader, filePath string) (*Item, error) {
 		return nil, fmt.Errorf("file: %s", err)
 	}
 
-	_, filename := filepath.Split(filePath)
-	return &Item{
-		Type:    ItemTypeFile,
-		Name:    filename,
-		Path:    cleanPath,
-		ModTime: time.Now(),
-	}, nil
-}
-
-func (ds *diskSource) Remove(filePath string) (*Item, error) {
-	cleanPath := strings.ReplaceAll(filepath.Clean(filePath), "..", "")
-	diskPath := filepath.Join(ds.basePath, cleanPath)
-
-	if err := os.Remove(diskPath); err != nil {
-		return nil, err
+	relPath, err := filepath.Rel(ds.basePath, file.Name())
+	if err != nil {
+		return nil, fmt.Errorf("rel %s: %s", diskPath, err)
 	}
 
 	_, filename := filepath.Split(filePath)
 	return &Item{
 		Type:    ItemTypeFile,
 		Name:    filename,
-		Path:    cleanPath,
+		Path:    "/" + relPath,
+		ModTime: time.Now(),
+	}, nil
+}
+
+func (ds *diskSource) Remove(filePath string) (*Item, error) {
+	diskPath := pathutil.Join(ds.basePath, filePath)
+
+	if err := os.Remove(diskPath); err != nil {
+		return nil, err
+	}
+
+	relPath, err := filepath.Rel(ds.basePath, diskPath)
+	if err != nil {
+		return nil, fmt.Errorf("rel %s: %s", diskPath, err)
+	}
+
+	_, filename := filepath.Split(filePath)
+	return &Item{
+		Type:    ItemTypeFile,
+		Name:    filename,
+		Path:    "/" + relPath,
 		ModTime: time.Now(),
 	}, nil
 }
