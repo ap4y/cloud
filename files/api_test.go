@@ -2,7 +2,6 @@ package files
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
 	"mime/multipart"
@@ -25,32 +24,31 @@ func TestGalleryAPI(t *testing.T) {
 
 	api := NewFilesAPI(src)
 
-	t.Run("listDir", func(t *testing.T) {
+	t.Run("listTree", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "http://cloud.api/./files", nil)
+		req := httptest.NewRequest("GET", "http://cloud.api/", nil)
 		api.ServeHTTP(w, req)
 
 		resp := w.Result()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 		assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
 
-		items := make([]*Item, 0)
-		require.NoError(t, json.NewDecoder(resp.Body).Decode(&items))
-		require.Len(t, items, 3)
-		assert.Equal(t, "foo", items[0].Name)
+		tree := &apiItem{}
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(tree))
+		assert.Equal(t, "/", tree.Name)
+		assert.Equal(t, "/", tree.URL)
 	})
 
-	t.Run("getContents", func(t *testing.T) {
+	t.Run("getFile", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "http://cloud.api/./files/foo", nil)
+		req := httptest.NewRequest("GET", "http://cloud.api//file/foo", nil)
 		api.ServeHTTP(w, req)
 
 		resp := w.Result()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
-		assert.Equal(t, "application/base64", resp.Header.Get("Content-Type"))
+		assert.Equal(t, "text/plain; charset=utf-8", resp.Header.Get("Content-Type"))
 
-		dec := base64.NewDecoder(base64.StdEncoding, resp.Body)
-		data, err := ioutil.ReadAll(dec)
+		data, err := ioutil.ReadAll(resp.Body)
 		require.NoError(t, err)
 		assert.Equal(t, "foo\n", string(data))
 	})
@@ -65,7 +63,7 @@ func TestGalleryAPI(t *testing.T) {
 		formWriter.Close()
 
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("POST", "http://cloud.api/./files", &buf)
+		req := httptest.NewRequest("POST", "http://cloud.api/./file", &buf)
 		req.Header.Set("Content-Type", formWriter.FormDataContentType())
 		api.ServeHTTP(w, req)
 
@@ -73,20 +71,20 @@ func TestGalleryAPI(t *testing.T) {
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 		assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
 
-		items, err := src.List(".")
+		tree, err := src.Tree()
 		require.NoError(t, err)
-		require.Len(t, items, 4)
+		require.Len(t, tree.Children, 4)
 
 		w = httptest.NewRecorder()
-		req = httptest.NewRequest("DELETE", "http://cloud.api/./files/bar", nil)
+		req = httptest.NewRequest("DELETE", "http://cloud.api/./file/bar", nil)
 		api.ServeHTTP(w, req)
 
 		resp = w.Result()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 		assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
 
-		items, err = src.List(".")
+		tree, err = src.Tree()
 		require.NoError(t, err)
-		require.Len(t, items, 3)
+		require.Len(t, tree.Children, 3)
 	})
 }

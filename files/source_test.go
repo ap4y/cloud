@@ -18,49 +18,57 @@ func TestDiskSource(t *testing.T) {
 	source, err := NewDiskSource(filepath.Join(pwd, "fixtures"))
 	require.NoError(t, err)
 
-	t.Run("List", func(t *testing.T) {
-		items, err := source.List("")
+	t.Run("Tree", func(t *testing.T) {
+		tree, err := source.Tree()
 		require.NoError(t, err)
-		require.Len(t, items, 3)
 
-		assert.Equal(t, "foo", items[0].Name)
-		assert.Equal(t, ItemTypeFile, items[0].Type)
-		assert.Equal(t, "test1", items[1].Name)
-		assert.Equal(t, ItemTypeDirectory, items[1].Type)
-		assert.Equal(t, "test2", items[2].Name)
-		assert.Equal(t, ItemTypeDirectory, items[2].Type)
+		assert.Equal(t, "/", tree.Name)
+		assert.Equal(t, "/", tree.Path)
+		assert.Equal(t, ItemTypeDirectory, tree.Type)
+		require.Len(t, tree.Children, 3)
 
-		items, err = source.List("..")
-		require.NoError(t, err)
-		require.Len(t, items, 3)
-		assert.Equal(t, "foo", items[0].Name)
+		item := tree.Children[0]
+		assert.Equal(t, "foo", item.Name)
+		assert.Equal(t, "/foo", item.Path)
+		assert.Equal(t, ItemTypeFile, item.Type)
 
-		items, err = source.List("test1")
-		require.NoError(t, err)
-		require.Len(t, items, 1)
-		assert.Equal(t, "bar", items[0].Name)
-		assert.Equal(t, "/test1/bar", items[0].Path)
+		item = tree.Children[1]
+		assert.Equal(t, "test1", item.Name)
+		assert.Equal(t, "/test1", item.Path)
+		assert.Equal(t, ItemTypeDirectory, item.Type)
+		require.Len(t, item.Children, 1)
+		assert.Equal(t, "bar", item.Children[0].Name)
+		assert.Equal(t, "/test1/bar", item.Children[0].Path)
+		assert.Equal(t, ItemTypeFile, item.Children[0].Type)
 
-		items, err = source.List("../../test1")
-		require.NoError(t, err)
-		require.Len(t, items, 1)
-		assert.Equal(t, "bar", items[0].Name)
+		item = tree.Children[2]
+		assert.Equal(t, "test2", item.Name)
+		assert.Equal(t, "/test2", item.Path)
+		assert.Equal(t, ItemTypeDirectory, item.Type)
+		require.Len(t, item.Children, 1)
+		assert.Equal(t, "baz", item.Children[0].Name)
+		assert.Equal(t, "/test2/baz", item.Children[0].Path)
+		assert.Equal(t, ItemTypeFile, item.Children[0].Type)
 	})
 
-	t.Run("Content", func(t *testing.T) {
-		r, err := source.Content("foo")
+	t.Run("File", func(t *testing.T) {
+		r, err := source.File("foo")
 		require.NoError(t, err)
 		res, err := ioutil.ReadAll(r)
 		require.NoError(t, err)
 		assert.Equal(t, "foo\n", string(res))
 
-		_, err = source.Content("../foo")
+		_, err = source.File("../foo")
 		require.NoError(t, err)
 	})
 
 	t.Run("Save", func(t *testing.T) {
-		require.NoError(t, source.Save(strings.NewReader("test"), "/test1", "test"))
+		item, err := source.Save(strings.NewReader("test"), "/test1/test")
+		require.NoError(t, err)
 		defer os.Remove("./fixtures/test1/test")
+		assert.Equal(t, "test", item.Name)
+		assert.Equal(t, "/test1/test", item.Path)
+		assert.Equal(t, ItemTypeFile, item.Type)
 
 		res, err := ioutil.ReadFile("./fixtures/test1/test")
 		require.NoError(t, err)
@@ -68,8 +76,12 @@ func TestDiskSource(t *testing.T) {
 	})
 
 	t.Run("Save/unsafe_filename", func(t *testing.T) {
-		require.NoError(t, source.Save(strings.NewReader("test"), "/test1", "../test"))
+		item, err := source.Save(strings.NewReader("test"), "/test1/../test")
+		require.NoError(t, err)
 		defer os.Remove("./fixtures/test1/test")
+		assert.Equal(t, "test", item.Name)
+		assert.Equal(t, "/test1/test", item.Path)
+		assert.Equal(t, ItemTypeFile, item.Type)
 
 		res, err := ioutil.ReadFile("./fixtures/test1/test")
 		require.NoError(t, err)
@@ -77,8 +89,12 @@ func TestDiskSource(t *testing.T) {
 	})
 
 	t.Run("Save/unsafe_path", func(t *testing.T) {
-		require.NoError(t, source.Save(strings.NewReader("test"), "../test1", "../test"))
+		item, err := source.Save(strings.NewReader("test"), "../test1/test")
+		require.NoError(t, err)
 		defer os.Remove("./fixtures/test1/test")
+		assert.Equal(t, "test", item.Name)
+		assert.Equal(t, "/test1/test", item.Path)
+		assert.Equal(t, ItemTypeFile, item.Type)
 
 		res, err := ioutil.ReadFile("./fixtures/test1/test")
 		require.NoError(t, err)
@@ -86,10 +102,20 @@ func TestDiskSource(t *testing.T) {
 	})
 
 	t.Run("Remove", func(t *testing.T) {
-		require.NoError(t, source.Save(strings.NewReader("test"), "/test1", "test"))
-		require.NoError(t, source.Remove("test1/test"))
+		_, err := source.Save(strings.NewReader("test"), "/test1/test")
+		require.NoError(t, err)
+		item, err := source.Remove("/test1/test")
+		require.NoError(t, err)
+		assert.Equal(t, "test", item.Name)
+		assert.Equal(t, "/test1/test", item.Path)
+		assert.Equal(t, ItemTypeFile, item.Type)
 
-		require.NoError(t, source.Save(strings.NewReader("test"), "/test1", "test"))
-		require.NoError(t, source.Remove("../test1/test"))
+		_, err = source.Save(strings.NewReader("test"), "/test1/test")
+		require.NoError(t, err)
+		item, err = source.Remove("../test1/test")
+		require.NoError(t, err)
+		assert.Equal(t, "test", item.Name)
+		assert.Equal(t, "/test1/test", item.Path)
+		assert.Equal(t, ItemTypeFile, item.Type)
 	})
 }

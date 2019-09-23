@@ -22,18 +22,19 @@ const (
 
 // Item represents a single source file.
 type Item struct {
-	Type    ItemType  `json:"type"`
-	Name    string    `json:"name"`
-	Path    string    `json:"path"`
-	ModTime time.Time `json:"updated_at"`
+	Type     ItemType  `json:"type"`
+	Name     string    `json:"name"`
+	Path     string    `json:"path"`
+	ModTime  time.Time `json:"updated_at"`
+	Children []*Item   `json:"children"`
 }
 
 // Source provides album and images metadata.
 type Source interface {
-	List(path string) ([]*Item, error)
-	Content(filePath string) (io.ReadCloser, error)
-	Save(r io.Reader, path, filename string) error
-	Remove(filePath string) error
+	Tree() (*Item, error)
+	File(filePath string) (*os.File, error)
+	Save(r io.Reader, filePath string) (*Item, error)
+	Remove(filePath string) (*Item, error)
 }
 
 type diskSource struct {
@@ -59,52 +60,55 @@ func NewDiskSource(basePath string) (Source, error) {
 	return &diskSource{basePath}, nil
 }
 
-func (ds *diskSource) List(path string) ([]*Item, error) {
-	cleanPath := strings.ReplaceAll(filepath.Clean(path), "..", "")
-	diskPath := filepath.Join(ds.basePath, cleanPath)
-
-	items := []*Item{}
-	err := filepath.Walk(diskPath, func(path string, fi os.FileInfo, err error) error {
+func (ds *diskSource) Tree() (*Item, error) {
+	items := map[string]*Item{}
+	err := filepath.Walk(ds.basePath, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return fmt.Errorf("walk %s: %s", path, err)
 		}
 
+		relPath := strings.ReplaceAll(path, ds.basePath, "")
+		dirPath := strings.ReplaceAll(relPath, "/"+fi.Name(), "")
+
 		var item *Item
 		if fi.IsDir() {
 			item = &Item{
-				Type:    ItemTypeDirectory,
-				Name:    fi.Name(),
-				Path:    fi.Name(),
-				ModTime: fi.ModTime(),
+				Type:     ItemTypeDirectory,
+				Name:     fi.Name(),
+				Path:     relPath,
+				ModTime:  fi.ModTime(),
+				Children: make([]*Item, 0),
 			}
+			items[relPath] = item
 		} else {
 			item = &Item{
 				Type:    ItemTypeFile,
-				Name:    strings.ReplaceAll(fi.Name(), filepath.Ext(fi.Name()), ""),
-				Path:    strings.ReplaceAll(path, ds.basePath, ""),
+				Name:    fi.Name(),
+				Path:    relPath,
 				ModTime: fi.ModTime(),
 			}
 		}
 
-		if path != diskPath {
-			items = append(items, item)
+		if path != ds.basePath {
+			items[dirPath].Children = append(items[dirPath].Children, item)
 		}
-
-		if fi.IsDir() && path != diskPath {
-			return filepath.SkipDir
-		}
-
 		return nil
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("walk %s: %s", diskPath, err)
+		return nil, fmt.Errorf("walk: %s", err)
 	}
 
-	return items, nil
+	return &Item{
+		Type:     ItemTypeDirectory,
+		Name:     "/",
+		Path:     "/",
+		ModTime:  time.Now(),
+		Children: (items[""].Children),
+	}, nil
 }
 
-func (ds *diskSource) Content(filePath string) (io.ReadCloser, error) {
+func (ds *diskSource) File(filePath string) (*os.File, error) {
 	cleanPath := strings.ReplaceAll(filepath.Clean(filePath), "..", "")
 	diskPath := filepath.Join(ds.basePath, cleanPath)
 
@@ -116,26 +120,41 @@ func (ds *diskSource) Content(filePath string) (io.ReadCloser, error) {
 	return file, nil
 }
 
-func (ds *diskSource) Save(r io.Reader, path, filename string) error {
-	filePath := filepath.Join(path, strings.ReplaceAll(filename, "..", ""))
-	cleanPath := strings.ReplaceAll(filepath.Clean(filePath), "..", "")
+func (ds *diskSource) Save(r io.Reader, filePath string) (*Item, error) {
+	cleanPath := filepath.Clean(strings.ReplaceAll(filePath, "..", ""))
 	diskPath := filepath.Join(ds.basePath, cleanPath)
 
-	file, err := os.OpenFile(diskPath, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0600)
+	file, err := os.OpenFile(diskPath, os.O_RDWR|os.O_CREATE, 0600)
 	if err != nil {
-		return fmt.Errorf("file: %s", err)
+		return nil, fmt.Errorf("file: %s", err)
 	}
 
 	if _, err := io.Copy(file, r); err != nil {
-		return fmt.Errorf("file: %s", err)
+		return nil, fmt.Errorf("file: %s", err)
 	}
 
-	return nil
+	_, filename := filepath.Split(filePath)
+	return &Item{
+		Type:    ItemTypeFile,
+		Name:    filename,
+		Path:    cleanPath,
+		ModTime: time.Now(),
+	}, nil
 }
 
-func (ds *diskSource) Remove(filePath string) error {
+func (ds *diskSource) Remove(filePath string) (*Item, error) {
 	cleanPath := strings.ReplaceAll(filepath.Clean(filePath), "..", "")
 	diskPath := filepath.Join(ds.basePath, cleanPath)
 
-	return os.Remove(diskPath)
+	if err := os.Remove(diskPath); err != nil {
+		return nil, err
+	}
+
+	_, filename := filepath.Split(filePath)
+	return &Item{
+		Type:    ItemTypeFile,
+		Name:    filename,
+		Path:    cleanPath,
+		ModTime: time.Now(),
+	}, nil
 }
