@@ -44,7 +44,7 @@ func (s *Share) Includes(name, item string) bool {
 // ShareStore manages share metadata.
 type ShareStore interface {
 	// All returns all stores shares.
-	All() ([]*Share, error)
+	All() ([]Share, error)
 	// Save persists share metadata.
 	Save(share *Share) error
 	// Get return share metadata.
@@ -74,14 +74,14 @@ func NewDiskShareStore(dir string) (ShareStore, error) {
 	return &diskShareStore{dir}, nil
 }
 
-func (store *diskShareStore) All() ([]*Share, error) {
+func (store *diskShareStore) All() ([]Share, error) {
 	path := filepath.Join(store.dir, "*")
 	matches, err := filepath.Glob(path)
 	if err != nil {
 		return nil, fmt.Errorf("file: %s", err)
 	}
 
-	shares := make([]*Share, 0)
+	shares := make([]Share, 0, len(matches))
 	for _, match := range matches {
 		_, slug := filepath.Split(match)
 		share, err := store.Get(slug)
@@ -89,7 +89,7 @@ func (store *diskShareStore) All() ([]*Share, error) {
 			return nil, err
 		}
 
-		shares = append(shares, share)
+		shares = append(shares, *share)
 	}
 
 	return shares, nil
@@ -225,7 +225,7 @@ type shareHandler struct {
 	store ShareStore
 }
 
-func (sh *shareHandler) listShares(w http.ResponseWriter, req *http.Request) {
+func (sh shareHandler) listShares(w http.ResponseWriter, req *http.Request) {
 	shares, err := sh.store.All()
 	if err != nil {
 		httputil.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -235,7 +235,7 @@ func (sh *shareHandler) listShares(w http.ResponseWriter, req *http.Request) {
 	httputil.Respond(w, shares)
 }
 
-func (sh *shareHandler) getShare(w http.ResponseWriter, req *http.Request) {
+func (sh shareHandler) getShare(w http.ResponseWriter, req *http.Request) {
 	slug := chi.URLParam(req, "slug")
 	if slug == "" {
 		httputil.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -251,7 +251,7 @@ func (sh *shareHandler) getShare(w http.ResponseWriter, req *http.Request) {
 	httputil.Respond(w, share)
 }
 
-func (sh *shareHandler) createShare(w http.ResponseWriter, req *http.Request) {
+func (sh shareHandler) createShare(w http.ResponseWriter, req *http.Request) {
 	var share *Share
 	if err := json.NewDecoder(req.Body).Decode(&share); err != nil {
 		httputil.Error(w, fmt.Sprintf("Failed to decode json: %s", err), http.StatusBadRequest)
@@ -283,7 +283,7 @@ func (sh *shareHandler) createShare(w http.ResponseWriter, req *http.Request) {
 	httputil.Respond(w, share)
 }
 
-func (sh *shareHandler) removeShare(w http.ResponseWriter, req *http.Request) {
+func (sh shareHandler) removeShare(w http.ResponseWriter, req *http.Request) {
 	slug := chi.URLParam(req, "slug")
 	if slug == "" {
 		httputil.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)

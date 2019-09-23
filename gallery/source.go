@@ -12,9 +12,9 @@ import (
 // Source provides album and images metadata.
 type Source interface {
 	// Albums returns list of all albums in a Source.
-	Albums() ([]*Album, error)
+	Albums() ([]Album, error)
 	// Images returns images metadata for a given album.
-	Images(album string) ([]*Image, error)
+	Images(album string) ([]Image, error)
 	// Image returns image file for a given image path.
 	Image(imagePath string) (*os.File, error)
 }
@@ -48,26 +48,26 @@ func NewDiskSource(basePath string, imgExtensions []string) (Source, error) {
 	return &diskSource{basePath, exts}, nil
 }
 
-func (ds *diskSource) Albums() ([]*Album, error) {
+func (ds *diskSource) Albums() ([]Album, error) {
 	fis, err := ioutil.ReadDir(ds.basePath)
 	if err != nil {
 		return nil, fmt.Errorf("scan: %s", err)
 	}
 
-	albums := []*Album{}
+	albums := make([]Album, 0, len(fis))
 	for _, fi := range fis {
 		images, err := ds.images(fi.Name())
 		if err != nil {
 			continue
 		}
 
-		albums = append(albums, &Album{fi.Name(), fi.ModTime(), len(images)})
+		albums = append(albums, Album{fi.Name(), fi.ModTime(), len(images)})
 	}
 
 	return albums, nil
 }
 
-func (ds *diskSource) Images(album string) ([]*Image, error) {
+func (ds *diskSource) Images(album string) ([]Image, error) {
 	cleanPath := strings.Replace(filepath.Clean(album), "..", "", -1)
 	images, err := ds.images(cleanPath)
 	if err != nil {
@@ -93,9 +93,9 @@ func (ds *diskSource) Image(imagePath string) (*os.File, error) {
 	return file, nil
 }
 
-func (ds *diskSource) images(folderName string) ([]*Image, error) {
+func (ds *diskSource) images(folderName string) ([]Image, error) {
 	diskPath := filepath.Join(ds.basePath, folderName)
-	images := []*Image{}
+	images := make([]Image, 0)
 
 	err := filepath.Walk(diskPath, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
@@ -111,7 +111,7 @@ func (ds *diskSource) images(folderName string) ([]*Image, error) {
 			return nil
 		}
 
-		image := &Image{
+		image := Image{
 			Name:    strings.Replace(fi.Name(), ext, "", -1),
 			Path:    fi.Name(),
 			ModTime: fi.ModTime(),

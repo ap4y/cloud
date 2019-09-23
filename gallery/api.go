@@ -55,7 +55,7 @@ func (api *galleryAPI) listAlbumImages(w http.ResponseWriter, req *http.Request)
 	}
 
 	if share, ok := req.Context().Value(capi.ShareCtxKey).(*capi.Share); ok {
-		shareImages := make([]*Image, 0)
+		shareImages := make([]Image, 0, len(images))
 		for _, image := range images {
 			if share.Includes(galleryName, image.Path) {
 				shareImages = append(shareImages, image)

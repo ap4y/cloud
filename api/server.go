@@ -1,10 +1,9 @@
 package api
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
+	"github.com/ap4y/cloud/internal/httputil"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -42,15 +41,15 @@ func NewServer(modules map[Module]http.Handler, cs CredentialsStorage, ss ShareS
 		apiMux.Group(func(r chi.Router) {
 			r.Use(Authenticator(cs))
 
-			moduleIds := []Module{}
+			moduleIds := make([]Module, len(modules))
+			idx := 0
 			for module := range modules {
-				moduleIds = append(moduleIds, module)
+				moduleIds[idx] = module
+				idx++
 			}
 
 			r.Get("/modules", func(w http.ResponseWriter, res *http.Request) {
-				if err := json.NewEncoder(w).Encode(map[string][]Module{"modules": moduleIds}); err != nil {
-					http.Error(w, fmt.Sprintf("Failed to encode json: %s", err), http.StatusBadRequest)
-				}
+				httputil.Respond(w, map[string][]Module{"modules": moduleIds})
 			})
 
 			r.Get("/shares", sh.listShares)

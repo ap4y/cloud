@@ -104,7 +104,7 @@ func TestShareStore(t *testing.T) {
 		res, err := store.All()
 		require.NoError(t, err)
 		require.Len(t, res, 1)
-		assert.Equal(t, share, res[0])
+		assert.Equal(t, *share, res[0])
 	})
 
 	t.Run("Get", func(t *testing.T) {

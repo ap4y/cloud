@@ -6,15 +6,14 @@ import (
 	"image"
 	"image/jpeg"
 	"io"
-	"os"
 
 	"github.com/nfnt/resize"
 	"github.com/rwcarlsen/goexif/exif"
 )
 
-// Thumbnail returns thubmnail for an image file constrained by maxHeight.
-func Thumbnail(file *os.File, maxHeight uint) (io.Reader, error) {
-	img, _, err := image.Decode(file)
+// Thumbnail returns thubmnail from a reader constrained by maxHeight.
+func Thumbnail(r io.Reader, maxHeight uint) (io.Reader, error) {
+	img, _, err := image.Decode(r)
 	if err != nil {
 		return nil, fmt.Errorf("decode: %s", err)
 	}
@@ -28,9 +27,9 @@ func Thumbnail(file *os.File, maxHeight uint) (io.Reader, error) {
 	return out, nil
 }
 
-// EXIF returns exif metadata for an image file.
-func EXIF(file *os.File) (*exif.Exif, error) {
-	x, err := exif.Decode(file)
+// EXIF returns exif metadata from a reader.
+func EXIF(r io.Reader) (*exif.Exif, error) {
+	x, err := exif.Decode(r)
 	if err != nil {
 		return nil, fmt.Errorf("decode: %s", err)
 	}
