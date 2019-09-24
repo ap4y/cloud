@@ -87,4 +87,20 @@ func TestGalleryAPI(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, tree.Children, 3)
 	})
+
+	t.Run("createFolder", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("POST", "http://cloud.api/mkdir/test1/subfolder", nil)
+		api.ServeHTTP(w, req)
+		defer os.RemoveAll("./fixtures/test1/subfolder")
+
+		resp := w.Result()
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+
+		item := &apiItem{}
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(item))
+		assert.Equal(t, "subfolder", item.Name)
+		assert.Equal(t, "/test1/subfolder", item.URL)
+	})
 }

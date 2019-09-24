@@ -49,6 +49,16 @@ func (api *filesAPI) listTree(w http.ResponseWriter, req *http.Request) {
 	httputil.Respond(w, toAPIItem(tree))
 }
 
+func (api *filesAPI) createFolder(w http.ResponseWriter, req *http.Request) {
+	item, err := api.source.Mkdir(chi.URLParam(req, "path"))
+	if err != nil {
+		httputil.Error(w, fmt.Sprint("failed to created folder:", err), http.StatusBadRequest)
+		return
+	}
+
+	httputil.Respond(w, toAPIItem(item))
+}
+
 func (api *filesAPI) uploadFile(w http.ResponseWriter, req *http.Request) {
 	file, header, err := req.FormFile("file")
 	if err != nil {

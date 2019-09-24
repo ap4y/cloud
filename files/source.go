@@ -33,6 +33,7 @@ type Item struct {
 // Source provides album and images metadata.
 type Source interface {
 	Tree() (*Item, error)
+	Mkdir(path string) (*Item, error)
 	File(filePath string) (*os.File, error)
 	Save(r io.Reader, filePath string) (*Item, error)
 	Remove(filePath string) (*Item, error)
@@ -117,6 +118,26 @@ func (ds *diskSource) Tree() (*Item, error) {
 	}
 
 	return items["/"], nil
+}
+
+func (ds *diskSource) Mkdir(path string) (*Item, error) {
+	diskPath := pathutil.Join(ds.basePath, path)
+	if err := os.Mkdir(diskPath, 0600); err != nil {
+		return nil, fmt.Errorf("mkdir %s: %s", diskPath, err)
+	}
+
+	relPath, err := filepath.Rel(ds.basePath, diskPath)
+	if err != nil {
+		return nil, fmt.Errorf("rel %s: %s", diskPath, err)
+	}
+
+	_, folder := filepath.Split(diskPath)
+	return &Item{
+		Type:    ItemTypeDirectory,
+		Name:    folder,
+		Path:    "/" + relPath,
+		ModTime: time.Now(),
+	}, nil
 }
 
 func (ds *diskSource) File(filePath string) (*os.File, error) {
