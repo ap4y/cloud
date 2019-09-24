@@ -41,7 +41,7 @@ func TestGalleryAPI(t *testing.T) {
 
 	t.Run("getFile", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "http://cloud.api//file/foo", nil)
+		req := httptest.NewRequest("GET", "http://cloud.api/file/foo", nil)
 		api.ServeHTTP(w, req)
 
 		resp := w.Result()
@@ -63,7 +63,7 @@ func TestGalleryAPI(t *testing.T) {
 		formWriter.Close()
 
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("POST", "http://cloud.api/./file", &buf)
+		req := httptest.NewRequest("POST", "http://cloud.api/upload/test1/inner", &buf)
 		req.Header.Set("Content-Type", formWriter.FormDataContentType())
 		api.ServeHTTP(w, req)
 
@@ -73,10 +73,10 @@ func TestGalleryAPI(t *testing.T) {
 
 		tree, err := src.Tree()
 		require.NoError(t, err)
-		require.Len(t, tree.Children, 4)
+		require.Len(t, tree.Children, 3)
 
 		w = httptest.NewRecorder()
-		req = httptest.NewRequest("DELETE", "http://cloud.api/./file/bar", nil)
+		req = httptest.NewRequest("DELETE", "http://cloud.api/file/test1/inner/bar", nil)
 		api.ServeHTTP(w, req)
 
 		resp = w.Result()

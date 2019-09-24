@@ -29,11 +29,10 @@ func NewFilesAPI(source Source) http.Handler {
 
 	mux.Route("/", func(r chi.Router) {
 		r.Get("/", api.listTree)
-		r.Route("/{path}/file", func(r chi.Router) {
-			r.Post("/", api.uploadFile)
-			r.Get("/{file}", api.getFile)
-			r.Delete("/{file}", api.removeFile)
-		})
+		r.Post("/mkdir/{path}*", api.createFolder)
+		r.Post("/upload/{path}*", api.uploadFile)
+		r.Get("/file/{path}*", api.getFile)
+		r.Delete("/file/{path}*", api.removeFile)
 	})
 
 	return api
@@ -84,7 +83,7 @@ func (api *filesAPI) uploadFile(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *filesAPI) getFile(w http.ResponseWriter, req *http.Request) {
-	fullPath := filepath.Join("/", chi.URLParam(req, "path"), chi.URLParam(req, "file"))
+	fullPath := filepath.Join("/", chi.URLParam(req, "path"))
 	path, err := url.QueryUnescape(fullPath)
 	if err != nil {
 		httputil.Error(w, fmt.Sprint("invalid path:", err), http.StatusBadRequest)
@@ -107,7 +106,7 @@ func (api *filesAPI) getFile(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *filesAPI) removeFile(w http.ResponseWriter, req *http.Request) {
-	fullPath := filepath.Join("/", chi.URLParam(req, "path"), chi.URLParam(req, "file"))
+	fullPath := filepath.Join("/", chi.URLParam(req, "path"))
 	path, err := url.QueryUnescape(fullPath)
 	if err != nil {
 		httputil.Error(w, fmt.Sprint("invalid path:", err), http.StatusBadRequest)
