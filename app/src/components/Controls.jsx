@@ -1,3 +1,4 @@
+import React from "react";
 import styled from "@emotion/styled/macro";
 
 export const Alert = styled.p`
@@ -22,3 +23,44 @@ export const Spinner = styled.div`
     }
   }
 `;
+
+const ToolbarContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: baseline;
+  justify-content: space-between;
+
+  > div {
+    position: relative;
+    display: flex;
+    margin-bottom: 2rem;
+
+    > a {
+      display: block;
+      margin-left: 2rem;
+      height: 24px;
+      color: var(--secondary-color);
+    }
+
+    > a:first-of-type {
+      margin-left: 0;
+    }
+  }
+
+  @media (min-width: 700px) {
+    flex-direction: row;
+
+    > div {
+      margin-bottom: 0;
+    }
+  }
+`;
+
+export const Toolbar = ({ title, children }) => {
+  return (
+    <ToolbarContainer>
+      <h2>{title}</h2>
+      <div>{children}</div>
+    </ToolbarContainer>
+  );
+};

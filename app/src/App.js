@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled/macro";
 import { connect } from "react-redux";
-import {
-  BrowserRouter,
-  Route,
-  NavLink,
-  Switch,
-  Redirect
-} from "react-router-dom";
+import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 
 import AlbumsList from "./pages/albums";
+import FilesTree from "./pages/files_tree";
 import LoginForm from "./pages/login";
-import { ShareRoutes, GalleryRoutes } from "./Routes";
+import { ShareRoutes, GalleryRoutes, FilesRoutes } from "./Routes";
 import SharesList from "./pages/shares";
 import Sidepanel from "./components/Sidepanel";
 import { apiClient, fetchModules, signOut } from "./actions";
@@ -20,7 +15,14 @@ const supportedModules = {
   gallery: {
     sidebar: AlbumsList,
     content: GalleryRoutes,
-    icon: null
+    icon: "photo_library",
+    title: "Gallery"
+  },
+  files: {
+    sidebar: FilesTree,
+    content: FilesRoutes,
+    icon: "storage",
+    title: "Files"
   }
 };
 
@@ -35,12 +37,14 @@ const PageContainer = styled.div`
 const Content = styled.main`
   flex: 1;
   position: relative;
+  display: flex;
+  flex-direction: column;
 
   overflow-x: hidden;
 
   > div {
+    flex: 1 1 auto;
     padding: 2rem;
-
     background: white;
   }
 
@@ -64,7 +68,7 @@ const CollapseButton = styled.a`
   display: flex;
   align-items: center;
   padding: 1.5rem;
-  margin-bottom: -3rem;
+  margin-bottom: -2.5rem;
   top: 0;
   width: 100%;
   z-index: 1;
@@ -107,11 +111,11 @@ const App = ({ modules, authError, authToken, fetchModules, signOut }) => {
     const component = supportedModules[module];
     if (!component) return;
 
-    navItems.push(
-      <li key={module}>
-        <NavLink to={module}>{component.icon}</NavLink>
-      </li>
-    );
+    navItems.push({
+      route: `/${module}`,
+      title: component.title,
+      icon: component.icon
+    });
 
     sidebarItems.push(
       <Route key={module} path={`/${module}`} component={component.sidebar} />
@@ -123,7 +127,7 @@ const App = ({ modules, authError, authToken, fetchModules, signOut }) => {
   });
 
   const renderSidebar = () => (
-    <Sidepanel collapsed={collapsed} onSignOut={signOut}>
+    <Sidepanel collapsed={collapsed} navItems={navItems} onSignOut={signOut}>
       {sidebarItems}
     </Sidepanel>
   );
@@ -139,9 +143,11 @@ const App = ({ modules, authError, authToken, fetchModules, signOut }) => {
       <PageContainer>
         <Switch>
           <Route path="/gallery" render={renderSidebar} />
+          <Route path="/files" render={renderSidebar} />
         </Switch>
         <Content>
           <Route path="/gallery" render={renderCollapseButton} />
+          <Route path="/files" render={renderCollapseButton} />
 
           <div>
             <Switch>

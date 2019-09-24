@@ -1,5 +1,6 @@
 import { combineReducers } from "redux";
 import * as ActionTypes from "./actions";
+import { removeFromTree, addToTree } from "./lib/utils";
 
 function modules(state = [], action) {
   switch (action.type) {
@@ -25,6 +26,25 @@ function albumImages(state = {}, action) {
   switch (action.type) {
     case ActionTypes.ALBUM_SUCCESS:
       return { ...state, [action.albumName]: action.images };
+    default:
+      return state;
+  }
+}
+
+function files(state = { tree: { name: "", path: "", children: [] } }, action) {
+  switch (action.type) {
+    case ActionTypes.FILES_SUCCESS:
+      return { ...state, tree: action.tree };
+    case ActionTypes.FILE_REMOVE_SUCCESS:
+      return {
+        ...state,
+        tree: removeFromTree(state.tree, action.folder, action.file)
+      };
+    case ActionTypes.FILE_UPLOAD_SUCCESS:
+      return {
+        ...state,
+        tree: addToTree(state.tree, action.folder, action.file)
+      };
     default:
       return state;
   }
@@ -91,6 +111,7 @@ export default combineReducers({
   modules,
   gallery,
   albumImages,
+  files,
   shares,
   share,
   authToken,

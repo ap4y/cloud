@@ -3,7 +3,8 @@ import { connect } from "react-redux";
 import { Route, Switch, Redirect } from "react-router-dom";
 
 import ImageGrid from "./pages/gallery";
-import { fetchGalleries, fetchShare } from "./actions";
+import FilesGrid from "./pages/files";
+import { fetchGalleries, fetchFilesTree, fetchShare } from "./actions";
 
 const GalleryRoutesContainer = ({ albums, fetchGalleries }) => {
   useEffect(() => {
@@ -23,6 +24,27 @@ const GalleryRoutes = connect(
   ({ gallery: { albums } }) => ({ albums }),
   { fetchGalleries }
 )(GalleryRoutesContainer);
+
+const FilesRoutesContainer = ({ tree, location, fetchFilesTree }) => {
+  useEffect(() => {
+    fetchFilesTree();
+  }, [fetchFilesTree]);
+
+  return (
+    <Switch>
+      <Route path="/files/:path*" component={FilesGrid} />
+      {tree.length > 0 && location.pathname !== "/files/" && (
+        <Redirect to="/files/" />
+      )}
+      <Route render={() => <h2>No files to list</h2>} />
+    </Switch>
+  );
+};
+
+const FilesRoutes = connect(
+  ({ files: { tree } }) => ({ tree }),
+  { fetchFilesTree }
+)(FilesRoutesContainer);
 
 const ShareRoutesContainer = ({ share, match, fetchShare }) => {
   useEffect(() => {
@@ -55,4 +77,4 @@ const ShareRoutes = connect(
   { fetchShare }
 )(ShareRoutesContainer);
 
-export { GalleryRoutes, ShareRoutes };
+export { GalleryRoutes, FilesRoutes, ShareRoutes };

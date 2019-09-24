@@ -6,6 +6,7 @@ import VisibilitySensor from "react-visibility-sensor";
 
 import ImagePreview from "../components/ImagePreview";
 import SharePopup from "../components/SharePopup";
+import { Toolbar } from "../components/Controls";
 import { apiClient, fetchAlbum, shareAlbum, fetchExif } from "../actions";
 
 const Figure = styled.figure`
@@ -112,35 +113,13 @@ const SortControl = styled.div`
   }
 `;
 
-const ToolbarContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: baseline;
-  justify-content: space-between;
-
-  > div {
-    position: relative;
-    display: flex;
-    margin-bottom: 2rem;
-
-    > a {
-      display: block;
-      margin-left: 3rem;
-      height: 2rem;
-      color: var(--secondary-color);
-    }
-  }
-
-  @media (min-width: 700px) {
-    flex-direction: row;
-
-    > div {
-      margin-bottom: 0;
-    }
-  }
-`;
-
-const Toolbar = ({ albumName, allowSharing, sorting, onSort, onShare }) => {
+const GalleryToolbar = ({
+  albumName,
+  allowSharing,
+  sorting,
+  onSort,
+  onShare
+}) => {
   const changeSorting = (e, field) => {
     e.preventDefault();
 
@@ -154,37 +133,34 @@ const Toolbar = ({ albumName, allowSharing, sorting, onSort, onShare }) => {
   };
 
   return (
-    <ToolbarContainer>
-      <h2>{albumName}</h2>
-      <div>
-        <SortControl>
-          <i className="material-icons-round">sort</i>
-          <a href="#name" onClick={e => changeSorting(e, "name")}>
-            <i
-              style={{
-                visibility: sorting.field === "name" ? "" : "hidden"
-              }}
-              className="material-icons-round"
-            >{`arrow_drop_${sorting.order}`}</i>
-            Name
-          </a>
-          <a href="#date" onClick={e => changeSorting(e, "updated_at")}>
-            <i
-              style={{
-                visibility: sorting.field === "updated_at" ? "" : "hidden"
-              }}
-              className="material-icons-round"
-            >{`arrow_drop_${sorting.order}`}</i>
-            Date
-          </a>
-        </SortControl>
-        {allowSharing && (
-          <a href="#share" onClick={onShare}>
-            <i className="material-icons-round">share</i>
-          </a>
-        )}
-      </div>
-    </ToolbarContainer>
+    <Toolbar title={albumName}>
+      <SortControl>
+        <i className="material-icons-round">sort</i>
+        <a href="#name" onClick={e => changeSorting(e, "name")}>
+          <i
+            style={{
+              visibility: sorting.field === "name" ? "" : "hidden"
+            }}
+            className="material-icons-round"
+          >{`arrow_drop_${sorting.order}`}</i>
+          Name
+        </a>
+        <a href="#date" onClick={e => changeSorting(e, "updated_at")}>
+          <i
+            style={{
+              visibility: sorting.field === "updated_at" ? "" : "hidden"
+            }}
+            className="material-icons-round"
+          >{`arrow_drop_${sorting.order}`}</i>
+          Date
+        </a>
+      </SortControl>
+      {allowSharing && (
+        <a href="#share" onClick={onShare}>
+          <i className="material-icons-round">share</i>
+        </a>
+      )}
+    </Toolbar>
   );
 };
 
@@ -314,7 +290,7 @@ export const ImageGrid = ({
 
   return (
     <div>
-      <Toolbar
+      <GalleryToolbar
         albumName={albumName}
         allowSharing={share === undefined}
         sorting={sorting}

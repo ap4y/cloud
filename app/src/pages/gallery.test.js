@@ -27,7 +27,7 @@ it("renders image list", () => {
     />
   );
 
-  expect(wrapper.find("Toolbar").prop("albumName")).toEqual("Test");
+  expect(wrapper.find("GalleryToolbar").prop("albumName")).toEqual("Test");
   expect(wrapper.find("ImageCell").length).toEqual(2);
   expect(
     wrapper
@@ -65,7 +65,9 @@ it("toggles share popup", () => {
   );
 
   expect(wrapper.find("StickySharePopup").exists()).toBeFalsy();
-  wrapper.find("Toolbar").invoke("onShare")({ preventDefault: () => {} });
+  wrapper.find("GalleryToolbar").invoke("onShare")({
+    preventDefault: () => {}
+  });
   expect(wrapper.find("StickySharePopup").exists()).toBeTruthy();
 });
 
@@ -85,7 +87,9 @@ it("creates shares", () => {
     />
   );
 
-  wrapper.find("Toolbar").invoke("onShare")({ preventDefault: () => {} });
+  wrapper.find("GalleryToolbar").invoke("onShare")({
+    preventDefault: () => {}
+  });
   expect(wrapper.find("StickySharePopup").exists()).toBeTruthy();
   wrapper.find("StickySharePopup").invoke("onShare")();
   expect(shared).toBeTruthy();

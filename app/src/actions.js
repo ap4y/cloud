@@ -42,23 +42,43 @@ class APIClient {
     return `/api/gallery/${gallery}/${type}/${path}?jwt=${this.authToken}`;
   }
 
+  fileURL(file, share = null) {
+    if (share) return `/api/share/${share}/files${file.url}`;
+
+    return `/api/files${file.url}?jwt=${this.authToken}`;
+  }
+
   do(path, method, body, headers) {
     let reqHeaders = {
       Accept: "application/json",
       "Content-Type": "application/json",
       ...headers
     };
+
     if (this.authToken) {
       reqHeaders["Authorization"] = `Bearer ${this.authToken}`;
+    }
+
+    if (reqHeaders["Content-Type"] === "multipart/form-data") {
+      delete reqHeaders["Content-Type"];
     }
 
     return fetch(`${this.url}/api${path}`, {
       method: method,
       headers: reqHeaders,
-      body: body && JSON.stringify(body)
+      body:
+        body && reqHeaders["Content-Type"] === "application/json"
+          ? JSON.stringify(body)
+          : body
     }).then(
       res => {
-        if (res.ok) return res.json();
+        if (res.ok) {
+          if (res.headers.get("Content-Type") === "application/json") {
+            return res.json();
+          } else {
+            return res.text();
+          }
+        }
         if (res.status === 401) {
           throw new AuthError("Unauthorized");
         }
@@ -179,3 +199,50 @@ export const removeShare = slug => dispatch =>
       slug
     });
   }, handleError(dispatch));
+
+export const FILES_SUCCESS = "FILES_SUCCESS";
+export const fetchFilesTree = () => dispatch =>
+  apiClient.do("/files").then(tree => {
+    dispatch({
+      type: FILES_SUCCESS,
+      tree
+    });
+  }, handleError(dispatch));
+
+export const FILE_SUCCESS = "FILE_SUCCESS";
+export const fetchFile = url => dispatch =>
+  apiClient.do(`/files${url}`).then(file => {
+    dispatch({
+      type: FILE_SUCCESS,
+      file
+    });
+    return file;
+  }, handleError(dispatch));
+
+export const FILE_REMOVE_SUCCESS = "FILE_REMOVE_SUCCESS";
+export const removeFile = (folder, file) => dispatch =>
+  apiClient.do(`/files${file.url}`, "DELETE").then(file => {
+    dispatch({
+      type: FILE_REMOVE_SUCCESS,
+      folder,
+      file
+    });
+  }, handleError(dispatch));
+
+export const FILE_UPLOAD_SUCCESS = "FILE_UPLOAD_SUCCESS";
+export const uploadFile = (folder, file) => dispatch => {
+  const formData = new FormData();
+  formData.append(`file`, file);
+
+  return apiClient
+    .do(`/files${folder.url}/file`, "POST", formData, {
+      "Content-Type": "multipart/form-data"
+    })
+    .then(file => {
+      dispatch({
+        type: FILE_UPLOAD_SUCCESS,
+        folder,
+        file
+      });
+    }, handleError(dispatch));
+};
