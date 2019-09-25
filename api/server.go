@@ -3,34 +3,15 @@ package api
 import (
 	"net/http"
 
+	"github.com/ap4y/cloud/common"
 	"github.com/ap4y/cloud/internal/httputil"
+	"github.com/ap4y/cloud/share"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
 
-type contextKey struct {
-	name string
-}
-
-// UsernameCtxKey defines username request context key.
-var UsernameCtxKey = &contextKey{"Username"}
-
-// ShareCtxKey defines share request context key.
-var ShareCtxKey = &contextKey{"Share"}
-
-// Module defines supported module
-type Module string
-
-const (
-	// ModuleGallery represents gallery module
-	ModuleGallery = "gallery"
-
-	// ModuleFiles represents files module
-	ModuleFiles = "files"
-)
-
 // NewServer returns a new root handler for the app.
-func NewServer(modules map[Module]http.Handler, cs CredentialsStorage, ss ShareStore) (http.Handler, error) {
+func NewServer(modules map[common.ModuleType]http.Handler, cs CredentialsStorage, ss share.Store) (http.Handler, error) {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Logger)
 
@@ -41,7 +22,7 @@ func NewServer(modules map[Module]http.Handler, cs CredentialsStorage, ss ShareS
 		apiMux.Group(func(r chi.Router) {
 			r.Use(Authenticator(cs))
 
-			moduleIds := make([]Module, len(modules))
+			moduleIds := make([]common.ModuleType, len(modules))
 			idx := 0
 			for module := range modules {
 				moduleIds[idx] = module
@@ -49,7 +30,7 @@ func NewServer(modules map[Module]http.Handler, cs CredentialsStorage, ss ShareS
 			}
 
 			r.Get("/modules", func(w http.ResponseWriter, res *http.Request) {
-				httputil.Respond(w, map[string][]Module{"modules": moduleIds})
+				httputil.Respond(w, map[string][]common.ModuleType{"modules": moduleIds})
 			})
 
 			r.Get("/shares", sh.listShares)
@@ -65,7 +46,7 @@ func NewServer(modules map[Module]http.Handler, cs CredentialsStorage, ss ShareS
 			r.Get("/", sh.getShare)
 
 			r.Group(func(r chi.Router) {
-				r.Use(ShareAuthenticator(ss))
+				r.Use(share.Authenticator(ss))
 
 				for module, handler := range modules {
 					r.Mount("/"+string(module), handler)

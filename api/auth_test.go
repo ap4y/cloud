@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/ap4y/cloud/common"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -73,7 +74,7 @@ func TestAuth(t *testing.T) {
 			t.Run("header - "+tc.name, func(t *testing.T) {
 				handler := Authenticator(credentials)(
 					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-						assert.Equal(t, tc.username, r.Context().Value(UsernameCtxKey))
+						assert.Equal(t, tc.username, r.Context().Value(common.UsernameCtxKey))
 						io.WriteString(w, "<html><body>Hello World!</body></html>")
 					}),
 				)
@@ -90,7 +91,7 @@ func TestAuth(t *testing.T) {
 			t.Run("query - "+tc.name, func(t *testing.T) {
 				handler := Authenticator(credentials)(
 					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-						assert.Equal(t, tc.username, r.Context().Value(UsernameCtxKey))
+						assert.Equal(t, tc.username, r.Context().Value(common.UsernameCtxKey))
 						io.WriteString(w, "<html><body>Hello World!</body></html>")
 					}),
 				)

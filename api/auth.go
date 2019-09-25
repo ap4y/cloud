@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/ap4y/cloud/common"
 	"github.com/ap4y/cloud/internal/httputil"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
@@ -123,7 +124,7 @@ func Authenticator(credentials CredentialsStorage) func(next http.Handler) http.
 				return
 			}
 
-			ctx := context.WithValue(req.Context(), UsernameCtxKey, username)
+			ctx := context.WithValue(req.Context(), common.UsernameCtxKey, username)
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})
 	}
