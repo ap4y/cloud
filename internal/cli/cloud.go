@@ -12,8 +12,10 @@ import (
 
 	"github.com/ap4y/cloud/api"
 	"github.com/ap4y/cloud/app"
+	"github.com/ap4y/cloud/common"
 	"github.com/ap4y/cloud/files"
 	"github.com/ap4y/cloud/gallery"
+	"github.com/ap4y/cloud/share"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
 )
@@ -49,19 +51,19 @@ func Run(configPath, devURL, addr string) error {
 }
 
 func setupServer(cfg *Config) (http.Handler, error) {
-	modules := map[api.Module]http.Handler{}
+	modules := map[common.ModuleType]http.Handler{}
 	for _, module := range cfg.Modules {
 		var handler http.Handler
 		var err error
 
-		if module == api.ModuleGallery {
+		if module == common.ModuleGallery {
 			handler, err = galleryModule(cfg.Gallery)
 			if err != nil {
 				return nil, fmt.Errorf("failed to initialise gallery: %s", err)
 			}
 		}
 
-		if module == api.ModuleFiles {
+		if module == common.ModuleFiles {
 			handler, err = filesModule(cfg.Files)
 			if err != nil {
 				return nil, fmt.Errorf("failed to initialise gallery: %s", err)
@@ -72,7 +74,7 @@ func setupServer(cfg *Config) (http.Handler, error) {
 	}
 
 	cs := api.NewMemoryCredentialsStorage(cfg.Users, jwt.SigningMethodHS256, []byte(cfg.JWTSecret))
-	ss, err := api.NewDiskShareStore(cfg.Share.Path)
+	ss, err := share.NewDiskStore(cfg.Share.Path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create share store: %s", err)
 	}

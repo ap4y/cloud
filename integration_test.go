@@ -11,7 +11,9 @@ import (
 	"testing"
 
 	"github.com/ap4y/cloud/api"
+	"github.com/ap4y/cloud/common"
 	"github.com/ap4y/cloud/gallery"
+	"github.com/ap4y/cloud/share"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -51,7 +53,7 @@ func TestAPIServer(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(cacheDir)
 
-	modules := map[api.Module]http.Handler{api.ModuleGallery: galleryModule(t, cacheDir)}
+	modules := map[common.ModuleType]http.Handler{common.ModuleGallery: galleryModule(t, cacheDir)}
 	cs := api.NewMemoryCredentialsStorage(
 		map[string]string{"test": "$2b$10$fEWhY87kzeaV3hUEB6phTuyWjpv73V5m.YcqTxHXnvqEGIou1tXGO"},
 		jwt.SigningMethodHS256,
@@ -61,11 +63,11 @@ func TestAPIServer(t *testing.T) {
 	sharesDir, err := ioutil.TempDir("", "shares")
 	require.NoError(t, err)
 	defer os.RemoveAll(sharesDir)
-	ss, err := api.NewDiskShareStore(sharesDir)
+	ss, err := share.NewDiskStore(sharesDir)
 	require.NoError(t, err)
-	err = ss.Save(&api.Share{Slug: "foo", Type: api.ModuleGallery, Name: "foo", Items: []string{"test.jpg"}})
+	err = ss.Save(&share.Share{Slug: "foo", Type: common.ModuleGallery, Name: "foo", Items: []string{"test.jpg"}})
 	require.NoError(t, err)
-	err = ss.Save(&api.Share{Slug: "bar", Type: api.ModuleGallery, Name: "album1", Items: []string{"test.jpg"}})
+	err = ss.Save(&share.Share{Slug: "bar", Type: common.ModuleGallery, Name: "album1", Items: []string{"test.jpg"}})
 	require.NoError(t, err)
 
 	handler, err := api.NewServer(modules, cs, ss)
@@ -79,6 +81,7 @@ func TestAPIServer(t *testing.T) {
 	for _, tc := range privateRoutes {
 		t.Run(fmt.Sprintf("anonymous/%s%s", tc.method, tc.url), func(t *testing.T) {
 			req, err := http.NewRequest(tc.method, ts.URL+"/api"+tc.url, strings.NewReader(tc.body))
+			require.NoError(t, err)
 			res, err := client.Do(req)
 			require.NoError(t, err)
 			assert.Equal(t, http.StatusUnauthorized, res.StatusCode)
@@ -89,6 +92,7 @@ func TestAPIServer(t *testing.T) {
 	for _, tc := range privateRoutes {
 		t.Run(fmt.Sprintf("%s%s", tc.method, tc.url), func(t *testing.T) {
 			req, err := http.NewRequest(tc.method, ts.URL+"/api"+tc.url, strings.NewReader(tc.body))
+			require.NoError(t, err)
 			req.Header.Set("Authorization", "Bearer "+jwtToken)
 			res, err := client.Do(req)
 			require.NoError(t, err)
@@ -99,6 +103,7 @@ func TestAPIServer(t *testing.T) {
 	for _, tc := range publicRoutes {
 		t.Run(fmt.Sprintf("%s%s", tc.method, tc.url), func(t *testing.T) {
 			req, err := http.NewRequest(tc.method, ts.URL+"/api"+tc.url, strings.NewReader(tc.body))
+			require.NoError(t, err)
 			res, err := client.Do(req)
 			require.NoError(t, err)
 			assert.Equal(t, http.StatusOK, res.StatusCode)

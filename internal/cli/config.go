@@ -1,6 +1,6 @@
 package cli
 
-import "github.com/ap4y/cloud/api"
+import "github.com/ap4y/cloud/common"
 
 // GalleryConfig defines gallery related configuration variables for CLI.
 type GalleryConfig struct {
@@ -20,10 +20,10 @@ type ShareConfig struct {
 
 // Config defines configuration variables for CLI.
 type Config struct {
-	JWTSecret string            `json:"jwt_secret"`
-	Modules   []api.Module      `json:"modules"`
-	Users     map[string]string `json:"users"`
-	Share     *ShareConfig      `json:"share"`
-	Gallery   *GalleryConfig    `json:"gallery"`
-	Files     *FilesConfig      `json:"files"`
+	JWTSecret string              `json:"jwt_secret"`
+	Modules   []common.ModuleType `json:"modules"`
+	Users     map[string]string   `json:"users"`
+	Share     *ShareConfig        `json:"share"`
+	Gallery   *GalleryConfig      `json:"gallery"`
+	Files     *FilesConfig        `json:"files"`
 }
