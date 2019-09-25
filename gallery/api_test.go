@@ -31,6 +31,7 @@ func TestGalleryAPI(t *testing.T) {
 	require.NoError(t, err)
 
 	api := NewGalleryAPI(src, cache)
+	s := &share.Share{Type: common.ModuleGallery, Name: "album1", Items: []string{"test.jpg"}}
 
 	t.Run("listAlbums", func(t *testing.T) {
 		w := httptest.NewRecorder()
@@ -45,6 +46,16 @@ func TestGalleryAPI(t *testing.T) {
 		require.NoError(t, json.NewDecoder(resp.Body).Decode(&albums))
 		require.Len(t, albums, 2)
 		assert.Equal(t, "album1", albums[0].Name)
+	})
+
+	t.Run("listAlbums/with share", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "http://cloud.api/", nil)
+		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
+		api.ServeHTTP(w, req.WithContext(ctx))
+
+		resp := w.Result()
+		require.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 
 	t.Run("listAlbumImages", func(t *testing.T) {
@@ -66,8 +77,7 @@ func TestGalleryAPI(t *testing.T) {
 	t.Run("listAlbumImages/with_share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/album1/images", nil)
-		share := &share.Share{Type: common.ModuleGallery, Name: "album1", Items: []string{"test.jpg"}}
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
+		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -81,21 +91,14 @@ func TestGalleryAPI(t *testing.T) {
 		assert.Equal(t, "test", images[0].Name)
 	})
 
-	t.Run("listAlbumImages/with_share/no_match", func(t *testing.T) {
+	t.Run("listAlbumImages/with unmatched share", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req := httptest.NewRequest("GET", "http://cloud.api/album1/images", nil)
-		share := &share.Share{Type: common.ModuleGallery, Name: "album1", Items: []string{"foo.jpg"}}
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
+		req := httptest.NewRequest("GET", "http://cloud.api/album2/images", nil)
+		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
-		require.Equal(t, http.StatusOK, resp.StatusCode)
-
-		images := make([]*Image, 0)
-		require.NoError(t, json.NewDecoder(resp.Body).Decode(&images))
-		assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
-
-		require.Len(t, images, 0)
+		require.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 
 	t.Run("getImage", func(t *testing.T) {
@@ -108,6 +111,27 @@ func TestGalleryAPI(t *testing.T) {
 		assert.Equal(t, "image/jpeg", resp.Header.Get("Content-Type"))
 	})
 
+	t.Run("getImage/with share", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "http://cloud.api/album1/image/test.jpg", nil)
+		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
+		api.ServeHTTP(w, req.WithContext(ctx))
+
+		resp := w.Result()
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Equal(t, "image/jpeg", resp.Header.Get("Content-Type"))
+	})
+
+	t.Run("getImage/with unmatched share", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "http://cloud.api/album2/image/test.jpg", nil)
+		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
+		api.ServeHTTP(w, req.WithContext(ctx))
+
+		resp := w.Result()
+		require.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+
 	t.Run("getImageThumbnail", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/album1/thumbnail/test.jpg", nil)
@@ -116,6 +140,27 @@ func TestGalleryAPI(t *testing.T) {
 		resp := w.Result()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
 		assert.Equal(t, "image/jpeg", resp.Header.Get("Content-Type"))
+	})
+
+	t.Run("getImageThumbnail/with share", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "http://cloud.api/album1/thumbnail/test.jpg", nil)
+		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
+		api.ServeHTTP(w, req.WithContext(ctx))
+
+		resp := w.Result()
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Equal(t, "image/jpeg", resp.Header.Get("Content-Type"))
+	})
+
+	t.Run("getImageThumbnail/with unmatched share", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "http://cloud.api/album2/thumbnail/test.jpg", nil)
+		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
+		api.ServeHTTP(w, req.WithContext(ctx))
+
+		resp := w.Result()
+		require.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 
 	t.Run("getImageEXIF", func(t *testing.T) {
