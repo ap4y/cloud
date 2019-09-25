@@ -7,8 +7,9 @@ import (
 	"path/filepath"
 	"time"
 
-	capi "github.com/ap4y/cloud/api"
+	"github.com/ap4y/cloud/common"
 	"github.com/ap4y/cloud/internal/httputil"
+	"github.com/ap4y/cloud/share"
 	"github.com/go-chi/chi"
 )
 
@@ -24,12 +25,12 @@ func NewGalleryAPI(source Source, cache Cache) http.Handler {
 	api := &galleryAPI{mux, source, cache}
 
 	mux.Route("/", func(r chi.Router) {
-		r.Get("/", api.listAlbums)
-		r.Route("/{path}", func(r chi.Router) {
-			r.Get("/images", api.listAlbumImages)
-			r.Get("/image/{file}", api.getImage)
-			r.Get("/thumbnail/{file}", api.getImageThumbnail)
-			r.Get("/exif/{file}", api.getImageEXIF)
+		r.Get("/", share.BlockHandler(api.listAlbums))
+		r.Route("/{gallery}", func(r chi.Router) {
+			r.Get("/images", share.VerifyHandler(common.ModuleGallery, "gallery", "", api.listAlbumImages))
+			r.Get("/image/{file}", share.VerifyHandler(common.ModuleGallery, "gallery", "file", api.getImage))
+			r.Get("/thumbnail/{file}", share.VerifyHandler(common.ModuleGallery, "gallery", "file", api.getImageThumbnail))
+			r.Get("/exif/{file}", share.VerifyHandler(common.ModuleGallery, "gallery", "file", api.getImageEXIF))
 		})
 	})
 
@@ -54,7 +55,7 @@ func (api *galleryAPI) listAlbumImages(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	if share, ok := req.Context().Value(capi.ShareCtxKey).(*capi.Share); ok {
+	if share, ok := req.Context().Value(common.ShareCtxKey).(*share.Share); ok {
 		shareImages := make([]Image, 0, len(images))
 		for _, image := range images {
 			if share.Includes(galleryName, image.Path) {

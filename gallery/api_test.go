@@ -10,7 +10,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	capi "github.com/ap4y/cloud/api"
+	"github.com/ap4y/cloud/common"
+	"github.com/ap4y/cloud/share"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -65,8 +66,8 @@ func TestGalleryAPI(t *testing.T) {
 	t.Run("listAlbumImages/with_share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/album1/images", nil)
-		share := &capi.Share{Name: "album1", Items: []string{"test.jpg"}}
-		ctx := context.WithValue(req.Context(), capi.ShareCtxKey, share)
+		share := &share.Share{Type: common.ModuleGallery, Name: "album1", Items: []string{"test.jpg"}}
+		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -83,8 +84,8 @@ func TestGalleryAPI(t *testing.T) {
 	t.Run("listAlbumImages/with_share/no_match", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/album1/images", nil)
-		share := &capi.Share{Name: "album1", Items: []string{"foo.jpg"}}
-		ctx := context.WithValue(req.Context(), capi.ShareCtxKey, share)
+		share := &share.Share{Type: common.ModuleGallery, Name: "album1", Items: []string{"foo.jpg"}}
+		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
