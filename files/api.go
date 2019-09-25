@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/ap4y/cloud/common"
 	"github.com/ap4y/cloud/internal/httputil"
+	"github.com/ap4y/cloud/share"
 	"github.com/go-chi/chi"
 )
 
@@ -28,11 +30,11 @@ func NewFilesAPI(source Source) http.Handler {
 	api := &filesAPI{mux, source}
 
 	mux.Route("/", func(r chi.Router) {
-		r.Get("/", api.listTree)
-		r.Post("/mkdir/{path}*", api.createFolder)
-		r.Post("/upload/{path}*", api.uploadFile)
-		r.Get("/file/{path}*", api.getFile)
-		r.Delete("/file/{path}*", api.removeFile)
+		r.Get("/", verifyHandler("", api.listTree))
+		r.Post("/mkdir/{path}*", share.BlockHandler(api.createFolder))
+		r.Post("/upload/{path}*", share.BlockHandler(api.uploadFile))
+		r.Get("/file/{path}*", verifyHandler("path", api.getFile))
+		r.Delete("/file/{path}*", share.BlockHandler(api.removeFile))
 	})
 
 	return api
@@ -43,6 +45,22 @@ func (api *filesAPI) listTree(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		httputil.Error(w, fmt.Sprint("failed to traverse path:", err), http.StatusBadRequest)
 		return
+	}
+
+	if share, ok := req.Context().Value(common.ShareCtxKey).(*share.Share); ok {
+		tree = locateTreeNode(tree, share.Name)
+		if tree == nil {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+
+		filtered := make([]*Item, 0, len(tree.Children))
+		for _, child := range tree.Children {
+			if share.Includes(tree.Path, child.Path) {
+				filtered = append(filtered, child)
+			}
+		}
+		tree.Children = filtered
 	}
 
 	httputil.Respond(w, toAPIItem(tree))
@@ -83,14 +101,8 @@ func (api *filesAPI) uploadFile(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *filesAPI) getFile(w http.ResponseWriter, req *http.Request) {
-	fullPath := filepath.Join("/", chi.URLParam(req, "path"))
-	path, err := url.QueryUnescape(fullPath)
-	if err != nil {
-		httputil.Error(w, fmt.Sprint("invalid path:", err), http.StatusBadRequest)
-		return
-	}
-
-	file, err := api.source.File(path)
+	filePath := chi.URLParam(req, "path")
+	file, err := api.source.File(filePath)
 	if err != nil {
 		httputil.Error(w, fmt.Sprint("failed to traverse path:", err), http.StatusBadRequest)
 		return
@@ -102,18 +114,12 @@ func (api *filesAPI) getFile(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	http.ServeContent(w, req, fullPath, fi.ModTime(), file)
+	http.ServeContent(w, req, fi.Name(), fi.ModTime(), file)
 }
 
 func (api *filesAPI) removeFile(w http.ResponseWriter, req *http.Request) {
-	fullPath := filepath.Join("/", chi.URLParam(req, "path"))
-	path, err := url.QueryUnescape(fullPath)
-	if err != nil {
-		httputil.Error(w, fmt.Sprint("invalid path:", err), http.StatusBadRequest)
-		return
-	}
-
-	item, err := api.source.Remove(path)
+	filePath := chi.URLParam(req, "path")
+	item, err := api.source.Remove(filePath)
 	if err != nil {
 		httputil.Error(w, fmt.Sprint("failed to remove file:", err), http.StatusBadRequest)
 		return
@@ -148,4 +154,64 @@ func apiTree(tree []*Item) []apiItem {
 	}
 
 	return result
+}
+
+func locateTreeNode(tree *Item, path string) *Item {
+	if path == "/" {
+		return tree
+	}
+
+	node := tree
+	components := strings.Split(path, "/")
+	for _, component := range components {
+		if component == "" {
+			continue
+		}
+
+		var item *Item
+		for _, child := range node.Children {
+			if child.Name == component {
+				item = child
+				break
+			}
+		}
+
+		if item == nil {
+			return nil
+		}
+
+		node = item
+	}
+
+	return node
+}
+
+func verifyHandler(itemParam string, next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		share, ok := req.Context().Value(common.ShareCtxKey).(*share.Share)
+		if !ok {
+			next.ServeHTTP(w, req)
+			return
+		}
+
+		if share.Type != common.ModuleFiles {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+
+		if itemParam == "" {
+			next.ServeHTTP(w, req)
+			return
+		}
+
+		filePath := "/" + chi.URLParam(req, itemParam)
+		for _, item := range share.Items {
+			if strings.HasPrefix(filePath, item) {
+				next.ServeHTTP(w, req)
+				return
+			}
+		}
+
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+	})
 }

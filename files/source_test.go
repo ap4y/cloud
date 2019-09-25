@@ -36,7 +36,7 @@ func TestDiskSource(t *testing.T) {
 		assert.Equal(t, "test1", item.Name)
 		assert.Equal(t, "/test1", item.Path)
 		assert.Equal(t, ItemTypeDirectory, item.Type)
-		require.Len(t, item.Children, 1)
+		require.Len(t, item.Children, 2)
 		assert.Equal(t, "bar", item.Children[0].Name)
 		assert.Equal(t, "/test1/bar", item.Children[0].Path)
 		assert.Equal(t, ItemTypeFile, item.Children[0].Type)
