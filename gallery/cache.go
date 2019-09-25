@@ -8,14 +8,16 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/ap4y/cloud/internal/pathutil"
 )
 
 // Cache caches gallery metadata.
 type Cache interface {
 	// Returns thumbnail and modtime for a given image path if it exists, otherwise returns nil.
-	Thumbnail(imagePath string) (io.ReadSeeker, time.Time)
+	Thumbnail(gallery, image string) (io.ReadSeeker, time.Time)
 	// Stores thumbnail for a given image path and returns reader for a stored thumbnail.
-	StoreThumbnail(imagePath string, r io.Reader) (io.ReadSeeker, error)
+	StoreThumbnail(gallery, image string, r io.Reader) (io.ReadSeeker, error)
 }
 
 // DiskCache implements cache over filesystem.
@@ -39,12 +41,13 @@ func NewDiskCache(dir string) (Cache, error) {
 	return &diskCache{dir}, nil
 }
 
-func (dc *diskCache) cacheKey(imagePath string) string {
+func (dc *diskCache) cacheKey(gallery, image string) string {
+	imagePath := pathutil.Join(gallery, image)
 	return fmt.Sprintf("%x", md5.Sum([]byte(imagePath)))
 }
 
-func (dc *diskCache) Thumbnail(imagePath string) (io.ReadSeeker, time.Time) {
-	filename := dc.cacheKey(imagePath)
+func (dc *diskCache) Thumbnail(gallery, image string) (io.ReadSeeker, time.Time) {
+	filename := dc.cacheKey(gallery, image)
 	path := filepath.Join(dc.dir, filename)
 	file, err := os.OpenFile(path, os.O_RDONLY, 0600)
 	if err != nil {
@@ -59,8 +62,8 @@ func (dc *diskCache) Thumbnail(imagePath string) (io.ReadSeeker, time.Time) {
 	return file, fi.ModTime()
 }
 
-func (dc *diskCache) StoreThumbnail(imagePath string, r io.Reader) (io.ReadSeeker, error) {
-	filename := dc.cacheKey(imagePath)
+func (dc *diskCache) StoreThumbnail(gallery, image string, r io.Reader) (io.ReadSeeker, error) {
+	filename := dc.cacheKey(gallery, image)
 	path := filepath.Join(dc.dir, filename)
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0600)
 	if err != nil {

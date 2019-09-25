@@ -36,11 +36,11 @@ func TestSource(t *testing.T) {
 	})
 
 	t.Run("Image", func(t *testing.T) {
-		img, err := src.Image("/album1/test.jpg")
+		img, err := src.Image("album1", "test.jpg")
 		require.NoError(t, err)
 		assert.NotNil(t, img)
 
-		img, err = src.Image("../album1/test.jpg")
+		img, err = src.Image("../album1", "test.jpg")
 		require.NoError(t, err)
 		assert.NotNil(t, img)
 	})
@@ -70,7 +70,7 @@ func TestSourceIgnoreExts(t *testing.T) {
 	})
 
 	t.Run("Image", func(t *testing.T) {
-		_, err := src.Image("/album1/test.jpg")
+		_, err := src.Image("album1", "test.jpg")
 		require.Error(t, err)
 	})
 }

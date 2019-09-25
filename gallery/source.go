@@ -18,7 +18,7 @@ type Source interface {
 	// Images returns images metadata for a given album.
 	Images(album string) ([]Image, error)
 	// Image returns image file for a given image path.
-	Image(imagePath string) (*os.File, error)
+	Image(ablum, image string) (*os.File, error)
 }
 
 type diskSource struct {
@@ -78,8 +78,8 @@ func (ds *diskSource) Images(album string) ([]Image, error) {
 	return images, nil
 }
 
-func (ds *diskSource) Image(imagePath string) (*os.File, error) {
-	diskPath := pathutil.Join(ds.basePath, imagePath)
+func (ds *diskSource) Image(album, image string) (*os.File, error) {
+	diskPath := pathutil.Join(ds.basePath, album, image)
 
 	file, err := os.Open(diskPath)
 	if err != nil {

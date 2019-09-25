@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"path/filepath"
 	"time"
 
 	"github.com/ap4y/cloud/common"
@@ -48,7 +47,7 @@ func (api *galleryAPI) listAlbums(w http.ResponseWriter, req *http.Request) {
 }
 
 func (api *galleryAPI) listAlbumImages(w http.ResponseWriter, req *http.Request) {
-	galleryName := chi.URLParam(req, "path")
+	galleryName := chi.URLParam(req, "gallery")
 	images, err := api.source.Images(galleryName)
 	if err != nil {
 		httputil.Error(w, fmt.Sprint("failed to fetch images:", err), http.StatusBadRequest)
@@ -69,8 +68,7 @@ func (api *galleryAPI) listAlbumImages(w http.ResponseWriter, req *http.Request)
 }
 
 func (api *galleryAPI) getImage(w http.ResponseWriter, req *http.Request) {
-	imgPath := filepath.Join(chi.URLParam(req, "path"), chi.URLParam(req, "file"))
-	file, err := api.source.Image(imgPath)
+	file, err := api.source.Image(chi.URLParam(req, "gallery"), chi.URLParam(req, "file"))
 	if err != nil {
 		http.Error(w, fmt.Sprint("failed to fetch image:", err), http.StatusNotFound)
 		return
@@ -82,17 +80,19 @@ func (api *galleryAPI) getImage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	http.ServeContent(w, req, imgPath, fi.ModTime(), file)
+	http.ServeContent(w, req, fi.Name(), fi.ModTime(), file)
 }
 
 func (api *galleryAPI) getImageThumbnail(w http.ResponseWriter, req *http.Request) {
-	imgPath := filepath.Join(chi.URLParam(req, "path"), chi.URLParam(req, "file"))
-	if thumb, modTime := api.cache.Thumbnail(imgPath); thumb != nil {
-		http.ServeContent(w, req, imgPath, modTime, thumb)
+	galleryName := chi.URLParam(req, "gallery")
+	fileName := chi.URLParam(req, "file")
+
+	if thumb, modTime := api.cache.Thumbnail(galleryName, fileName); thumb != nil {
+		http.ServeContent(w, req, fileName, modTime, thumb)
 		return
 	}
 
-	file, err := api.source.Image(imgPath)
+	file, err := api.source.Image(galleryName, fileName)
 	if err != nil {
 		http.Error(w, fmt.Sprint("failed to fetch image:", err), http.StatusNotFound)
 		return
@@ -104,19 +104,18 @@ func (api *galleryAPI) getImageThumbnail(w http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	thumb, err := api.cache.StoreThumbnail(imgPath, thumbData)
+	thumb, err := api.cache.StoreThumbnail(galleryName, fileName, thumbData)
 	if err != nil {
 		log.Print("failed to cache thumbnail:", err)
 		http.Error(w, "", http.StatusNotFound)
 		return
 	}
 
-	http.ServeContent(w, req, imgPath, time.Now(), thumb)
+	http.ServeContent(w, req, fileName, time.Now(), thumb)
 }
 
 func (api *galleryAPI) getImageEXIF(w http.ResponseWriter, req *http.Request) {
-	imgPath := filepath.Join(chi.URLParam(req, "path"), chi.URLParam(req, "file"))
-	file, err := api.source.Image(imgPath)
+	file, err := api.source.Image(chi.URLParam(req, "gallery"), chi.URLParam(req, "file"))
 	if err != nil {
 		httputil.Error(w, fmt.Sprint("failed to fetch image:", err), http.StatusNotFound)
 		return
