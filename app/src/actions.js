@@ -247,3 +247,13 @@ export const uploadFile = (folder, file) => dispatch => {
       });
     }, handleError(dispatch));
 };
+
+export const FILE_MKDIR_SUCCESS = "FILE_MKDIR_SUCCESS";
+export const createFolder = (parent, name) => dispatch =>
+  apiClient.do(`/files/mkdir/${parent.url}/${name}`, "POST").then(item => {
+    dispatch({
+      type: FILE_MKDIR_SUCCESS,
+      folder: parent,
+      item
+    });
+  }, handleError(dispatch));

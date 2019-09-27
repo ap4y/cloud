@@ -4,7 +4,13 @@ import { connect } from "react-redux";
 import { NavLink } from "react-router-dom";
 
 import { Toolbar } from "../components/Controls";
-import { apiClient, fetchFile, removeFile, uploadFile } from "../actions";
+import {
+  apiClient,
+  fetchFile,
+  removeFile,
+  uploadFile,
+  createFolder
+} from "../actions";
 import { locateInTree } from "../lib/utils";
 
 const viewableExt = ["md", "org", "txt"];
@@ -73,34 +79,38 @@ const FilesToolbar = ({
   onSave,
   onDelete,
   onUpload,
-  onShare
+  onShare,
+  onMkdir
 }) => {
   return (
     <Toolbar title={file ? file.path : path}>
-      {canSave && (
-        <a href="#save" onClick={onSave}>
-          <i className="material-icons-round">save</i>
-        </a>
-      )}
       {file && (
-        <a href={apiClient.fileURL(file)} download={file.name}>
-          <i className="material-icons-round">download</i>
-        </a>
-      )}
-      {file && (
-        <a href="#delete" onClick={onDelete}>
-          <i className="material-icons-round">delete</i>
-        </a>
+        <>
+          {canSave && (
+            <a href="#save" onClick={onSave}>
+              <i className="material-icons-round">save</i>
+            </a>
+          )}
+          <a href={apiClient.fileURL(file)} download={file.name}>
+            <i className="material-icons-round">download</i>
+          </a>
+          <a href="#delete" onClick={onDelete}>
+            <i className="material-icons-round">delete</i>
+          </a>
+        </>
       )}
       {!file && (
-        <a href="#upload" onClick={onUpload}>
-          <i className="material-icons-round">upload</i>
-        </a>
-      )}
-      {!file && (
-        <a href="#share" onClick={onShare}>
-          <i className="material-icons-round">share</i>
-        </a>
+        <>
+          <a href="#mkdir" onClick={onMkdir}>
+            <i className="material-icons-round">create_new_folder</i>
+          </a>
+          <a href="#upload" onClick={onUpload}>
+            <i className="material-icons-round">upload</i>
+          </a>
+          <a href="#share" onClick={onShare}>
+            <i className="material-icons-round">share</i>
+          </a>
+        </>
       )}
     </Toolbar>
   );
@@ -122,7 +132,8 @@ export const FilesGrid = ({
   history,
   fetchFile,
   removeFile,
-  uploadFile
+  uploadFile,
+  createFolder
 }) => {
   const [content, setContent] = useState(null);
 
@@ -166,18 +177,26 @@ export const FilesGrid = ({
     uploadFile(folder, new File([content], file.name));
   };
 
+  const mkdir = e => {
+    e.preventDefault();
+    const folderName = window.prompt("Folder Name");
+    if (!folderName) return;
+
+    createFolder(folder, folderName);
+  };
+
   const fileItems = folder.children
     .sort((a, b) => `${a.type}${a.name}`.localeCompare(`${b.type}${b.name}`))
     .map(file => {
       return (
         <FilesItem key={file.path}>
           {file.type === "directory" && (
-            <NavLink to={`/files${file.path}/`}>
+            <NavLink to={`/files${encodeURI(file.path)}/`}>
               <DirCell dir={file} />
             </NavLink>
           )}
           {file.type === "file" && (
-            <NavLink to={`/files${file.path}`}>
+            <NavLink to={`/files${encodeURI(file.path)}`}>
               <FileCell file={file} />
             </NavLink>
           )}
@@ -190,10 +209,11 @@ export const FilesGrid = ({
       <FilesToolbar
         path={folder.path}
         file={file}
-        canSave={file && content}
+        canSave={content !== null}
         onSave={saveFile}
         onDelete={deleteFile}
         onUpload={presentUpload}
+        onMkdir={mkdir}
       />
       {!file && <Files>{fileItems}</Files>}
       {file && !content && <FileCell file={file} large withModTime />}
@@ -219,5 +239,5 @@ export default connect(
     const { folder, file } = locateInTree(tree, path);
     return { file, folder, items: folder.children };
   },
-  { fetchFile, removeFile, uploadFile }
+  { fetchFile, removeFile, uploadFile, createFolder }
 )(FilesGrid);

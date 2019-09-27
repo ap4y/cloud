@@ -45,6 +45,11 @@ function files(state = { tree: { name: "", path: "", children: [] } }, action) {
         ...state,
         tree: addToTree(state.tree, action.folder, action.file)
       };
+    case ActionTypes.FILE_MKDIR_SUCCESS:
+      return {
+        ...state,
+        tree: addToTree(state.tree, action.folder, action.item)
+      };
     default:
       return state;
   }
