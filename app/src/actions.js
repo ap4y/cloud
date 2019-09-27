@@ -217,8 +217,8 @@ export const removeShare = slug => dispatch =>
   }, handleError(dispatch));
 
 export const FILES_SUCCESS = "FILES_SUCCESS";
-export const fetchFilesTree = () => dispatch =>
-  apiClient.do("/files").then(tree => {
+export const fetchFilesTree = shareSlug => dispatch =>
+  apiClient.do(`${shareSlug ? `/share/${shareSlug}` : ""}/files`).then(tree => {
     dispatch({
       type: FILES_SUCCESS,
       tree
@@ -226,14 +226,16 @@ export const fetchFilesTree = () => dispatch =>
   }, handleError(dispatch));
 
 export const FILE_SUCCESS = "FILE_SUCCESS";
-export const fetchFile = url => dispatch =>
-  apiClient.do(`/files${url}`).then(file => {
-    dispatch({
-      type: FILE_SUCCESS,
-      file
-    });
-    return file;
-  }, handleError(dispatch));
+export const fetchFile = (url, shareSlug) => dispatch =>
+  apiClient
+    .do(`${shareSlug ? `/share/${shareSlug}` : ""}/files${url}`)
+    .then(file => {
+      dispatch({
+        type: FILE_SUCCESS,
+        file
+      });
+      return file;
+    }, handleError(dispatch));
 
 export const FILE_REMOVE_SUCCESS = "FILE_REMOVE_SUCCESS";
 export const removeFile = (folder, file) => dispatch =>

@@ -110,7 +110,9 @@ position: relative;
 const FilesToolbar = ({
   path,
   file,
+  fileURL,
   canSave,
+  canEdit,
   onSave,
   onDelete,
   onUpload,
@@ -121,20 +123,22 @@ const FilesToolbar = ({
     <Toolbar title={file ? file.path : path}>
       {file && (
         <>
-          {canSave && (
+          {canEdit && canSave && (
             <a href="#save" onClick={onSave}>
               <i className="material-icons-round">save</i>
             </a>
           )}
-          <a href={apiClient.fileURL(file)} download={file.name}>
+          <a href={fileURL} download={file.name}>
             <i className="material-icons-round">download</i>
           </a>
-          <a href="#delete" onClick={onDelete}>
-            <i className="material-icons-round">delete</i>
-          </a>
+          {canEdit && (
+            <a href="#delete" onClick={onDelete}>
+              <i className="material-icons-round">delete</i>
+            </a>
+          )}
         </>
       )}
-      {!file && (
+      {!file && canEdit && (
         <>
           <a href="#mkdir" onClick={onMkdir}>
             <i className="material-icons-round">create_new_folder</i>
@@ -164,6 +168,8 @@ const FilesContent = styled.div`
 export const FilesGrid = ({
   file,
   folder,
+  share,
+  match,
   history,
   fetchFile,
   removeFile,
@@ -196,7 +202,7 @@ export const FilesGrid = ({
       return;
     }
 
-    fetchFile(file.url).then(content => setContent(content));
+    fetchFile(file.url, share).then(content => setContent(content));
   }, [file, fetchFile]);
 
   useEffect(() => {
@@ -249,16 +255,10 @@ export const FilesGrid = ({
           selected={sharedItems.includes(file)}
           onClick={() => toggleSharedItem(file)}
         >
-          {file.type === "directory" && (
-            <NavLink to={`/files${encodeURI(file.path)}/`}>
-              <DirCell dir={file} />
-            </NavLink>
-          )}
-          {file.type === "file" && (
-            <NavLink to={`/files${encodeURI(file.path)}`}>
-              <FileCell file={file} />
-            </NavLink>
-          )}
+          <NavLink to={`${match.url}${encodeURI(file.path)}`}>
+            {file.type === "directory" && <DirCell dir={file} />}
+            {file.type === "file" && <FileCell file={file} />}
+          </NavLink>
         </FilesItem>
       );
     });
@@ -268,7 +268,9 @@ export const FilesGrid = ({
       <FilesToolbar
         path={folder.path}
         file={file}
+        fileURL={file && apiClient.fileURL(file, share)}
         canSave={content !== null}
+        canEdit={share === undefined}
         onSave={saveFile}
         onDelete={deleteFile}
         onUpload={presentUpload}
@@ -296,9 +298,9 @@ export const FilesGrid = ({
 
 export default connect(
   ({ files: { tree } }, props) => {
-    const { path = "" } = props.match.params;
+    const { path = "", slug } = props.match.params;
     const { folder, file } = locateInTree(tree, path);
-    return { file, folder, items: folder.children };
+    return { file, folder, items: folder.children, share: slug };
   },
   { fetchFile, removeFile, uploadFile, createFolder, shareFolder }
 )(FilesGrid);

@@ -46,7 +46,7 @@ const FilesRoutes = connect(
   { fetchFilesTree }
 )(FilesRoutesContainer);
 
-const ShareRoutesContainer = ({ share, match, fetchShare }) => {
+const ShareRoutesContainer = ({ share, match, fetchShare, fetchFilesTree }) => {
   useEffect(() => {
     fetchShare(match.params.slug);
   }, [fetchShare, match.params.slug]);
@@ -55,10 +55,21 @@ const ShareRoutesContainer = ({ share, match, fetchShare }) => {
     if (share) document.title = share.name;
   }, [share]);
 
+  useEffect(() => {
+    if (share && share.type === "files") fetchFilesTree(share.slug);
+  }, [share, fetchFilesTree]);
+
   const galleryRoutes = share => (
     <Switch>
       <Route path={`${match.path}/gallery/:albumName`} component={ImageGrid} />
       <Redirect to={`${match.url}/gallery/${share.name}`} />
+    </Switch>
+  );
+
+  const filesRoutes = share => (
+    <Switch>
+      <Route path={`${match.path}/files/:path*`} component={FilesGrid} />
+      <Redirect to={`${match.url}/files/${share.name}`} />
     </Switch>
   );
 
@@ -67,6 +78,8 @@ const ShareRoutesContainer = ({ share, match, fetchShare }) => {
   switch (share.type) {
     case "gallery":
       return galleryRoutes(share);
+    case "files":
+      return filesRoutes(share);
     default:
       return <div />;
   }
@@ -74,7 +87,7 @@ const ShareRoutesContainer = ({ share, match, fetchShare }) => {
 
 const ShareRoutes = connect(
   ({ share: { current } }) => ({ share: current }),
-  { fetchShare }
+  { fetchShare, fetchFilesTree }
 )(ShareRoutesContainer);
 
 export { GalleryRoutes, FilesRoutes, ShareRoutes };
