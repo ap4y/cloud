@@ -5,9 +5,9 @@ import { NavLink, Route } from "react-router-dom";
 import VisibilitySensor from "react-visibility-sensor";
 
 import ImagePreview from "../components/ImagePreview";
-import SharePopup from "../components/SharePopup";
 import { Toolbar } from "../components/Controls";
 import { apiClient, fetchAlbum, shareAlbum, fetchExif } from "../actions";
+import useSharing from "../lib/useSharing";
 
 const Figure = styled.figure`
   position: relative;
@@ -74,21 +74,6 @@ export const ImageCell = ({ image: { name, path, updated_at }, src }) => {
     </VisibilitySensor>
   );
 };
-
-const StickySharePopup = styled(SharePopup)`
-  position: sticky;
-  top: 1rem;
-  width: 100%;
-  margin: 0 auto 2rem auto;
-
-  &:after {
-    display: none;
-  }
-
-  @media (min-width: 800px) {
-    max-width: 400px;
-  }
-`;
 
 const SortControl = styled.div`
   display: flex;
@@ -218,11 +203,16 @@ export const ImageGrid = ({
   fetchExif,
   shareAlbum
 }) => {
-  const [sharedItems, setSharedItems] = useState([]);
-  const [showSharing, setShowSharing] = useState(false);
-  const [sharingSlug, setSharingSlug] = useState(null);
-  const [sharingError, setSharingError] = useState(null);
   const [sorting, setSorting] = useState({ field: "name", order: "up" });
+  const [
+    sharePopup,
+    showSharing,
+    setShowSharing,
+    sharedItems,
+    toggleSharedItem
+  ] = useSharing(images, expireAt =>
+    shareAlbum(albumName, sharedItems, expireAt)
+  );
 
   useEffect(() => {
     fetchAlbum(albumName, share);
@@ -230,38 +220,11 @@ export const ImageGrid = ({
 
   useEffect(() => {
     setShowSharing(false);
-  }, [albumName]);
+  }, [albumName, setShowSharing]);
 
   const toggleSharing = e => {
     e.preventDefault();
-    if (showSharing) {
-      setShowSharing(false);
-    } else {
-      setSharedItems(images);
-      setShowSharing(true);
-    }
-  };
-
-  const createShare = expireAt => {
-    shareAlbum(albumName, sharedItems, expireAt)
-      .then(({ slug }) => setSharingSlug(slug))
-      .catch(e => setSharingError(e.message));
-  };
-
-  const finalizeSharing = () => {
-    setShowSharing(false);
-    setSharingSlug(null);
-    setSharingError(null);
-  };
-
-  const toggleSharedItem = image => {
-    if (!showSharing) return;
-
-    if (sharedItems.includes(image)) {
-      setSharedItems(sharedItems.filter(i => i !== image));
-    } else {
-      setSharedItems([...sharedItems, image]);
-    }
+    setShowSharing(true);
   };
 
   const sortImages = sorting => setSorting(sorting);
@@ -297,15 +260,7 @@ export const ImageGrid = ({
         onSort={sortImages}
         onShare={toggleSharing}
       />
-      {showSharing && (
-        <StickySharePopup
-          items={sharedItems}
-          onShare={createShare}
-          slug={sharingSlug}
-          error={sharingError}
-          onClose={finalizeSharing}
-        />
-      )}
+      {showSharing && sharePopup}
       <Images>{imageItems}</Images>
       <Route
         path={`${match.url}/:imageName`}
