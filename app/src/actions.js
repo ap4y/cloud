@@ -172,6 +172,21 @@ export const shareAlbum = (albumName, images, expireAt) => dispatch =>
       });
       return share;
     }, handleError(dispatch, null, true));
+export const shareFolder = (folder, items, expireAt) => dispatch =>
+  apiClient
+    .do("/shares", "POST", {
+      type: "files",
+      name: folder.path,
+      items: items.map(({ path }) => path),
+      expires_at: expireAt
+    })
+    .then(share => {
+      dispatch({
+        type: CREATE_SHARE_SUCCESS,
+        share
+      });
+      return share;
+    }, handleError(dispatch, null, true));
 
 export const SHARE_SUCCESS = "SHARE_SUCCESS";
 export const fetchShare = slug => dispatch =>

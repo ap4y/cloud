@@ -9,9 +9,11 @@ import {
   fetchFile,
   removeFile,
   uploadFile,
-  createFolder
+  createFolder,
+  shareFolder
 } from "../actions";
 import { locateInTree } from "../lib/utils";
+import useSharing from "../lib/useSharing";
 
 const viewableExt = ["md", "org", "txt"];
 
@@ -63,12 +65,45 @@ const Files = styled.div`
 `;
 
 const FilesItem = styled.div`
+position: relative;
+
   a {
     color: var(--secondary-color);
   }
 
   a:hover {
     color: var(--primary-color);
+  }
+
+  &:before {
+    display: ${({ active }) => (active ? "block" : "none")};
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    cursor: pointer;
+  }
+
+  &:after {
+    display: ${({ active }) => (active ? "flex" : "none")};
+    content: "${({ selected }) => (selected ? "✓" : "")}";
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 25px;
+    height: 25px;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+
+    background: var(--outline-color);
+    border-radius: 15px;
+
+    color: var(--primary-text-color);
+    font-weight: 700;
   }
 `;
 
@@ -133,9 +168,19 @@ export const FilesGrid = ({
   fetchFile,
   removeFile,
   uploadFile,
-  createFolder
+  createFolder,
+  shareFolder
 }) => {
   const [content, setContent] = useState(null);
+  const [
+    sharePopup,
+    showSharing,
+    setShowSharing,
+    sharedItems,
+    toggleSharedItem
+  ] = useSharing(folder.children, expireAt =>
+    shareFolder(folder, sharedItems, expireAt)
+  );
 
   const fileInputRef = useRef(null);
 
@@ -153,6 +198,10 @@ export const FilesGrid = ({
 
     fetchFile(file.url).then(content => setContent(content));
   }, [file, fetchFile]);
+
+  useEffect(() => {
+    setShowSharing(false);
+  }, [folder, setShowSharing]);
 
   const deleteFile = e => {
     e.preventDefault();
@@ -185,11 +234,21 @@ export const FilesGrid = ({
     createFolder(folder, folderName);
   };
 
+  const toggleSharing = e => {
+    e.preventDefault();
+    setShowSharing(true);
+  };
+
   const fileItems = folder.children
     .sort((a, b) => `${a.type}${a.name}`.localeCompare(`${b.type}${b.name}`))
     .map(file => {
       return (
-        <FilesItem key={file.path}>
+        <FilesItem
+          key={file.path}
+          active={showSharing}
+          selected={sharedItems.includes(file)}
+          onClick={() => toggleSharedItem(file)}
+        >
           {file.type === "directory" && (
             <NavLink to={`/files${encodeURI(file.path)}/`}>
               <DirCell dir={file} />
@@ -214,7 +273,9 @@ export const FilesGrid = ({
         onDelete={deleteFile}
         onUpload={presentUpload}
         onMkdir={mkdir}
+        onShare={toggleSharing}
       />
+      {showSharing && sharePopup}
       {!file && <Files>{fileItems}</Files>}
       {file && !content && <FileCell file={file} large withModTime />}
       {file && content && (
@@ -239,5 +300,5 @@ export default connect(
     const { folder, file } = locateInTree(tree, path);
     return { file, folder, items: folder.children };
   },
-  { fetchFile, removeFile, uploadFile, createFolder }
+  { fetchFile, removeFile, uploadFile, createFolder, shareFolder }
 )(FilesGrid);
