@@ -34,6 +34,33 @@ export const GalleryItems = ({ gallery, items }) => {
   );
 };
 
+const FileList = styled.ul`
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  i {
+    margin-right: 0.5rem;
+  }
+`;
+
+export const FilesItems = ({ folder, items }) => {
+  return (
+    <FileList>
+      {items.map((item, idx) => (
+        <li key={idx}>
+          <i className="material-icons-round">arrow_right</i>
+          {item}
+        </li>
+      ))}
+    </FileList>
+  );
+};
+
 const Share = styled.div`
   margin-bottom: 7rem;
 
@@ -99,10 +126,12 @@ export const SharesList = ({ shares, fetchShares, removeShare, history }) => {
           <i className="material-icons-round">link</i>
         </a>
 
-        {name}
+        {type === "gallery" && `Gallery: ${name}`}
+        {type === "files" && `Folder: ${name}`}
       </h3>
 
       {type === "gallery" && <GalleryItems gallery={name} items={items} />}
+      {type === "files" && <FilesItems folder={name} items={items} />}
 
       <div>
         <button onClick={() => removeShare(slug)}>

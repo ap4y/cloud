@@ -203,7 +203,7 @@ export const FilesGrid = ({
     }
 
     fetchFile(file.url, share).then(content => setContent(content));
-  }, [file, fetchFile]);
+  }, [file, fetchFile, share]);
 
   useEffect(() => {
     setShowSharing(false);
