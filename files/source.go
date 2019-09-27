@@ -122,7 +122,7 @@ func (ds *diskSource) Tree() (*Item, error) {
 
 func (ds *diskSource) Mkdir(path string) (*Item, error) {
 	diskPath := pathutil.Join(ds.basePath, path)
-	if err := os.Mkdir(diskPath, 0600); err != nil {
+	if err := os.Mkdir(diskPath, 0700); err != nil {
 		return nil, fmt.Errorf("mkdir %s: %s", diskPath, err)
 	}
 

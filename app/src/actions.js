@@ -64,6 +64,7 @@ class APIClient {
     }
 
     return fetch(`${this.url}/api${path}`, {
+      cache: "no-cache",
       method: method,
       headers: reqHeaders,
       body:
@@ -235,7 +236,7 @@ export const uploadFile = (folder, file) => dispatch => {
   formData.append(`file`, file);
 
   return apiClient
-    .do(`/files${folder.url}/file`, "POST", formData, {
+    .do(`/files/upload/${folder.url}`, "POST", formData, {
       "Content-Type": "multipart/form-data"
     })
     .then(file => {

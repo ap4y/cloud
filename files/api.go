@@ -130,12 +130,7 @@ func (api *filesAPI) removeFile(w http.ResponseWriter, req *http.Request) {
 
 func itemPath(item *Item) string {
 	if item.Type == ItemTypeFile {
-		path := strings.ReplaceAll(item.Path, item.Name, "")
-		if path == "/" {
-			path = "//"
-		}
-
-		return fmt.Sprintf("%sfile/%s", path, item.Name)
+		return fmt.Sprintf("/file%s", item.Path)
 	}
 
 	return item.Path
