@@ -32,6 +32,7 @@ func NewFilesAPI(source Source) http.Handler {
 	mux.Route("/", func(r chi.Router) {
 		r.Get("/", verifyHandler("", api.listTree))
 		r.Post("/mkdir/{path}*", share.BlockHandler(api.createFolder))
+		r.Post("/rmdir/{path}*", share.BlockHandler(api.removeFolder))
 		r.Post("/upload/{path}*", share.BlockHandler(api.uploadFile))
 		r.Get("/file/{path}*", verifyHandler("path", api.getFile))
 		r.Delete("/file/{path}*", share.BlockHandler(api.removeFile))
@@ -68,6 +69,16 @@ func (api *filesAPI) listTree(w http.ResponseWriter, req *http.Request) {
 
 func (api *filesAPI) createFolder(w http.ResponseWriter, req *http.Request) {
 	item, err := api.source.Mkdir(chi.URLParam(req, "path"))
+	if err != nil {
+		httputil.Error(w, fmt.Sprint("failed to created folder:", err), http.StatusBadRequest)
+		return
+	}
+
+	httputil.Respond(w, toAPIItem(item))
+}
+
+func (api *filesAPI) removeFolder(w http.ResponseWriter, req *http.Request) {
+	item, err := api.source.Rmdir(chi.URLParam(req, "path"))
 	if err != nil {
 		httputil.Error(w, fmt.Sprint("failed to created folder:", err), http.StatusBadRequest)
 		return

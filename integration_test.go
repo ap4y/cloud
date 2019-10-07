@@ -40,6 +40,7 @@ var privateRoutes = []struct {
 	{"GET", "/gallery/album1/exif/test.jpg", "", false},
 	{"GET", "/files", "", false},
 	{"POST", "/files/mkdir/testfoo", "", false},
+	{"POST", "/files/rmdir/testfoo", "", false},
 	{"POST", "/files/upload/test1", "bar", true},
 	{"DELETE", "/files/file/test1/test", "", false},
 	{"GET", "/files/file/foo", "", false},
@@ -67,6 +68,7 @@ var prohibitedRoutes = []struct {
 }{
 	{"GET", "/share/bar/gallery", ""},
 	{"POST", "/share/baz/files/mkdir/testfoo", ""},
+	{"POST", "/share/baz/files/rmdir/testfoo", ""},
 	{"POST", "/share/baz/files/upload/foo", ""},
 	{"DELETE", "/share/baz/files/file/foo", ""},
 }
@@ -143,7 +145,6 @@ func TestAPIServer(t *testing.T) {
 			assert.Equal(t, http.StatusOK, res.StatusCode)
 		})
 	}
-	os.RemoveAll("./files/fixtures/testfoo")
 
 	for _, tc := range publicRoutes {
 		t.Run(fmt.Sprintf("%s%s", tc.method, tc.url), func(t *testing.T) {

@@ -81,6 +81,42 @@ func TestDiskSource(t *testing.T) {
 		assert.Equal(t, "/test2/folder", item.Path)
 	})
 
+	t.Run("Rmdir", func(t *testing.T) {
+		_, err := source.Mkdir("/test2/folder")
+		require.NoError(t, err)
+
+		item, err := source.Rmdir("/test2/folder")
+		require.NoError(t, err)
+
+		assert.Equal(t, ItemTypeDirectory, item.Type)
+		assert.Equal(t, "folder", item.Name)
+		assert.Equal(t, "/test2/folder", item.Path)
+	})
+
+	t.Run("Mkdir/unsafe_path", func(t *testing.T) {
+		_, err := source.Mkdir("/test2/folder")
+		require.NoError(t, err)
+
+		item, err := source.Rmdir("../test2/folder")
+		require.NoError(t, err)
+
+		assert.Equal(t, ItemTypeDirectory, item.Type)
+		assert.Equal(t, "folder", item.Name)
+		assert.Equal(t, "/test2/folder", item.Path)
+	})
+
+	t.Run("Mkdir/unsafe_folder", func(t *testing.T) {
+		_, err := source.Mkdir("/test2/folder")
+		require.NoError(t, err)
+
+		item, err := source.Rmdir("/test2/..folder")
+		require.NoError(t, err)
+
+		assert.Equal(t, ItemTypeDirectory, item.Type)
+		assert.Equal(t, "folder", item.Name)
+		assert.Equal(t, "/test2/folder", item.Path)
+	})
+
 	t.Run("File", func(t *testing.T) {
 		r, err := source.File("foo")
 		require.NoError(t, err)

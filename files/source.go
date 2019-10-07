@@ -34,6 +34,7 @@ type Item struct {
 type Source interface {
 	Tree() (*Item, error)
 	Mkdir(path string) (*Item, error)
+	Rmdir(path string) (*Item, error)
 	File(filePath string) (*os.File, error)
 	Save(r io.Reader, filePath string) (*Item, error)
 	Remove(filePath string) (*Item, error)
@@ -124,6 +125,26 @@ func (ds *diskSource) Mkdir(path string) (*Item, error) {
 	diskPath := pathutil.Join(ds.basePath, path)
 	if err := os.Mkdir(diskPath, 0700); err != nil {
 		return nil, fmt.Errorf("mkdir %s: %s", diskPath, err)
+	}
+
+	relPath, err := filepath.Rel(ds.basePath, diskPath)
+	if err != nil {
+		return nil, fmt.Errorf("rel %s: %s", diskPath, err)
+	}
+
+	_, folder := filepath.Split(diskPath)
+	return &Item{
+		Type:    ItemTypeDirectory,
+		Name:    folder,
+		Path:    "/" + relPath,
+		ModTime: time.Now(),
+	}, nil
+}
+
+func (ds *diskSource) Rmdir(path string) (*Item, error) {
+	diskPath := pathutil.Join(ds.basePath, path)
+	if err := os.RemoveAll(diskPath); err != nil {
+		return nil, fmt.Errorf("rmdir %s: %s", diskPath, err)
 	}
 
 	relPath, err := filepath.Rel(ds.basePath, diskPath)

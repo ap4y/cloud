@@ -168,11 +168,10 @@ func TestFilesAPI(t *testing.T) {
 		require.Equal(t, http.StatusNotFound, resp.StatusCode)
 	})
 
-	t.Run("createFolder", func(t *testing.T) {
+	t.Run("createFolder/removeFolder", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("POST", "http://cloud.api/mkdir/test1/subfolder", nil)
 		api.ServeHTTP(w, req)
-		defer os.RemoveAll("./fixtures/test1/subfolder")
 
 		resp := w.Result()
 		require.Equal(t, http.StatusOK, resp.StatusCode)
@@ -182,11 +181,34 @@ func TestFilesAPI(t *testing.T) {
 		require.NoError(t, json.NewDecoder(resp.Body).Decode(item))
 		assert.Equal(t, "subfolder", item.Name)
 		assert.Equal(t, "/test1/subfolder", item.URL)
+
+		w = httptest.NewRecorder()
+		req = httptest.NewRequest("POST", "http://cloud.api/rmdir/test1/subfolder", nil)
+		api.ServeHTTP(w, req)
+
+		resp = w.Result()
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+		assert.Equal(t, "application/json", resp.Header.Get("Content-Type"))
+
+		item = &apiItem{}
+		require.NoError(t, json.NewDecoder(resp.Body).Decode(item))
+		assert.Equal(t, "subfolder", item.Name)
+		assert.Equal(t, "/test1/subfolder", item.URL)
 	})
 
 	t.Run("createFolder/with share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("POST", "http://cloud.api/mkdir/test1/subfolder", nil)
+		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
+		api.ServeHTTP(w, req.WithContext(ctx))
+
+		resp := w.Result()
+		require.Equal(t, http.StatusNotFound, resp.StatusCode)
+	})
+
+	t.Run("removeFolder/with share", func(t *testing.T) {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("POST", "http://cloud.api/rmdir/test1/subfolder", nil)
 		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
