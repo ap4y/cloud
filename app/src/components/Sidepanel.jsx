@@ -12,8 +12,13 @@ const SettingsBar = styled.div`
     display: flex;
     align-items: center;
     position: relative;
+    margin-right: 1rem;
 
     color: var(--secondary-color);
+  }
+
+  a:last-of-type {
+    margin-right: 0;
   }
 
   a:hover small {
@@ -46,9 +51,13 @@ const Container = styled.div`
   margin-right: ${({ collapsed }) => (collapsed ? -2 : 0)}rem;
 
   nav {
-    width: ${({ collapsed }) => (collapsed ? 0 : "calc(100% + 50px)")};
+    width: ${({ collapsed }) => (collapsed ? 0 : "calc(100% + 5rem)")};
     overflow-x: hidden;
     overflow-y: auto;
+
+    > div {
+      margin-right: 5rem;
+    }
   }
 
   ${SettingsBar} {

@@ -151,7 +151,13 @@ export const SharesList = ({ shares, fetchShares, removeShare, history }) => {
   return (
     <SharesContainer>
       <h1>Shares</h1>
-      <BackLink href="#back" onClick={history.goBack}>
+      <BackLink
+        href="#back"
+        onClick={e => {
+          e.preventDefault();
+          history.goBack();
+        }}
+      >
         <i className="material-icons-round">close</i>
       </BackLink>
       {shareItems}

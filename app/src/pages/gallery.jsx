@@ -77,6 +77,7 @@ export const ImageCell = ({ image: { name, path, updated_at }, src }) => {
 
 const SortControl = styled.div`
   display: flex;
+  margin-right: 2rem;
 
   a {
     display: flex;
