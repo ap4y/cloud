@@ -119,8 +119,21 @@ const FilesToolbar = ({
   onShare,
   onMkdir
 }) => {
+  const components = path.split("/").filter(item => item.length > 0);
+  const breadcrumbs = (
+    <>
+      <NavLink to="/files" exact>
+        .
+      </NavLink>
+      {components.map((item, idx) => (
+        <NavLink to={`/files/${components.slice(0, idx + 1).join("/")}`} exact>
+          {`/${item}`}
+        </NavLink>
+      ))}
+    </>
+  );
   return (
-    <Toolbar title={file ? file.path : path}>
+    <Toolbar title={breadcrumbs}>
       {file && (
         <>
           {canEdit && canSave && (
@@ -255,7 +268,7 @@ export const FilesGrid = ({
           selected={sharedItems.includes(file)}
           onClick={() => toggleSharedItem(file)}
         >
-          <NavLink to={`${match.url}${encodeURI(file.path)}`}>
+          <NavLink to={`${match.url}/${encodeURI(file.name)}`}>
             {file.type === "directory" && <DirCell dir={file} />}
             {file.type === "file" && <FileCell file={file} />}
           </NavLink>
@@ -266,7 +279,7 @@ export const FilesGrid = ({
   return (
     <FilesContent>
       <FilesToolbar
-        path={folder.path}
+        path={file ? file.path : folder.path}
         file={file}
         fileURL={file && apiClient.fileURL(file, share)}
         canSave={content !== null}
