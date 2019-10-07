@@ -274,3 +274,12 @@ export const createFolder = (parent, name) => dispatch =>
       item
     });
   }, handleError(dispatch));
+
+export const FILE_RMDIR_SUCCESS = "FILE_RMDIR_SUCCESS";
+export const removeFolder = folder => dispatch =>
+  apiClient.do(`/files/rmdir/${folder.url}`, "POST").then(item => {
+    dispatch({
+      type: FILE_RMDIR_SUCCESS,
+      folder
+    });
+  }, handleError(dispatch));

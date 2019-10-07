@@ -10,6 +10,7 @@ import {
   removeFile,
   uploadFile,
   createFolder,
+  removeFolder,
   shareFolder
 } from "../actions";
 import { locateInTree } from "../lib/utils";
@@ -117,7 +118,8 @@ const FilesToolbar = ({
   onDelete,
   onUpload,
   onShare,
-  onMkdir
+  onMkdir,
+  onRmdir
 }) => {
   const components = path.split("/").filter(item => item.length > 0);
   const breadcrumbs = (
@@ -126,7 +128,11 @@ const FilesToolbar = ({
         .
       </NavLink>
       {components.map((item, idx) => (
-        <NavLink to={`/files/${components.slice(0, idx + 1).join("/")}`} exact>
+        <NavLink
+          key={idx}
+          to={`/files/${components.slice(0, idx + 1).join("/")}`}
+          exact
+        >
           {`/${item}`}
         </NavLink>
       ))}
@@ -153,12 +159,17 @@ const FilesToolbar = ({
       )}
       {!file && canEdit && (
         <>
-          <a href="#mkdir" onClick={onMkdir}>
-            <i className="material-icons-round">create_new_folder</i>
-          </a>
           <a href="#upload" onClick={onUpload}>
             <i className="material-icons-round">upload</i>
           </a>
+          <a href="#mkdir" onClick={onMkdir}>
+            <i className="material-icons-round">create_new_folder</i>
+          </a>
+          {path !== "/" && (
+            <a href="#rmdir" onClick={onRmdir}>
+              <i className="material-icons-round">delete</i>
+            </a>
+          )}
           <a href="#share" onClick={onShare}>
             <i className="material-icons-round">share</i>
           </a>
@@ -188,6 +199,7 @@ export const FilesGrid = ({
   removeFile,
   uploadFile,
   createFolder,
+  removeFolder,
   shareFolder
 }) => {
   const [content, setContent] = useState(null);
@@ -253,6 +265,17 @@ export const FilesGrid = ({
     createFolder(folder, folderName);
   };
 
+  const rmdir = e => {
+    e.preventDefault();
+    if (!window.confirm("Are you sure?")) return;
+
+    const parentPath = folder.path
+      .split("/")
+      .slice(0, -1)
+      .join("/");
+    removeFolder(folder).then(() => history.replace(`/files${parentPath}`));
+  };
+
   const toggleSharing = e => {
     e.preventDefault();
     setShowSharing(true);
@@ -288,6 +311,7 @@ export const FilesGrid = ({
         onDelete={deleteFile}
         onUpload={presentUpload}
         onMkdir={mkdir}
+        onRmdir={rmdir}
         onShare={toggleSharing}
       />
       {showSharing && sharePopup}
@@ -315,5 +339,5 @@ export default connect(
     const { folder, file } = locateInTree(tree, path);
     return { file, folder, items: folder.children, share: slug };
   },
-  { fetchFile, removeFile, uploadFile, createFolder, shareFolder }
+  { fetchFile, removeFile, uploadFile, createFolder, removeFolder, shareFolder }
 )(FilesGrid);

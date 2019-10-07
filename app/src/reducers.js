@@ -1,6 +1,6 @@
 import { combineReducers } from "redux";
 import * as ActionTypes from "./actions";
-import { removeFromTree, addToTree } from "./lib/utils";
+import { locateInTree, removeFromTree, addToTree } from "./lib/utils";
 
 function modules(state = [], action) {
   switch (action.type) {
@@ -49,6 +49,16 @@ function files(state = { tree: { name: "", path: "", children: [] } }, action) {
       return {
         ...state,
         tree: addToTree(state.tree, action.folder, action.item)
+      };
+    case ActionTypes.FILE_RMDIR_SUCCESS:
+      const parentPath = action.folder.path
+        .split("/")
+        .slice(0, -1)
+        .join("/");
+      const { folder } = locateInTree(state.tree, parentPath);
+      return {
+        ...state,
+        tree: removeFromTree(state.tree, folder, action.folder)
       };
     default:
       return state;
