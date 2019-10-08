@@ -1,6 +1,6 @@
 import React from "react";
 import { shallow } from "enzyme";
-import { SharesList, GalleryItems } from "./shares";
+import { SharesList, GalleryItems, FilesItems } from "./shares";
 
 const share = {
   slug: "foo",
@@ -21,7 +21,7 @@ it("renders list of shares", () => {
       .find("h3")
       .at(0)
       .text()
-  ).toEqual("linkTest");
+  ).toEqual("linkGallery: Test");
 
   expect(wrapper.find("GalleryItems").length).toEqual(1);
 
@@ -52,7 +52,7 @@ it("removes shares", () => {
   expect(removedSlug).toEqual("foo");
 });
 
-it("renders share items", () => {
+it("renders gallery share items", () => {
   const wrapper = shallow(<GalleryItems gallery="foo" items={share.items} />);
   expect(wrapper.find("img").length).toEqual(2);
   expect(
@@ -61,4 +61,15 @@ it("renders share items", () => {
       .first()
       .prop("src")
   ).toEqual("/api/gallery/foo/thumbnail/Test1.jpg?jwt=foo");
+});
+
+it("renders files share items", () => {
+  const wrapper = shallow(<FilesItems items={share.items} />);
+  expect(wrapper.find("li").length).toEqual(2);
+  expect(
+    wrapper
+      .find("li")
+      .first()
+      .text()
+  ).toEqual("arrow_rightTest1.jpg");
 });

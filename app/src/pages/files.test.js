@@ -1,6 +1,7 @@
 import React from "react";
 import { act } from "react-dom/test-utils";
 import { shallow, mount } from "enzyme";
+import { HashRouter } from "react-router-dom";
 import { FilesGrid, DirCell, FileCell } from "./files";
 
 const tree = {
@@ -13,7 +14,7 @@ const tree = {
 };
 
 it("renders files list", () => {
-  const wrapper = shallow(<FilesGrid folder={tree} />);
+  const wrapper = shallow(<FilesGrid folder={tree} match={{ url: "/test" }} />);
 
   expect(wrapper.find("FilesToolbar").prop("path")).toEqual("/test");
 
@@ -36,20 +37,22 @@ it("renders files list", () => {
       .find("NavLink")
       .first()
       .prop("to")
-  ).toEqual("/files/bar/");
+  ).toEqual("/test/bar");
   expect(
     wrapper
       .find("NavLink")
       .last()
       .prop("to")
-  ).toEqual("/files/foo");
+  ).toEqual("/test/foo");
 });
 
 it("renders specific file", () => {
-  const file = { name: "foo", path: "/foo" };
-  const wrapper = shallow(<FilesGrid folder={tree} file={file} />);
+  const file = { name: "foo", path: "/foo.org" };
+  const wrapper = shallow(
+    <FilesGrid folder={tree} file={file} match={{ url: "/test" }} />
+  );
 
-  expect(wrapper.find("FilesToolbar").prop("path")).toEqual("/test");
+  expect(wrapper.find("FilesToolbar").prop("path")).toEqual("/foo.org");
   expect(wrapper.find("FilesToolbar").prop("file")).toEqual(file);
 
   expect(wrapper.find("DirCell").length).toEqual(0);
@@ -71,14 +74,17 @@ it("renders viewable file content", async () => {
   let wrapper = null;
   await act(async () => {
     wrapper = mount(
-      <FilesGrid
-        folder={tree}
-        file={file}
-        fetchFile={url => {
-          fetchedURL = url;
-          return new Promise(resolve => resolve("foo"));
-        }}
-      />
+      <HashRouter>
+        <FilesGrid
+          folder={tree}
+          file={file}
+          match={{ url: "/test" }}
+          fetchFile={url => {
+            fetchedURL = url;
+            return new Promise(resolve => resolve("foo"));
+          }}
+        />
+      </HashRouter>
     );
   });
 
@@ -86,7 +92,7 @@ it("renders viewable file content", async () => {
 
   expect(fetchedURL).toEqual(file.url);
 
-  expect(wrapper.find("FilesToolbar").prop("path")).toEqual("/test");
+  expect(wrapper.find("FilesToolbar").prop("path")).toEqual("/foo.org");
   expect(wrapper.find("FilesToolbar").prop("file")).toEqual(file);
 
   expect(wrapper.find("TextEditor").length).toEqual(1);
@@ -139,6 +145,7 @@ it("uploads file", () => {
   const wrapper = shallow(
     <FilesGrid
       folder={tree}
+      match={{ url: "/test" }}
       uploadFile={(folder, file) => {
         result.folder = folder;
         result.file = file;
@@ -157,6 +164,7 @@ it("saves file", () => {
     <FilesGrid
       folder={tree}
       file={{ name: "foo" }}
+      match={{ url: "/test" }}
       uploadFile={(folder, file) => {
         result.folder = folder;
         result.file = file;
@@ -177,9 +185,9 @@ it("removes file", () => {
     <FilesGrid
       folder={tree}
       file={{ name: "foo" }}
+      match={{ url: "/test" }}
       removeFile={(folder, file) => {
-        result.folder = folder;
-        result.file = file;
+        result = { folder, file };
         return new Promise(() => {});
       }}
     />
@@ -188,4 +196,102 @@ it("removes file", () => {
 
   expect(result.folder).toEqual(tree);
   expect(result.file.name).toEqual("foo");
+});
+
+it("creates directory", () => {
+  global.prompt = jest.fn(() => "Test");
+
+  let result = {};
+  const wrapper = shallow(
+    <FilesGrid
+      folder={tree}
+      file={{ name: "foo" }}
+      match={{ url: "/test" }}
+      createFolder={(folder, name) => {
+        result = { folder, name };
+        return new Promise(() => {});
+      }}
+    />
+  );
+  wrapper.find("FilesToolbar").invoke("onMkdir")({ preventDefault: () => {} });
+
+  expect(result.folder).toEqual(tree);
+  expect(result.name).toEqual("Test");
+});
+
+it("removes directory", () => {
+  global.confirm = jest.fn(() => true);
+
+  let result = {};
+  const wrapper = shallow(
+    <FilesGrid
+      folder={tree}
+      file={{ name: "foo" }}
+      match={{ url: "/test" }}
+      removeFolder={folder => {
+        result = { folder };
+        return new Promise(() => {});
+      }}
+    />
+  );
+  wrapper.find("FilesToolbar").invoke("onRmdir")({ preventDefault: () => {} });
+
+  expect(result.folder).toEqual(tree);
+});
+
+it("creates shares", () => {
+  let shared = false;
+  const wrapper = shallow(
+    <FilesGrid
+      folder={tree}
+      file={{ name: "foo" }}
+      match={{ url: "/test" }}
+      shareFolder={() => {
+        shared = true;
+        return new Promise(() => {});
+      }}
+    />
+  );
+  wrapper.find("FilesToolbar").invoke("onShare")({ preventDefault: () => {} });
+  expect(wrapper.find("StickySharePopup").exists()).toBeTruthy();
+  wrapper.find("StickySharePopup").invoke("onShare")();
+  expect(shared).toBeTruthy();
+});
+
+it("renders shares", async () => {
+  const file = {
+    name: "foo.org",
+    path: "/foo.org",
+    url: "/files/test/files/foo.org"
+  };
+
+  let result = {};
+  let wrapper = null;
+  await act(async () => {
+    wrapper = mount(
+      <HashRouter>
+        <FilesGrid
+          folder={tree}
+          file={file}
+          match={{ url: "/test" }}
+          share="test"
+          fetchFile={(url, share) => {
+            result = { url, share };
+            return new Promise(resolve => resolve("foo"));
+          }}
+        />
+      </HashRouter>
+    );
+  });
+
+  wrapper.update();
+
+  expect(result.url).toEqual(file.url);
+  expect(result.share).toEqual("test");
+
+  expect(wrapper.find("FilesToolbar").prop("path")).toEqual("/foo.org");
+  expect(wrapper.find("FilesToolbar").prop("file")).toEqual(file);
+
+  expect(wrapper.find("TextEditor").length).toEqual(1);
+  expect(wrapper.find("TextEditor").prop("value")).toEqual("foo");
 });
