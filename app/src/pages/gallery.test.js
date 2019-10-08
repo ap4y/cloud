@@ -48,7 +48,7 @@ it("renders image cell", () => {
 
   wrapper.find("VisibilitySensor").invoke("onChange")(true);
   expect(wrapper.find("figcaption").text()).toEqual(
-    "Test1/1/1970, 12:00:00 PM"
+    `Test${new Date(0).toLocaleString()}`
   );
   expect(wrapper.find("img").prop("src")).toEqual("test.jpg");
 });

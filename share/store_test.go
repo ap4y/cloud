@@ -33,13 +33,19 @@ func TestShareStore(t *testing.T) {
 		res, err := store.All()
 		require.NoError(t, err)
 		require.Len(t, res, 1)
-		assert.Equal(t, *share, res[0])
+		assert.Equal(t, "foo", res[0].Slug)
+		assert.Equal(t, common.ModuleGallery, res[0].Type)
+		assert.Equal(t, []string{"foo", "bar"}, res[0].Items)
+		assert.Equal(t, int64(0), res[0].ExpiresAt.Unix())
 	})
 
 	t.Run("Get", func(t *testing.T) {
 		res, err := store.Get("foo")
 		require.NoError(t, err)
-		assert.Equal(t, share, res)
+		assert.Equal(t, "foo", res.Slug)
+		assert.Equal(t, common.ModuleGallery, res.Type)
+		assert.Equal(t, []string{"foo", "bar"}, res.Items)
+		assert.Equal(t, int64(0), res.ExpiresAt.Unix())
 	})
 
 	t.Run("Remove", func(t *testing.T) {

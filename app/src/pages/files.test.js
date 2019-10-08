@@ -137,7 +137,7 @@ it("renders file cell", () => {
       .find("span")
       .last()
       .text()
-  ).toEqual("Updated At: 1/1/1970, 12:00:00 PM");
+  ).toEqual(`Updated At: ${new Date(0).toLocaleString()}`);
 });
 
 it("uploads file", () => {

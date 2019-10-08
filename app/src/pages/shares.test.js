@@ -32,7 +32,7 @@ it("renders list of shares", () => {
       .find("div")
       .last()
       .text()
-  ).toEqual("access_time1/1/1970");
+  ).toEqual(`access_time${new Date(0).toLocaleDateString()}`);
 });
 
 it("removes shares", () => {
