@@ -8,7 +8,7 @@ import "./milligram.css";
 import "./index.css";
 
 import App from "./App";
-import rootReducer from "./reducers";
+import rootReducer from "./lib/reducers";
 
 const store = createStore(rootReducer, applyMiddleware(thunkMiddleware));
 

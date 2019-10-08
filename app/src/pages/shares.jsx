@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import styled from "@emotion/styled/macro";
 import { connect } from "react-redux";
 
-import { apiClient, fetchShares, removeShare } from "../actions";
+import { apiClient, fetchShares, removeShare } from "../lib/actions";
 
 const Thumbs = styled.div`
   display: grid;

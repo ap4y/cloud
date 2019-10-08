@@ -7,7 +7,7 @@ import Img from "react-image";
 import EXIFData from "./ImageEXIF";
 import { Spinner } from "./Controls";
 
-import { apiClient } from "../actions";
+import { apiClient } from "../lib/actions";
 
 const Figure = styled.figure`
   margin: 0;

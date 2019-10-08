@@ -6,7 +6,7 @@ import VisibilitySensor from "react-visibility-sensor";
 
 import ImagePreview from "../components/ImagePreview";
 import { Toolbar } from "../components/Controls";
-import { apiClient, fetchAlbum, shareAlbum, fetchExif } from "../actions";
+import { apiClient, fetchAlbum, shareAlbum, fetchExif } from "../lib/actions";
 import useSharing from "../lib/useSharing";
 
 const Figure = styled.figure`

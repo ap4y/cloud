@@ -12,7 +12,7 @@ import {
   createFolder,
   removeFolder,
   shareFolder
-} from "../actions";
+} from "../lib/actions";
 import { locateInTree } from "../lib/utils";
 import useSharing from "../lib/useSharing";
 

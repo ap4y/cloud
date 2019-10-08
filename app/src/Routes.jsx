@@ -4,7 +4,7 @@ import { Route, Switch, Redirect } from "react-router-dom";
 
 import ImageGrid from "./pages/gallery";
 import FilesGrid from "./pages/files";
-import { fetchGalleries, fetchFilesTree, fetchShare } from "./actions";
+import { fetchGalleries, fetchFilesTree, fetchShare } from "./lib/actions";
 
 const GalleryRoutesContainer = ({ albums, fetchGalleries }) => {
   useEffect(() => {

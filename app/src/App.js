@@ -9,7 +9,7 @@ import LoginForm from "./pages/login";
 import { ShareRoutes, GalleryRoutes, FilesRoutes } from "./Routes";
 import SharesList from "./pages/shares";
 import Sidepanel from "./components/Sidepanel";
-import { apiClient, fetchModules, signOut } from "./actions";
+import { apiClient, fetchModules, signOut } from "./lib/actions";
 
 const supportedModules = {
   gallery: {

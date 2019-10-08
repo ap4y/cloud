@@ -5,7 +5,7 @@ import { Redirect } from "react-router-dom";
 
 import { Alert } from "../components/Controls";
 
-import { signIn, resetAuthError, resetErrorMessage } from "../actions";
+import { signIn, resetAuthError, resetErrorMessage } from "../lib/actions";
 
 const Container = styled.div`
   display: flex;
