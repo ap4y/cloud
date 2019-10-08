@@ -50,7 +50,7 @@ function files(state = { tree: { name: "", path: "", children: [] } }, action) {
         ...state,
         tree: addToTree(state.tree, action.folder, action.item)
       };
-    case ActionTypes.FILE_RMDIR_SUCCESS:
+    case ActionTypes.FILE_RMDIR_SUCCESS: {
       const parentPath = action.folder.path
         .split("/")
         .slice(0, -1)
@@ -60,6 +60,7 @@ function files(state = { tree: { name: "", path: "", children: [] } }, action) {
         ...state,
         tree: removeFromTree(state.tree, folder, action.folder)
       };
+    }
     default:
       return state;
   }

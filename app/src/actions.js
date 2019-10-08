@@ -277,7 +277,7 @@ export const createFolder = (parent, name) => dispatch =>
 
 export const FILE_RMDIR_SUCCESS = "FILE_RMDIR_SUCCESS";
 export const removeFolder = folder => dispatch =>
-  apiClient.do(`/files/rmdir/${folder.url}`, "POST").then(item => {
+  apiClient.do(`/files/rmdir/${folder.url}`, "POST").then(() => {
     dispatch({
       type: FILE_RMDIR_SUCCESS,
       folder

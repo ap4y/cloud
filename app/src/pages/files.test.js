@@ -178,7 +178,7 @@ it("saves file", () => {
 });
 
 it("removes file", () => {
-  global.confirm = jest.fn(() => true);
+  window.confirm = jest.fn(() => true);
 
   let result = {};
   const wrapper = shallow(
@@ -199,7 +199,7 @@ it("removes file", () => {
 });
 
 it("creates directory", () => {
-  global.prompt = jest.fn(() => "Test");
+  window.prompt = jest.fn(() => "Test");
 
   let result = {};
   const wrapper = shallow(
@@ -220,7 +220,7 @@ it("creates directory", () => {
 });
 
 it("removes directory", () => {
-  global.confirm = jest.fn(() => true);
+  window.confirm = jest.fn(() => true);
 
   let result = {};
   const wrapper = shallow(

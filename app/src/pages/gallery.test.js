@@ -97,7 +97,7 @@ it("creates shares", () => {
 
 it("requests shares", () => {
   let result = {};
-  const wrapper = mount(
+  mount(
     <HashRouter>
       <ImageGrid
         albumName="Test"
