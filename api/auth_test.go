@@ -75,7 +75,7 @@ func TestAuth(t *testing.T) {
 				handler := Authenticator(credentials)(
 					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 						assert.Equal(t, tc.username, r.Context().Value(common.UsernameCtxKey))
-						io.WriteString(w, "<html><body>Hello World!</body></html>")
+						io.WriteString(w, "<html><body>Hello World!</body></html>") // nolint: errcheck
 					}),
 				)
 
@@ -92,7 +92,7 @@ func TestAuth(t *testing.T) {
 				handler := Authenticator(credentials)(
 					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 						assert.Equal(t, tc.username, r.Context().Value(common.UsernameCtxKey))
-						io.WriteString(w, "<html><body>Hello World!</body></html>")
+						io.WriteString(w, "<html><body>Hello World!</body></html>") // nolint: errcheck
 					}),
 				)
 

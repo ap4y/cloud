@@ -36,7 +36,7 @@ func TestShareHandler(t *testing.T) {
 		Slug:      "foo",
 		Type:      common.ModuleGallery,
 		Items:     []string{"foo", "bar"},
-		ExpiresAt: common.NilTime{time.Time{}},
+		ExpiresAt: common.NilTime{Time: time.Time{}},
 	}
 	require.NoError(t, store.Save(s))
 

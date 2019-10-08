@@ -27,7 +27,7 @@ func TestShareAuthenticator(t *testing.T) {
 	var ctxShare *Share
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		ctxShare, _ = r.Context().Value(common.ShareCtxKey).(*Share)
-		io.WriteString(w, "Hello World!")
+		io.WriteString(w, "Hello World!") // nolint: errcheck
 	}
 
 	mux := chi.NewRouter()

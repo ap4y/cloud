@@ -11,7 +11,7 @@ func Error(w http.ResponseWriter, error string, code int) {
 	w.Header().Set("Content-Type", "application/json")
 
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(map[string]string{"error": error})
+	json.NewEncoder(w).Encode(map[string]string{"error": error}) // nolint: errcheck
 }
 
 // Respond json encodes entity into ResponseWriter or error if encoding failed.

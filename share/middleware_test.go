@@ -16,7 +16,7 @@ import (
 
 func TestBlockHandler(t *testing.T) {
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "<html><body>Hello World!</body></html>")
+		io.WriteString(w, "<html><body>Hello World!</body></html>") // nolint: errcheck
 	}
 
 	t.Run("with share", func(t *testing.T) {
@@ -47,7 +47,7 @@ func TestVerifyHandler(t *testing.T) {
 	filesShare := &Share{Slug: "baz", Type: common.ModuleFiles, Name: "foo", Items: []string{"test.jpg"}}
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "Hello World!")
+		io.WriteString(w, "Hello World!") // nolint: errcheck
 	}
 
 	mux := chi.NewRouter()

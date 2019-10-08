@@ -20,6 +20,8 @@ import (
 	"github.com/go-chi/chi"
 )
 
+// TODO: config validation
+
 // Run is an entry point for a CLI.
 func Run(configPath, devURL, addr string) error {
 	cfg := new(Config)
