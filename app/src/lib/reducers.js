@@ -1,6 +1,6 @@
 import { combineReducers } from "redux";
 import * as ActionTypes from "./actions";
-import { locateInTree, removeFromTree, addToTree } from "./lib/utils";
+import { locateInTree, removeFromTree, addToTree } from "./utils";
 
 function modules(state = [], action) {
   switch (action.type) {

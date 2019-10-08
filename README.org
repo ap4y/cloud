@@ -6,8 +6,10 @@
 
 Screenshots:
 
-- [[https://raw.githubusercontent.com/ap4y/cloud/master/screenshot2.png][Gallery Grid]]
-- [[https://raw.githubusercontent.com/ap4y/cloud/master/screenshot1.png][Gallery Preview]]
+- [[https://gitlab.com/ap4y/cloud/raw/master/screenshot2.png][Gallery Grid]]
+- [[https://gitlab.com/ap4y/cloud/raw/master/screenshot1.png][Gallery Preview]]
+- [[https://gitlab.com/ap4y/cloud/raw/master/screenshot3.png][Files Preview]]
+- [[https://gitlab.com/ap4y/cloud/raw/master/screenshot4.png][Files Grid]]
 
 ** Getting started
 
@@ -43,7 +45,7 @@ local ~cloud~ app to it using ~-devURL~ argument.
 
 ** Configuration
 
-*Cloud* uses ~json~ config files to setup authentication and necessary paths. [[https://github.com/ap4y/cloud/blob/master/config.example.json][Sample config]]:
+*Cloud* uses ~json~ config files to setup authentication and necessary paths. [[https://gitlab.com/ap4y/cloud/blob/master/config.example.json][Sample config]]:
 
 #+BEGIN_SRC js
 {
@@ -52,9 +54,15 @@ local ~cloud~ app to it using ~-devURL~ argument.
   "users": {
     "ap4y": "$2b$10$fEWhY87kzeaV3hUEB6phTuyWjpv73V5m.YcqTxHXnvqEGIou1tXGO"
   },
+  "share": {
+    "path": "./"
+  },
   "gallery": {
     "path": "/mnt/media/Photos/Export/",
     "cache": "/tmp/cloud/"
+  },
+  "files": {
+    "path": "/mnt/media/Photos/Export/"
   }
 }
 #+END_SRC
@@ -65,8 +73,12 @@ Configuration fields:
 - ~modules~ defines enabled modules.
 - ~users~ defines ~bcrypt~ hashes for user credentials, you can use
   ~mkpasswd~ to hash your passwords.
+- ~share~ setups a share storage. ~path~ defines storage location for
+  a disk share storage.
 - ~gallery~ defines necessary paths for the gallery module. ~path~ is
   a gallery source folder and ~cache~ is a thumbnail cache folder.
+- ~files~ defines necessary paths for the files module. ~path~ is
+  a source folder for this module.
 
 Additionally following command line arguments are supported:
 
@@ -80,3 +92,9 @@ Gallery provides common image gallery features: image grid, thumbnails
 and full screen previews. Gallery traverses provided ~path~ on a disk
 and exposes folders with images as shareable galleries. Thumbnails are
 generated on the fly and cached for subsequent use.
+
+** Files
+
+Files provides file viewer interface with a basic management
+features. Files module traverses provided ~path~ on a disk and
+construct a tree, parts of the tree can be individually shared.
