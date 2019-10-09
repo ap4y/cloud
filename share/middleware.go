@@ -3,8 +3,8 @@ package share
 import (
 	"net/http"
 
-	"github.com/ap4y/cloud/common"
 	"github.com/go-chi/chi"
+	"gitlab.com/ap4y/cloud/common"
 )
 
 // BlockHandler responds with NotFound for all requests that have share in context

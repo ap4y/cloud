@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/ap4y/cloud/internal/pathutil"
+	"gitlab.com/ap4y/cloud/internal/pathutil"
 )
 
 // Cache caches gallery metadata.

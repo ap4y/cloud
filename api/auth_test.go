@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ap4y/cloud/common"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gitlab.com/ap4y/cloud/common"
 )
 
 func TestAuth(t *testing.T) {

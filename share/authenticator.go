@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/ap4y/cloud/common"
 	"github.com/go-chi/chi"
+	"gitlab.com/ap4y/cloud/common"
 )
 
 // Authenticator returns new share authentication middleware.

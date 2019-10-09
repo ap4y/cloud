@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ap4y/cloud/internal/httputil"
-	"github.com/ap4y/cloud/share"
 	"github.com/go-chi/chi"
+	"gitlab.com/ap4y/cloud/internal/httputil"
+	"gitlab.com/ap4y/cloud/share"
 )
 
 type shareHandler struct {

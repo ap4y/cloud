@@ -10,10 +10,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ap4y/cloud/common"
-	"github.com/ap4y/cloud/share"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/share"
 )
 
 func TestGalleryAPI(t *testing.T) {

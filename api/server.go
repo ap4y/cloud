@@ -3,11 +3,11 @@ package api
 import (
 	"net/http"
 
-	"github.com/ap4y/cloud/common"
-	"github.com/ap4y/cloud/internal/httputil"
-	"github.com/ap4y/cloud/share"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/internal/httputil"
+	"gitlab.com/ap4y/cloud/share"
 )
 
 // NewServer returns a new root handler for the app.

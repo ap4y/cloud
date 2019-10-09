@@ -13,14 +13,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ap4y/cloud/api"
-	"github.com/ap4y/cloud/common"
-	"github.com/ap4y/cloud/files"
-	"github.com/ap4y/cloud/gallery"
-	"github.com/ap4y/cloud/share"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gitlab.com/ap4y/cloud/api"
+	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/files"
+	"gitlab.com/ap4y/cloud/gallery"
+	"gitlab.com/ap4y/cloud/share"
 )
 
 var privateRoutes = []struct {

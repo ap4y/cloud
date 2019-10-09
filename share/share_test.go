@@ -3,8 +3,8 @@ package share
 import (
 	"testing"
 
-	"github.com/ap4y/cloud/common"
 	"github.com/stretchr/testify/assert"
+	"gitlab.com/ap4y/cloud/common"
 )
 
 func TestShare(t *testing.T) {

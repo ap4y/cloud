@@ -8,10 +8,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ap4y/cloud/common"
 	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gitlab.com/ap4y/cloud/common"
 )
 
 func TestShareAuthenticator(t *testing.T) {

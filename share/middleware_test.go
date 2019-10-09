@@ -8,10 +8,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ap4y/cloud/common"
 	"github.com/go-chi/chi"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gitlab.com/ap4y/cloud/common"
 )
 
 func TestBlockHandler(t *testing.T) {

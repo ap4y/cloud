@@ -1,6 +1,6 @@
 package cli
 
-import "github.com/ap4y/cloud/common"
+import "gitlab.com/ap4y/cloud/common"
 
 // GalleryConfig defines gallery related configuration variables for CLI.
 type GalleryConfig struct {

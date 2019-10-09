@@ -1,6 +1,6 @@
 package share
 
-import "github.com/ap4y/cloud/common"
+import "gitlab.com/ap4y/cloud/common"
 
 // Share stores share data.
 type Share struct {

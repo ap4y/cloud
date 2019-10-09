@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ap4y/cloud/common"
-	"github.com/ap4y/cloud/internal/httputil"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
+	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/internal/httputil"
 	"golang.org/x/crypto/bcrypt"
 )
 
