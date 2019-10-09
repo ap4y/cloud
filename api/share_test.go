@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/module"
 	"gitlab.com/ap4y/cloud/niltime"
 	"gitlab.com/ap4y/cloud/share"
 )
@@ -36,7 +36,7 @@ func TestShareHandler(t *testing.T) {
 
 	s := &share.Share{
 		Slug:      "foo",
-		Type:      common.ModuleGallery,
+		Type:      module.Gallery,
 		Items:     []string{"foo", "bar"},
 		ExpiresAt: niltime.Time{Time: time.Time{}},
 	}
@@ -94,7 +94,7 @@ func TestShareHandler(t *testing.T) {
 		require.NoError(t, json.NewDecoder(res.Body).Decode(share))
 
 		require.NotNil(t, share.Slug)
-		assert.Equal(t, common.ModuleGallery, share.Type)
+		assert.Equal(t, module.Gallery, share.Type)
 		assert.Equal(t, int64(0), share.ExpiresAt.Unix())
 	})
 

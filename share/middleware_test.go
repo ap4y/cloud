@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/ap4y/cloud/common"
 	"gitlab.com/ap4y/cloud/contextkey"
+	"gitlab.com/ap4y/cloud/module"
 )
 
 func TestBlockHandler(t *testing.T) {
@@ -45,16 +45,16 @@ func TestBlockHandler(t *testing.T) {
 }
 
 func TestVerifyHandler(t *testing.T) {
-	share := &Share{Slug: "bar", Type: common.ModuleGallery, Name: "foo", Items: []string{"test.jpg"}}
-	filesShare := &Share{Slug: "baz", Type: common.ModuleFiles, Name: "foo", Items: []string{"test.jpg"}}
+	share := &Share{Slug: "bar", Type: module.Gallery, Name: "foo", Items: []string{"test.jpg"}}
+	filesShare := &Share{Slug: "baz", Type: module.Files, Name: "foo", Items: []string{"test.jpg"}}
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "Hello World!") // nolint: errcheck
 	}
 
 	mux := chi.NewRouter()
-	mux.Get("/{path}", VerifyHandler(common.ModuleGallery, "path", "", handler))
-	mux.Get("/{path}/file/{file}", VerifyHandler(common.ModuleGallery, "path", "file", handler))
+	mux.Get("/{path}", VerifyHandler(module.Gallery, "path", "", handler))
+	mux.Get("/{path}/file/{file}", VerifyHandler(module.Gallery, "path", "file", handler))
 
 	tcs := []struct {
 		name   string

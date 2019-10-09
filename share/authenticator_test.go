@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/ap4y/cloud/common"
 	"gitlab.com/ap4y/cloud/contextkey"
+	"gitlab.com/ap4y/cloud/module"
 )
 
 func TestShareAuthenticator(t *testing.T) {
@@ -23,7 +23,7 @@ func TestShareAuthenticator(t *testing.T) {
 
 	store, err := NewDiskStore(dir)
 	require.NoError(t, err)
-	share := &Share{Slug: "bar", Type: common.ModuleGallery, Name: "foo", Items: []string{"test.jpg"}}
+	share := &Share{Slug: "bar", Type: module.Gallery, Name: "foo", Items: []string{"test.jpg"}}
 	require.NoError(t, store.Save(share))
 
 	var ctxShare *Share

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/module"
 	"gitlab.com/ap4y/cloud/niltime"
 )
 
@@ -23,7 +23,7 @@ func TestShareStore(t *testing.T) {
 
 	share := &Share{
 		Slug:      "foo",
-		Type:      common.ModuleGallery,
+		Type:      module.Gallery,
 		Items:     []string{"foo", "bar"},
 		ExpiresAt: niltime.Time{Time: time.Unix(0, 0)},
 	}
@@ -36,7 +36,7 @@ func TestShareStore(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, res, 1)
 		assert.Equal(t, "foo", res[0].Slug)
-		assert.Equal(t, common.ModuleGallery, res[0].Type)
+		assert.Equal(t, module.Gallery, res[0].Type)
 		assert.Equal(t, []string{"foo", "bar"}, res[0].Items)
 		assert.Equal(t, int64(0), res[0].ExpiresAt.Unix())
 	})
@@ -45,7 +45,7 @@ func TestShareStore(t *testing.T) {
 		res, err := store.Get("foo")
 		require.NoError(t, err)
 		assert.Equal(t, "foo", res.Slug)
-		assert.Equal(t, common.ModuleGallery, res.Type)
+		assert.Equal(t, module.Gallery, res.Type)
 		assert.Equal(t, []string{"foo", "bar"}, res.Items)
 		assert.Equal(t, int64(0), res.ExpiresAt.Unix())
 	})

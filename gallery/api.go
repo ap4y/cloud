@@ -8,9 +8,9 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"gitlab.com/ap4y/cloud/common"
 	"gitlab.com/ap4y/cloud/contextkey"
 	"gitlab.com/ap4y/cloud/internal/httputil"
+	"gitlab.com/ap4y/cloud/module"
 	"gitlab.com/ap4y/cloud/share"
 )
 
@@ -28,10 +28,10 @@ func NewGalleryAPI(source Source, cache Cache) http.Handler {
 	mux.Route("/", func(r chi.Router) {
 		r.Get("/", share.BlockHandler(api.listAlbums))
 		r.Route("/{gallery}", func(r chi.Router) {
-			r.Get("/images", share.VerifyHandler(common.ModuleGallery, "gallery", "", api.listAlbumImages))
-			r.Get("/image/{file}", share.VerifyHandler(common.ModuleGallery, "gallery", "file", api.getImage))
-			r.Get("/thumbnail/{file}", share.VerifyHandler(common.ModuleGallery, "gallery", "file", api.getImageThumbnail))
-			r.Get("/exif/{file}", share.VerifyHandler(common.ModuleGallery, "gallery", "file", api.getImageEXIF))
+			r.Get("/images", share.VerifyHandler(module.Gallery, "gallery", "", api.listAlbumImages))
+			r.Get("/image/{file}", share.VerifyHandler(module.Gallery, "gallery", "file", api.getImage))
+			r.Get("/thumbnail/{file}", share.VerifyHandler(module.Gallery, "gallery", "file", api.getImageThumbnail))
+			r.Get("/exif/{file}", share.VerifyHandler(module.Gallery, "gallery", "file", api.getImageEXIF))
 		})
 	})
 

@@ -1,17 +1,17 @@
 package share
 
 import (
-	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/module"
 	"gitlab.com/ap4y/cloud/niltime"
 )
 
 // Share stores share data.
 type Share struct {
-	Slug      string            `json:"slug"`
-	Type      common.ModuleType `json:"type"`
-	Name      string            `json:"name"`
-	Items     []string          `json:"items"`
-	ExpiresAt niltime.Time      `json:"expires_at"`
+	Slug      string       `json:"slug"`
+	Type      module.Type  `json:"type"`
+	Name      string       `json:"name"`
+	Items     []string     `json:"items"`
+	ExpiresAt niltime.Time `json:"expires_at"`
 }
 
 // IsValid returns true if share is valid.

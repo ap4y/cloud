@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/ap4y/cloud/common"
 	"gitlab.com/ap4y/cloud/contextkey"
+	"gitlab.com/ap4y/cloud/module"
 	"gitlab.com/ap4y/cloud/share"
 )
 
@@ -33,7 +33,7 @@ func TestGalleryAPI(t *testing.T) {
 	require.NoError(t, err)
 
 	api := NewGalleryAPI(src, cache)
-	s := &share.Share{Type: common.ModuleGallery, Name: "album1", Items: []string{"test.jpg"}}
+	s := &share.Share{Type: module.Gallery, Name: "album1", Items: []string{"test.jpg"}}
 
 	t.Run("listAlbums", func(t *testing.T) {
 		w := httptest.NewRecorder()

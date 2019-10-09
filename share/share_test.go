@@ -5,11 +5,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/module"
 )
 
 func TestShare(t *testing.T) {
-	share := &Share{Slug: "bar", Type: common.ModuleGallery, Name: "foo", Items: []string{"test.jpg"}}
+	share := &Share{Slug: "bar", Type: module.Gallery, Name: "foo", Items: []string{"test.jpg"}}
 
 	t.Run("IsValid", func(t *testing.T) {
 		assert.False(t, Share{}.IsValid())

@@ -6,13 +6,13 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 
-	"gitlab.com/ap4y/cloud/common"
 	"gitlab.com/ap4y/cloud/internal/httputil"
+	"gitlab.com/ap4y/cloud/module"
 	"gitlab.com/ap4y/cloud/share"
 )
 
 // NewServer returns a new root handler for the app.
-func NewServer(modules map[common.ModuleType]http.Handler, cs CredentialsStorage, ss share.Store) (http.Handler, error) {
+func NewServer(modules map[module.Type]http.Handler, cs CredentialsStorage, ss share.Store) (http.Handler, error) {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Logger)
 
@@ -23,7 +23,7 @@ func NewServer(modules map[common.ModuleType]http.Handler, cs CredentialsStorage
 		apiMux.Group(func(r chi.Router) {
 			r.Use(Authenticator(cs))
 
-			moduleIds := make([]common.ModuleType, len(modules))
+			moduleIds := make([]module.Type, len(modules))
 			idx := 0
 			for module := range modules {
 				moduleIds[idx] = module
@@ -31,7 +31,7 @@ func NewServer(modules map[common.ModuleType]http.Handler, cs CredentialsStorage
 			}
 
 			r.Get("/modules", func(w http.ResponseWriter, res *http.Request) {
-				httputil.Respond(w, map[string][]common.ModuleType{"modules": moduleIds})
+				httputil.Respond(w, map[string][]module.Type{"modules": moduleIds})
 			})
 
 			r.Get("/shares", sh.listShares)

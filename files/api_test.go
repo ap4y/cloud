@@ -15,8 +15,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/ap4y/cloud/common"
 	"gitlab.com/ap4y/cloud/contextkey"
+	"gitlab.com/ap4y/cloud/module"
 	"gitlab.com/ap4y/cloud/share"
 )
 
@@ -29,7 +29,7 @@ func TestFilesAPI(t *testing.T) {
 
 	api := NewFilesAPI(src)
 
-	share := &share.Share{Type: common.ModuleFiles, Name: "/test1", Items: []string{"/test1/inner"}}
+	share := &share.Share{Type: module.Files, Name: "/test1", Items: []string{"/test1/inner"}}
 
 	t.Run("listTree", func(t *testing.T) {
 		w := httptest.NewRecorder()

@@ -9,9 +9,9 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"gitlab.com/ap4y/cloud/common"
 	"gitlab.com/ap4y/cloud/contextkey"
 	"gitlab.com/ap4y/cloud/internal/httputil"
+	"gitlab.com/ap4y/cloud/module"
 	"gitlab.com/ap4y/cloud/share"
 )
 
@@ -202,7 +202,7 @@ func verifyHandler(itemParam string, next http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 
-		if share.Type != common.ModuleFiles {
+		if share.Type != module.Files {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}

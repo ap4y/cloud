@@ -16,10 +16,11 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"gitlab.com/ap4y/cloud/api"
-	"gitlab.com/ap4y/cloud/common"
 	"gitlab.com/ap4y/cloud/files"
 	"gitlab.com/ap4y/cloud/gallery"
+	"gitlab.com/ap4y/cloud/module"
 	"gitlab.com/ap4y/cloud/share"
 )
 
@@ -78,9 +79,9 @@ func TestAPIServer(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(cacheDir)
 
-	modules := map[common.ModuleType]http.Handler{
-		common.ModuleGallery: galleryModule(t, cacheDir),
-		common.ModuleFiles:   filesModule(t),
+	modules := map[module.Type]http.Handler{
+		module.Gallery: galleryModule(t, cacheDir),
+		module.Files:   filesModule(t),
 	}
 	cs := api.NewMemoryCredentialsStorage(
 		map[string]string{"test": "$2b$10$fEWhY87kzeaV3hUEB6phTuyWjpv73V5m.YcqTxHXnvqEGIou1tXGO"},
@@ -93,11 +94,11 @@ func TestAPIServer(t *testing.T) {
 	defer os.RemoveAll(sharesDir)
 	ss, err := share.NewDiskStore(sharesDir)
 	require.NoError(t, err)
-	err = ss.Save(&share.Share{Slug: "foo", Type: common.ModuleGallery, Name: "foo", Items: []string{"test.jpg"}})
+	err = ss.Save(&share.Share{Slug: "foo", Type: module.Gallery, Name: "foo", Items: []string{"test.jpg"}})
 	require.NoError(t, err)
-	err = ss.Save(&share.Share{Slug: "bar", Type: common.ModuleGallery, Name: "album1", Items: []string{"test.jpg"}})
+	err = ss.Save(&share.Share{Slug: "bar", Type: module.Gallery, Name: "album1", Items: []string{"test.jpg"}})
 	require.NoError(t, err)
-	err = ss.Save(&share.Share{Slug: "baz", Type: common.ModuleFiles, Name: "/test1", Items: []string{"/test1/inner"}})
+	err = ss.Save(&share.Share{Slug: "baz", Type: module.Files, Name: "/test1", Items: []string{"/test1/inner"}})
 	require.NoError(t, err)
 
 	handler, err := api.NewServer(modules, cs, ss)

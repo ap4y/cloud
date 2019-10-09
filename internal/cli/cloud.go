@@ -15,9 +15,9 @@ import (
 
 	"gitlab.com/ap4y/cloud/api"
 	"gitlab.com/ap4y/cloud/app"
-	"gitlab.com/ap4y/cloud/common"
 	"gitlab.com/ap4y/cloud/files"
 	"gitlab.com/ap4y/cloud/gallery"
+	"gitlab.com/ap4y/cloud/module"
 	"gitlab.com/ap4y/cloud/share"
 )
 
@@ -54,26 +54,26 @@ func Run(configPath, devURL, addr string) error {
 }
 
 func setupServer(cfg *Config) (http.Handler, error) {
-	modules := map[common.ModuleType]http.Handler{}
-	for _, module := range cfg.Modules {
+	modules := map[module.Type]http.Handler{}
+	for _, mod := range cfg.Modules {
 		var handler http.Handler
 		var err error
 
-		if module == common.ModuleGallery {
+		if mod == module.Gallery {
 			handler, err = galleryModule(cfg.Gallery)
 			if err != nil {
 				return nil, fmt.Errorf("failed to initialise gallery: %s", err)
 			}
 		}
 
-		if module == common.ModuleFiles {
+		if mod == module.Files {
 			handler, err = filesModule(cfg.Files)
 			if err != nil {
 				return nil, fmt.Errorf("failed to initialise gallery: %s", err)
 			}
 		}
 
-		modules[module] = handler
+		modules[mod] = handler
 	}
 
 	cs := api.NewMemoryCredentialsStorage(cfg.Users, jwt.SigningMethodHS256, []byte(cfg.JWTSecret))

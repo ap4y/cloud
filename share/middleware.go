@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"gitlab.com/ap4y/cloud/common"
 	"gitlab.com/ap4y/cloud/contextkey"
+	"gitlab.com/ap4y/cloud/module"
 )
 
 // BlockHandler responds with NotFound for all requests that have share in context
@@ -22,7 +22,7 @@ func BlockHandler(next http.HandlerFunc) http.HandlerFunc {
 }
 
 // VerifyHandler verifies share from the context against name and option item parameter.
-func VerifyHandler(shareType common.ModuleType, nameParam, itemParam string, next http.HandlerFunc) http.HandlerFunc {
+func VerifyHandler(shareType module.Type, nameParam, itemParam string, next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		share, ok := req.Context().Value(contextkey.ShareCtxKey).(*Share)
 		if !ok {
