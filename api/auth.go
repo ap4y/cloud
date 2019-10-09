@@ -9,9 +9,10 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
+	"golang.org/x/crypto/bcrypt"
+
 	"gitlab.com/ap4y/cloud/common"
 	"gitlab.com/ap4y/cloud/internal/httputil"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // UserAuthKey defines usename key in jwt token.

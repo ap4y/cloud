@@ -12,6 +12,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
+
 	"gitlab.com/ap4y/cloud/api"
 	"gitlab.com/ap4y/cloud/app"
 	"gitlab.com/ap4y/cloud/common"
