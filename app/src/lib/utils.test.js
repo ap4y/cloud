@@ -61,6 +61,12 @@ describe("addToTree", () => {
     expect(tree.children.length).toEqual(2);
   });
 
+  it("adds existing file", () => {
+    const newTree = addToTree(tree, { path: "/" }, file);
+    expect(newTree.children.length).toEqual(2);
+    expect(tree.children.length).toEqual(2);
+  });
+
   it("adds subfolder file", () => {
     const newTree = addToTree(tree, { path: "/bar" }, { name: "test" });
     expect(newTree.children.length).toEqual(2);

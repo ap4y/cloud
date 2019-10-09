@@ -43,7 +43,7 @@ export function removeFromTree(tree, folder, file) {
 }
 
 export function addToTree(tree, folder, file) {
-  removeFromTree(tree, folder, file);
+  tree = removeFromTree(tree, folder, file);
 
   if (folder.path === "/") {
     return { ...tree, children: [...tree.children, file] };
