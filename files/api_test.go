@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/contextkey"
 	"gitlab.com/ap4y/cloud/share"
 )
 
@@ -48,7 +49,7 @@ func TestFilesAPI(t *testing.T) {
 	t.Run("listTree/with share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, share)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -83,7 +84,7 @@ func TestFilesAPI(t *testing.T) {
 	t.Run("getFile/with share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/file/test1/inner/foo", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, share)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -98,7 +99,7 @@ func TestFilesAPI(t *testing.T) {
 	t.Run("getFile/with unmatched share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/file/foo", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, share)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -152,7 +153,7 @@ func TestFilesAPI(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("POST", "http://cloud.api/upload/test1/inner", &buf)
 		req.Header.Set("Content-Type", formWriter.FormDataContentType())
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, share)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -162,7 +163,7 @@ func TestFilesAPI(t *testing.T) {
 	t.Run("removeFile/with share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("DELETE", "http://cloud.api/file/test1/inner/foo", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, share)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -200,7 +201,7 @@ func TestFilesAPI(t *testing.T) {
 	t.Run("createFolder/with share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("POST", "http://cloud.api/mkdir/test1/subfolder", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, share)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -210,7 +211,7 @@ func TestFilesAPI(t *testing.T) {
 	t.Run("removeFolder/with share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("POST", "http://cloud.api/rmdir/test1/subfolder", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, share)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()

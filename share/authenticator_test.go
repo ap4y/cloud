@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/contextkey"
 )
 
 func TestShareAuthenticator(t *testing.T) {
@@ -27,7 +28,7 @@ func TestShareAuthenticator(t *testing.T) {
 
 	var ctxShare *Share
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		ctxShare, _ = r.Context().Value(common.ShareCtxKey).(*Share)
+		ctxShare, _ = r.Context().Value(contextkey.ShareCtxKey).(*Share)
 		io.WriteString(w, "Hello World!") // nolint: errcheck
 	}
 

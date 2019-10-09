@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi"
 
 	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/contextkey"
 	"gitlab.com/ap4y/cloud/internal/httputil"
 	"gitlab.com/ap4y/cloud/share"
 )
@@ -49,7 +50,7 @@ func (api *filesAPI) listTree(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if share, ok := req.Context().Value(common.ShareCtxKey).(*share.Share); ok {
+	if share, ok := req.Context().Value(contextkey.ShareCtxKey).(*share.Share); ok {
 		tree = locateTreeNode(tree, share.Name)
 		if tree == nil {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -195,7 +196,7 @@ func locateTreeNode(tree *Item, path string) *Item {
 
 func verifyHandler(itemParam string, next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		share, ok := req.Context().Value(common.ShareCtxKey).(*share.Share)
+		share, ok := req.Context().Value(contextkey.ShareCtxKey).(*share.Share)
 		if !ok {
 			next.ServeHTTP(w, req)
 			return

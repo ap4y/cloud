@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/contextkey"
 )
 
 // Authenticator returns new share authentication middleware.
@@ -25,7 +25,7 @@ func Authenticator(store Store) func(next http.Handler) http.Handler {
 				return
 			}
 
-			ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
+			ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, share)
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})
 	}

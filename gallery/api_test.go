@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/contextkey"
 	"gitlab.com/ap4y/cloud/share"
 )
 
@@ -52,7 +53,7 @@ func TestGalleryAPI(t *testing.T) {
 	t.Run("listAlbums/with share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, s)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -78,7 +79,7 @@ func TestGalleryAPI(t *testing.T) {
 	t.Run("listAlbumImages/with_share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/album1/images", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, s)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -95,7 +96,7 @@ func TestGalleryAPI(t *testing.T) {
 	t.Run("listAlbumImages/with unmatched share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/album2/images", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, s)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -115,7 +116,7 @@ func TestGalleryAPI(t *testing.T) {
 	t.Run("getImage/with share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/album1/image/test.jpg", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, s)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -126,7 +127,7 @@ func TestGalleryAPI(t *testing.T) {
 	t.Run("getImage/with unmatched share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/album2/image/test.jpg", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, s)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -146,7 +147,7 @@ func TestGalleryAPI(t *testing.T) {
 	t.Run("getImageThumbnail/with share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/album1/thumbnail/test.jpg", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, s)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -157,7 +158,7 @@ func TestGalleryAPI(t *testing.T) {
 	t.Run("getImageThumbnail/with unmatched share", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req := httptest.NewRequest("GET", "http://cloud.api/album2/thumbnail/test.jpg", nil)
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, s)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, s)
 		api.ServeHTTP(w, req.WithContext(ctx))
 
 		resp := w.Result()

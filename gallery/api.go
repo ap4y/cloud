@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi"
 
 	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/contextkey"
 	"gitlab.com/ap4y/cloud/internal/httputil"
 	"gitlab.com/ap4y/cloud/share"
 )
@@ -55,7 +56,7 @@ func (api *galleryAPI) listAlbumImages(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	if share, ok := req.Context().Value(common.ShareCtxKey).(*share.Share); ok {
+	if share, ok := req.Context().Value(contextkey.ShareCtxKey).(*share.Share); ok {
 		shareImages := make([]Image, 0, len(images))
 		for _, image := range images {
 			if share.Includes(galleryName, image.Path) {

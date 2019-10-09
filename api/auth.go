@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/chi"
 	"golang.org/x/crypto/bcrypt"
 
-	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/contextkey"
 	"gitlab.com/ap4y/cloud/internal/httputil"
 )
 
@@ -125,7 +125,7 @@ func Authenticator(credentials CredentialsStorage) func(next http.Handler) http.
 				return
 			}
 
-			ctx := context.WithValue(req.Context(), common.UsernameCtxKey, username)
+			ctx := context.WithValue(req.Context(), contextkey.UsernameCtxKey, username)
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/contextkey"
 )
 
 func TestBlockHandler(t *testing.T) {
@@ -25,7 +26,7 @@ func TestBlockHandler(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		share := &Share{Name: "album1", Items: []string{"test.jpg"}}
-		ctx := context.WithValue(req.Context(), common.ShareCtxKey, share)
+		ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, share)
 		BlockHandler(handler)(w, req.WithContext(ctx))
 
 		resp := w.Result()
@@ -76,7 +77,7 @@ func TestVerifyHandler(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			if tc.share != nil {
-				ctx := context.WithValue(req.Context(), common.ShareCtxKey, tc.share)
+				ctx := context.WithValue(req.Context(), contextkey.ShareCtxKey, tc.share)
 				req = req.WithContext(ctx)
 			}
 			mux.ServeHTTP(w, req)
