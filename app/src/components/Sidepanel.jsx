@@ -46,6 +46,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-width: ${({ collapsed }) => (collapsed ? 0 : 250)}px;
   max-width: ${({ collapsed }) => (collapsed ? 0 : 80)}%;
   padding: 4rem ${({ collapsed }) => (collapsed ? 1 : 2)}rem;
   margin-right: ${({ collapsed }) => (collapsed ? -2 : 0)}rem;
