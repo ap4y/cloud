@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/niltime"
 )
 
 func TestShareStore(t *testing.T) {
@@ -24,7 +25,7 @@ func TestShareStore(t *testing.T) {
 		Slug:      "foo",
 		Type:      common.ModuleGallery,
 		Items:     []string{"foo", "bar"},
-		ExpiresAt: common.NilTime{Time: time.Unix(0, 0)},
+		ExpiresAt: niltime.Time{Time: time.Unix(0, 0)},
 	}
 	t.Run("Save", func(t *testing.T) {
 		require.NoError(t, store.Save(share))
@@ -59,7 +60,7 @@ func TestShareStore(t *testing.T) {
 
 	t.Run("Expire", func(t *testing.T) {
 		require.NoError(t, store.Save(share))
-		require.NoError(t, store.Save(&Share{Slug: "bar", ExpiresAt: common.NilTime{Time: time.Time{}}}))
+		require.NoError(t, store.Save(&Share{Slug: "bar", ExpiresAt: niltime.Time{Time: time.Time{}}}))
 		require.NoError(t, store.Expire())
 
 		res, err := store.Get("foo")

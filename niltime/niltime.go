@@ -1,14 +1,14 @@
-package common
+package niltime
 
 import "time"
 
-// NilTime implements json nil-able time.Time.
-type NilTime struct {
+// Time implements json nil-able time.Time.
+type Time struct {
 	time.Time
 }
 
 // MarshalJSON overrides json marshaling rules for NilTime.
-func (t NilTime) MarshalJSON() ([]byte, error) {
+func (t Time) MarshalJSON() ([]byte, error) {
 	if t.IsZero() {
 		return []byte("null"), nil
 	}

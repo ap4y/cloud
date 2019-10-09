@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"gitlab.com/ap4y/cloud/common"
+	"gitlab.com/ap4y/cloud/niltime"
 	"gitlab.com/ap4y/cloud/share"
 )
 
@@ -37,7 +38,7 @@ func TestShareHandler(t *testing.T) {
 		Slug:      "foo",
 		Type:      common.ModuleGallery,
 		Items:     []string{"foo", "bar"},
-		ExpiresAt: common.NilTime{Time: time.Time{}},
+		ExpiresAt: niltime.Time{Time: time.Time{}},
 	}
 	require.NoError(t, store.Save(s))
 
