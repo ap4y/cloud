@@ -29,23 +29,18 @@ function handleError(dispatch, type = null, rethrow = false) {
 class APIClient {
   constructor(url) {
     this.url = url;
-    this.authToken = localStorage.getItem("authToken");
-  }
-
-  set token(token) {
-    this.authToken = token;
   }
 
   imageURL(gallery, path, type = "image", share = null) {
     if (share) return `/api/share/${share}/gallery/${gallery}/${type}/${path}`;
 
-    return `/api/gallery/${gallery}/${type}/${path}?jwt=${this.authToken}`;
+    return `/api/gallery/${gallery}/${type}/${path}`;
   }
 
   fileURL(file, share = null) {
     if (share) return `/api/share/${share}/files${file.url}`;
 
-    return `/api/files${file.url}?jwt=${this.authToken}`;
+    return `/api/files${file.url}`;
   }
 
   do(path, method, body, headers) {
@@ -54,10 +49,6 @@ class APIClient {
       "Content-Type": "application/json",
       ...headers
     };
-
-    if (this.authToken) {
-      reqHeaders["Authorization"] = `Bearer ${this.authToken}`;
-    }
 
     if (reqHeaders["Content-Type"] === "multipart/form-data") {
       delete reqHeaders["Content-Type"];
@@ -105,8 +96,8 @@ export const AUTH_SUCCESS = "AUTH_SUCCESS";
 export const AUTH_FAILURE = "AUTH_FAILURE";
 export const signIn = (username, password) => dispatch =>
   apiClient.do("/user/sign_in", "POST", { username, password }).then(
-    ({ token }) => {
-      dispatch({ type: AUTH_SUCCESS, token });
+    () => {
+      dispatch({ type: AUTH_SUCCESS });
     },
     e => {
       dispatch({ type: AUTH_FAILURE, error: e.message });
@@ -119,6 +110,7 @@ export const signOut = () => ({ type: AUTH_SIGNOUT });
 export const MODULES_SUCCESS = "MODULES_SUCCESS";
 export const fetchModules = () => dispatch =>
   apiClient.do("/modules").then(({ modules }) => {
+    dispatch({ type: AUTH_SUCCESS });
     dispatch({
       type: MODULES_SUCCESS,
       modules

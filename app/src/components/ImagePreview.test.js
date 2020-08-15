@@ -46,7 +46,7 @@ it("renders image thumbnails", () => {
       .find("AlbumItem")
       .first()
       .prop("src")
-  ).toEqual("/api/gallery/bar/thumbnail/test/Test.jpg?jwt=foo");
+  ).toEqual("/api/gallery/bar/thumbnail/test/Test.jpg");
 });
 
 it("renders image preview", () => {
@@ -66,7 +66,7 @@ it("renders image preview", () => {
       .find("Img")
       .first()
       .prop("src")
-  ).toEqual("/api/gallery/bar/image/test/Test.jpg?jwt=foo");
+  ).toEqual("/api/gallery/bar/image/test/Test.jpg");
 });
 
 it("renders navigation chevrons", () => {

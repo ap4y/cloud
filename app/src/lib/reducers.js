@@ -89,13 +89,11 @@ function share(state = { current: null, loading: false }, action) {
   }
 }
 
-function authToken(state = localStorage.getItem("authToken"), action) {
+function auth(state = { success: false }, action) {
   switch (action.type) {
     case ActionTypes.AUTH_SUCCESS:
-      localStorage.setItem("authToken", action.token);
-      return action.token;
+      return { success: true };
     case ActionTypes.AUTH_SIGNOUT:
-      localStorage.removeItem("authToken");
       return null;
     default:
       return state;
@@ -130,7 +128,7 @@ export default combineReducers({
   files,
   shares,
   share,
-  authToken,
+  auth,
   authError,
   errorMessage
 });

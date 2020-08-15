@@ -21,7 +21,7 @@ const Container = styled.div`
 `;
 
 export const LoginForm = ({
-  authToken,
+  authSuccess,
   errorMessage,
   location,
   signIn,
@@ -32,7 +32,7 @@ export const LoginForm = ({
   const [password, setPassword] = useState("");
 
   const { from } = location.state || { from: { pathname: "/" } };
-  if (authToken) return <Redirect to={from} />;
+  if (authSuccess) return <Redirect to={from} />;
 
   const performAuth = e => {
     e.preventDefault();
@@ -62,6 +62,6 @@ export const LoginForm = ({
 };
 
 export default connect(
-  ({ authToken, errorMessage }) => ({ authToken, errorMessage }),
+  ({ auth, errorMessage }) => ({ authSuccess: auth.success, errorMessage }),
   { signIn, resetErrorMessage, resetAuthError }
 )(LoginForm);

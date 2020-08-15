@@ -6,9 +6,9 @@ it("renders form", () => {
   shallow(<LoginForm location={{}} />);
 });
 
-it("redirect to from with authToken", () => {
+it("redirect to from with authSuccess", () => {
   const wrapper = shallow(
-    <LoginForm location={{ state: { from: "/foo" } }} authToken="bar" />
+    <LoginForm location={{ state: { from: "/foo" } }} authSuccess={true} />
   );
   expect(wrapper.exists("Redirect")).toBeTruthy();
   expect(wrapper.find("Redirect").prop("to")).toEqual("/foo");

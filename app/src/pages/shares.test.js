@@ -62,7 +62,7 @@ it("renders gallery share items", () => {
       .find("img")
       .first()
       .prop("src")
-  ).toEqual("/api/gallery/foo/thumbnail/Test1.jpg?jwt=foo");
+  ).toEqual("/api/gallery/foo/thumbnail/Test1.jpg");
 });
 
 it("renders files share items", () => {

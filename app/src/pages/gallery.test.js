@@ -41,7 +41,7 @@ it("renders image list", () => {
       .find("ImageCell")
       .first()
       .prop("src")
-  ).toEqual("/api/gallery/Test/thumbnail/test/Test.jpg?jwt=foo");
+  ).toEqual("/api/gallery/Test/thumbnail/test/Test.jpg");
 });
 
 it("renders image cell", () => {

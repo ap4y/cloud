@@ -93,15 +93,15 @@ const CollapseButton = styled.a`
   }
 `;
 
-const App = ({ modules, authError, authToken, fetchModules, signOut }) => {
+const App = ({ modules, authError, authSuccess, fetchModules, signOut }) => {
   const [collapsed, setCollapsed] = useState(
     document.body.clientWidth >= 700 ? false : true
   );
 
   useEffect(() => {
-    apiClient.token = authToken;
+    apiClient.token = authSuccess;
     fetchModules();
-  }, [fetchModules, authToken]);
+  }, [fetchModules, authSuccess]);
 
   let navItems = [],
     sidebarItems = [],
@@ -173,6 +173,10 @@ const App = ({ modules, authError, authToken, fetchModules, signOut }) => {
 };
 
 export default connect(
-  ({ modules, authError, authToken }) => ({ modules, authError, authToken }),
+  ({ modules, authError, auth }) => ({
+    modules,
+    authError,
+    authSuccess: auth.success
+  }),
   { fetchModules, signOut }
 )(App);

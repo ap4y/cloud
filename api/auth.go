@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
@@ -17,6 +16,8 @@ import (
 
 // UserAuthKey defines usename key in jwt token.
 const UserAuthKey = "user"
+
+const tokenCookieKey = "token"
 
 // CredentialsStorage stores and validates user credentials.
 type CredentialsStorage interface {
@@ -104,6 +105,13 @@ func AuthHandler(credentials CredentialsStorage) http.Handler {
 			return
 		}
 
+		http.SetCookie(w, &http.Cookie{
+			Name:     tokenCookieKey,
+			Value:    token,
+			Path:     "/",
+			SameSite: http.SameSiteStrictMode,
+			HttpOnly: true,
+		})
 		httputil.Respond(w, map[string]string{"token": token})
 	})
 
@@ -114,12 +122,13 @@ func AuthHandler(credentials CredentialsStorage) http.Handler {
 func Authenticator(credentials CredentialsStorage) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			token := tokenFromHeader(req.Header.Get("Authorization"))
-			if token == "" {
-				token = req.URL.Query().Get("jwt")
+			token, err := req.Cookie(tokenCookieKey)
+			if err != nil {
+				httputil.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+				return
 			}
 
-			username, err := credentials.Validate(token)
+			username, err := credentials.Validate(token.Value)
 			if err != nil {
 				httputil.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 				return
@@ -129,16 +138,4 @@ func Authenticator(credentials CredentialsStorage) func(next http.Handler) http.
 			next.ServeHTTP(w, req.WithContext(ctx))
 		})
 	}
-}
-
-func tokenFromHeader(header string) string {
-	if header == "" {
-		return ""
-	}
-
-	if !strings.HasPrefix(strings.ToLower(header), "bearer") {
-		return ""
-	}
-
-	return header[7:]
 }

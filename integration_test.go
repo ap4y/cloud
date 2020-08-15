@@ -140,7 +140,7 @@ func TestAPIServer(t *testing.T) {
 			req, err := http.NewRequest(tc.method, ts.URL+"/api"+tc.url, body)
 			require.NoError(t, err)
 			req.Header.Set("Content-Type", contentType)
-			req.Header.Set("Authorization", "Bearer "+jwtToken)
+			req.Header.Set("Cookie", "token="+jwtToken+";")
 			res, err := client.Do(req)
 			require.NoError(t, err)
 			assert.Equal(t, http.StatusOK, res.StatusCode)

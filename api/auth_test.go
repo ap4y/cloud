@@ -72,7 +72,7 @@ func TestAuth(t *testing.T) {
 		}
 
 		for _, tc := range tcs {
-			t.Run("header - "+tc.name, func(t *testing.T) {
+			t.Run("cookie - "+tc.name, func(t *testing.T) {
 				handler := Authenticator(credentials)(
 					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 						assert.Equal(t, tc.username, r.Context().Value(contextkey.UsernameCtxKey))
@@ -82,23 +82,7 @@ func TestAuth(t *testing.T) {
 
 				w := httptest.NewRecorder()
 				req := httptest.NewRequest("POST", "http://cloud.api", nil)
-				req.Header.Set("Authorization", "Bearer "+tc.token)
-				handler.ServeHTTP(w, req)
-
-				resp := w.Result()
-				require.Equal(t, tc.status, resp.StatusCode)
-			})
-
-			t.Run("query - "+tc.name, func(t *testing.T) {
-				handler := Authenticator(credentials)(
-					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-						assert.Equal(t, tc.username, r.Context().Value(contextkey.UsernameCtxKey))
-						io.WriteString(w, "<html><body>Hello World!</body></html>") // nolint: errcheck
-					}),
-				)
-
-				w := httptest.NewRecorder()
-				req := httptest.NewRequest("POST", "http://cloud.api?jwt="+tc.token, nil)
+				req.Header.Set("Cookie", fmt.Sprintf("%s=%s;", tokenCookieKey, tc.token))
 				handler.ServeHTTP(w, req)
 
 				resp := w.Result()
