@@ -1,0 +1,32 @@
+on: push
+jobs:
+  server:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: cedrickring/golang-action@1.5.2
+    - uses: golangci/golangci-lint-action@v1
+      with:
+        version: v1.29
+  app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./app
+    steps:
+    - uses: actions/checkout@master
+    - run: npm install
+    - run: npm test
+    - run: npx eslint .
+  docker_build:
+    needs: [server, app]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: docker/build-push-action@v1.1.0
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: ap4y/cloud
+        tag_with_sha: true
+        tag_with_ref: true
