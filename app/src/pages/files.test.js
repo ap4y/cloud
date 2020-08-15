@@ -2,7 +2,8 @@ import React from "react";
 import { act } from "react-dom/test-utils";
 import { shallow, mount } from "enzyme";
 import { HashRouter } from "react-router-dom";
-import { FilesGrid, DirCell, FileCell } from "./files";
+import { FilesGrid } from "./files";
+import { DirCell, FileCell } from "../components/files/Cells";
 
 const tree = {
   name: "test",

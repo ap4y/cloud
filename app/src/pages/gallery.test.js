@@ -1,7 +1,8 @@
 import React from "react";
 import { shallow, mount } from "enzyme";
 import { HashRouter } from "react-router-dom";
-import { ImageGrid, ImageCell } from "./gallery";
+import { ImageGrid } from "./gallery";
+import ImageCell from "../components/gallery/ImageCell";
 
 const image = {
   name: "Test",

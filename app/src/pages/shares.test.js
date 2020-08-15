@@ -1,6 +1,8 @@
 import React from "react";
 import { shallow } from "enzyme";
-import { SharesList, GalleryItems, FilesItems } from "./shares";
+import { SharesList } from "./shares";
+import GalleryItems from "../components/shares/GalleryItems";
+import FilesItems from "../components/shares/FilesItems";
 
 const share = {
   slug: "foo",

@@ -2,64 +2,9 @@ import React, { useEffect } from "react";
 import styled from "@emotion/styled/macro";
 import { connect } from "react-redux";
 
-import { apiClient, fetchShares, removeShare } from "../lib/actions";
-
-const Thumbs = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  grid-auto-rows: 100px;
-  grid-gap: 1rem;
-  margin-bottom: 1rem;
-
-  div {
-    overflow: hidden;
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
-export const GalleryItems = ({ gallery, items }) => {
-  return (
-    <Thumbs>
-      {items.map((item, idx) => (
-        <div key={idx}>
-          <img src={apiClient.imageURL(gallery, item, "thumbnail")} alt="" />
-        </div>
-      ))}
-    </Thumbs>
-  );
-};
-
-const FileList = styled.ul`
-  list-style: none;
-
-  li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-  }
-
-  i {
-    margin-right: 0.5rem;
-  }
-`;
-
-export const FilesItems = ({ folder, items }) => {
-  return (
-    <FileList>
-      {items.map((item, idx) => (
-        <li key={idx}>
-          <i className="material-icons-round">arrow_right</i>
-          {item}
-        </li>
-      ))}
-    </FileList>
-  );
-};
+import { fetchShares, removeShare } from "../lib/actions";
+import GalleryItems from "../components/shares/GalleryItems";
+import FilesItems from "../components/shares/FilesItems";
 
 const Share = styled.div`
   margin-bottom: 7rem;

@@ -3,7 +3,8 @@ import styled from "@emotion/styled/macro";
 import { connect } from "react-redux";
 import { NavLink } from "react-router-dom";
 
-import { Toolbar } from "../components/Controls";
+import { DirCell, FileCell } from "../components/files/Cells";
+import FilesToolbar from "../components/files/Toolbar";
 import {
   apiClient,
   fetchFile,
@@ -17,47 +18,6 @@ import { locateInTree } from "../lib/utils";
 import useSharing from "../lib/useSharing";
 
 const viewableExt = ["md", "org", "txt"];
-
-const CellItem = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  vertical-align: center;
-
-  > i {
-    font-size: ${({ large }) => (large ? 96 : 72)}px;
-    text-align: center;
-  }
-
-  span {
-    word-break: break-all;
-    text-align: center;
-  }
-`;
-
-export const DirCell = ({ dir: { name } }) => (
-  <CellItem>
-    <i className="material-icons-round">folder</i>
-    <span>{name}</span>
-  </CellItem>
-);
-
-export const FileCell = ({
-  file: { name, path, updated_at },
-  large,
-  withModTime
-}) => (
-  <CellItem large={large}>
-    <i className="material-icons-round">insert_drive_file</i>
-    <span>{name}</span>
-    {withModTime && (
-      <span>
-        <strong>Updated At: </strong>
-        {new Date(updated_at).toLocaleString()}
-      </span>
-    )}
-  </CellItem>
-);
 
 const Files = styled.div`
   display: grid;
@@ -107,77 +67,6 @@ position: relative;
     font-weight: 700;
   }
 `;
-
-const FilesToolbar = ({
-  path,
-  file,
-  fileURL,
-  canSave,
-  canEdit,
-  onSave,
-  onDelete,
-  onUpload,
-  onShare,
-  onMkdir,
-  onRmdir
-}) => {
-  const components = path.split("/").filter(item => item.length > 0);
-  const breadcrumbs = (
-    <>
-      <NavLink to="/files" exact>
-        .
-      </NavLink>
-      {components.map((item, idx) => (
-        <NavLink
-          key={idx}
-          to={`/files/${components.slice(0, idx + 1).join("/")}`}
-          exact
-        >
-          {`/${item}`}
-        </NavLink>
-      ))}
-    </>
-  );
-  return (
-    <Toolbar title={breadcrumbs}>
-      {file && (
-        <>
-          {canEdit && canSave && (
-            <a href="#save" onClick={onSave}>
-              <i className="material-icons-round">save</i>
-            </a>
-          )}
-          <a href={fileURL} download={file.name}>
-            <i className="material-icons-round">download</i>
-          </a>
-          {canEdit && (
-            <a href="#delete" onClick={onDelete}>
-              <i className="material-icons-round">delete</i>
-            </a>
-          )}
-        </>
-      )}
-      {!file && canEdit && (
-        <>
-          <a href="#upload" onClick={onUpload}>
-            <i className="material-icons-round">upload</i>
-          </a>
-          <a href="#mkdir" onClick={onMkdir}>
-            <i className="material-icons-round">create_new_folder</i>
-          </a>
-          {path !== "/" && (
-            <a href="#rmdir" onClick={onRmdir}>
-              <i className="material-icons-round">delete</i>
-            </a>
-          )}
-          <a href="#share" onClick={onShare}>
-            <i className="material-icons-round">share</i>
-          </a>
-        </>
-      )}
-    </Toolbar>
-  );
-};
 
 const TextEditor = styled.textarea`
   flex: 1 1 auto;
