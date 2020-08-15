@@ -14,9 +14,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/ap4y/cloud/module"
-	"gitlab.com/ap4y/cloud/niltime"
-	"gitlab.com/ap4y/cloud/share"
+	"github.com/ap4y/cloud/module"
+	"github.com/ap4y/cloud/niltime"
+	"github.com/ap4y/cloud/share"
 )
 
 func TestShareHandler(t *testing.T) {

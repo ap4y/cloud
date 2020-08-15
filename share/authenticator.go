@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"gitlab.com/ap4y/cloud/contextkey"
+	"github.com/ap4y/cloud/contextkey"
 )
 
 // Authenticator returns new share authentication middleware.

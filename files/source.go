@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"gitlab.com/ap4y/cloud/internal/pathutil"
+	"github.com/ap4y/cloud/internal/pathutil"
 )
 
 // ItemType defines entity types supported by sources.

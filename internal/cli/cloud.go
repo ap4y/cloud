@@ -13,12 +13,12 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/chi"
 
-	"gitlab.com/ap4y/cloud/api"
-	"gitlab.com/ap4y/cloud/app"
-	"gitlab.com/ap4y/cloud/files"
-	"gitlab.com/ap4y/cloud/gallery"
-	"gitlab.com/ap4y/cloud/module"
-	"gitlab.com/ap4y/cloud/share"
+	"github.com/ap4y/cloud/api"
+	"github.com/ap4y/cloud/app"
+	"github.com/ap4y/cloud/files"
+	"github.com/ap4y/cloud/gallery"
+	"github.com/ap4y/cloud/module"
+	"github.com/ap4y/cloud/share"
 )
 
 // TODO: config validation

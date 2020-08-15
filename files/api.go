@@ -9,10 +9,10 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"gitlab.com/ap4y/cloud/contextkey"
-	"gitlab.com/ap4y/cloud/internal/httputil"
-	"gitlab.com/ap4y/cloud/module"
-	"gitlab.com/ap4y/cloud/share"
+	"github.com/ap4y/cloud/contextkey"
+	"github.com/ap4y/cloud/internal/httputil"
+	"github.com/ap4y/cloud/module"
+	"github.com/ap4y/cloud/share"
 )
 
 type apiItem struct {

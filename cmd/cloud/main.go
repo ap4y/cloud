@@ -4,7 +4,7 @@ import (
 	"flag"
 	"log"
 
-	"gitlab.com/ap4y/cloud/internal/cli"
+	"github.com/ap4y/cloud/internal/cli"
 )
 
 var (

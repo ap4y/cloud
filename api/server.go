@@ -6,9 +6,9 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 
-	"gitlab.com/ap4y/cloud/internal/httputil"
-	"gitlab.com/ap4y/cloud/module"
-	"gitlab.com/ap4y/cloud/share"
+	"github.com/ap4y/cloud/internal/httputil"
+	"github.com/ap4y/cloud/module"
+	"github.com/ap4y/cloud/share"
 )
 
 // NewServer returns a new root handler for the app.

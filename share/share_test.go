@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"gitlab.com/ap4y/cloud/module"
+	"github.com/ap4y/cloud/module"
 )
 
 func TestShare(t *testing.T) {

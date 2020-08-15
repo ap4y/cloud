@@ -1,4 +1,4 @@
-module gitlab.com/ap4y/cloud
+module github.com/ap4y/cloud
 
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible

@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"gitlab.com/ap4y/cloud/contextkey"
-	"gitlab.com/ap4y/cloud/module"
+	"github.com/ap4y/cloud/contextkey"
+	"github.com/ap4y/cloud/module"
 )
 
 // BlockHandler responds with NotFound for all requests that have share in context

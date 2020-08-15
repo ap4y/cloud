@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gitlab.com/ap4y/cloud/contextkey"
-	"gitlab.com/ap4y/cloud/module"
+	"github.com/ap4y/cloud/contextkey"
+	"github.com/ap4y/cloud/module"
 )
 
 func TestShareAuthenticator(t *testing.T) {

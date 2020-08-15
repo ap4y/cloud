@@ -9,8 +9,8 @@ import (
 
 	"github.com/go-chi/chi"
 
-	"gitlab.com/ap4y/cloud/internal/httputil"
-	"gitlab.com/ap4y/cloud/share"
+	"github.com/ap4y/cloud/internal/httputil"
+	"github.com/ap4y/cloud/share"
 )
 
 type shareHandler struct {

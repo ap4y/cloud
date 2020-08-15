@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gitlab.com/ap4y/cloud/internal/pathutil"
+	"github.com/ap4y/cloud/internal/pathutil"
 )
 
 // Source provides album and images metadata.

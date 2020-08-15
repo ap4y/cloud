@@ -1,8 +1,8 @@
 package share
 
 import (
-	"gitlab.com/ap4y/cloud/module"
-	"gitlab.com/ap4y/cloud/niltime"
+	"github.com/ap4y/cloud/module"
+	"github.com/ap4y/cloud/niltime"
 )
 
 // Share stores share data.
