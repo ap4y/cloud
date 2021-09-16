@@ -18,10 +18,14 @@ func NewServer(modules map[module.Type]http.Handler, cs CredentialsStorage, ss s
 
 	sh := &shareHandler{ss}
 	mux.Route("/api", func(apiMux chi.Router) {
-		apiMux.Mount("/user", AuthHandler(cs))
+		if cs != nil {
+			apiMux.Mount("/user", AuthHandler(cs))
+		}
 
 		apiMux.Group(func(r chi.Router) {
-			r.Use(Authenticator(cs))
+			if cs != nil {
+				r.Use(Authenticator(cs))
+			}
 
 			moduleIds := make([]module.Type, len(modules))
 			idx := 0

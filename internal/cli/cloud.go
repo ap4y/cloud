@@ -76,7 +76,10 @@ func setupServer(cfg *Config) (http.Handler, error) {
 		modules[mod] = handler
 	}
 
-	cs := api.NewMemoryCredentialsStorage(cfg.Users, jwt.SigningMethodHS256, []byte(cfg.JWTSecret))
+	var cs api.CredentialsStorage
+	if cfg.JWTSecret != "" {
+		cs = api.NewMemoryCredentialsStorage(cfg.Users, jwt.SigningMethodHS256, []byte(cfg.JWTSecret))
+	}
 	ss, err := share.NewDiskStore(cfg.Share.Path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create share store: %s", err)
